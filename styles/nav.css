@@ -1,0 +1,20 @@
+nav {
+    display: flex;
+    background: var(--accent-2);
+    border-bottom: 1px solid rgba(230, 234, 233, 0.1);
+}
+
+nav a {
+    padding: 15px 30px;
+    color: var(--text-color);
+    text-decoration: none;
+    border-right: 1px solid rgba(230, 234, 233, 0.1);
+    font-family: "Glacial Indifference", sans-serif;
+    font-size: 16px;
+    text-transform: lowercase;
+}
+
+nav a:hover {
+    background: rgba(237, 253, 250, 0.05);
+    text-decoration: none;
+} 

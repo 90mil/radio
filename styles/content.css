@@ -12,7 +12,7 @@
 }
 
 .about h2 {
-    font-family: "Lora", serif;
+    font-family: "Lora", Georgia, serif;
     font-style: italic;
     font-size: 24px;
     margin-bottom: 30px;
@@ -21,15 +21,84 @@
     color: var(--text-color);
 }
 
+@keyframes scanline {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 0 100%;
+    }
+}
+
+@keyframes flicker {
+    0% { opacity: 0.97; }
+    5% { opacity: 0.95; }
+    10% { opacity: 0.9; }
+    15% { opacity: 0.95; }
+    20% { opacity: 0.98; }
+    25% { opacity: 0.95; }
+    30% { opacity: 0.9; }
+    35% { opacity: 0.95; }
+    40% { opacity: 0.98; }
+    45% { opacity: 0.95; }
+    50% { opacity: 0.97; }
+    55% { opacity: 0.95; }
+    60% { opacity: 0.98; }
+    65% { opacity: 0.95; }
+    70% { opacity: 0.9; }
+    75% { opacity: 0.95; }
+    80% { opacity: 0.98; }
+    85% { opacity: 0.95; }
+    90% { opacity: 0.9; }
+    95% { opacity: 0.95; }
+    100% { opacity: 0.98; }
+}
+
 .visual {
     width: 60%;
     background-size: cover;
     background-position: center;
     position: relative;
     background-repeat: no-repeat;
-    /* Add a subtle overlay to ensure text readability */
-    background-color: rgba(0, 0, 0, 0.2);  /* Lighter overlay */
+    background-color: rgba(0, 0, 0, 0.2);
     background-blend-mode: darken;
+    position: relative;
+    overflow: hidden;
+}
+
+.visual::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        to bottom,
+        transparent 50%,
+        rgba(0, 0, 0, 0.05) 51%,
+        transparent 52%
+    );
+    background-size: 100% 4px;
+    animation: scanline 6s linear infinite;
+    pointer-events: none;
+}
+
+.visual::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+        circle at center,
+        transparent 0%,
+        rgba(32, 128, 32, 0.2) 100%
+    );
+    mix-blend-mode: screen;
+    animation: flicker 4s infinite;
+    pointer-events: none;
 }
 
 .contact-info {

@@ -1,19 +1,20 @@
 .content {
     display: flex;
-    height: calc(100vh - 90px); /* Fixed height instead of min-height */
+    height: calc(100vh - 90px);
 }
 
 .about {
     width: 40%;
-    padding: 60px 90px 40px 90px;
+    padding: 60px 120px;
     background: var(--body-bg);  
     font-size: 16px;  
     line-height: 1.7; 
     border-right: 1px solid var(--text-color); 
-    overflow-y: auto; /* Allow scrolling if content is too long */
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-1) transparent;
 }
 
-/* Custom scrollbar styles */
 .about::-webkit-scrollbar {
     width: 2px;
 }
@@ -24,12 +25,6 @@
 
 .about::-webkit-scrollbar-track {
     background: transparent;
-}
-
-/* Firefox scrollbar styles */
-.about {
-    scrollbar-width: thin;
-    scrollbar-color: var(--accent-1) transparent;
 }
 
 .about h2 {
@@ -43,11 +38,11 @@
 }
 
 .about p {
-    margin-bottom: 30px; /* Add space between paragraphs */
+    margin-bottom: 30px;
 }
 
 .about p:last-child {
-    margin-bottom: 0; /* Remove margin from last paragraph */
+    margin-bottom: 0;
 }
 
 @keyframes scanline {
@@ -84,10 +79,10 @@
 }
 
 .visual {
-    position: fixed; /* Fix the visual section to the right */
+    position: fixed;
     right: 0;
-    top: 90px; /* Header height */
-    width: 60%; /* Simplified - no need to subtract margin anymore */
+    top: 90px;
+    width: 60%;
     height: calc(100vh - 90px);
     background-size: cover;
     background-position: center;
@@ -100,10 +95,7 @@
 .visual::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background: linear-gradient(
         to bottom,
         transparent 50%,
@@ -118,10 +110,7 @@
 .visual::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background: radial-gradient(
         circle at center,
         transparent 0%,
@@ -136,17 +125,17 @@
     position: absolute;
     top: 40px;
     right: 40px;
-    background: rgba(0, 0, 0, 0.9);  /* Darker background */
-    padding: 30px;  /* More padding */
-    border-radius: 0;  /* Remove border radius */
+    background: rgba(0, 0, 0, 0.9);
+    padding: 30px;
+    border-radius: 0;
 }
 
 .contact-info h3 {
     font-family: "Glacial Indifference", sans-serif;
     color: var(--text-color);
-    font-size: 18px;  /* Larger */
-    margin: 24px 0 12px 0;
-    text-transform: lowercase;  /* Match the style */
+    font-size: 18px;
+    margin: 24px 0 12px;
+    text-transform: lowercase;
 }
 
 .contact-info h3:first-child {
@@ -156,13 +145,13 @@
 .contact-info a {
     display: block;
     margin: 6px 0;
-    font-size: 16px;  /* Larger links */
-    color: rgba(237, 253, 250, 0.8);  /* Slightly dimmed links */
+    font-size: 16px;
+    color: rgba(237, 253, 250, 0.8);
 }
 
 @media (max-width: 1024px) {
     .about {
-        padding: 30px 45px 30px 75px; /* Combined spacing */
+        padding: 60px 60px 40px 90px;
     }
 }
 
@@ -174,7 +163,7 @@
     
     .about {
         width: 100%;
-        padding: 30px; /* Equal padding on all sides for mobile */
+        padding: 40px;
         border-right: none;
     }
     
@@ -195,6 +184,6 @@
 
 @media (max-width: 480px) {
     .about {
-        padding: 35px 20px 35px 20px; /* Reduced padding for smallest screens */
+        padding: 40px 25px;
     }
 } 

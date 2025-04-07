@@ -180,9 +180,11 @@ body {
 }
 
 .hover-box {
-    position: absolute;
+    --hover-text-color: rgba(255, 255, 255, 0.9);
+    position: fixed;
     background-color: rgba(0, 0, 0, 0.95);
-    color: white;
+    color: var(--hover-text-color);
+    width: var(--hover-box-width) !important;
     padding: 16px;
     border-radius: 4px;
     display: none;
@@ -197,7 +199,6 @@ body {
     transition: opacity 0.15s ease;
     border: 1px solid transparent;
     box-sizing: border-box;
-    width: 350px !important; /* Force this width and override any inline styles */
     max-width: 90vw;
 }
 
@@ -280,5 +281,13 @@ body {
         min-width: 430px; /* 10px less than day-block min-width */
         max-width: 590px; /* 10px less than day-block max-width */
     }
+}
+
+/* Use CSS custom properties for repeated values */
+:root {
+    --hover-box-padding: 16px;
+    --hover-box-width: 350px;
+    --day-block-min-width: 440px;
+    --day-block-max-width: 600px;
 }
 

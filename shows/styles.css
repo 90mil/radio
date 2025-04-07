@@ -281,15 +281,15 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
-    margin-bottom: 60px;  /* More space between months */
-    padding-top: 60px;  /* More space above cards */
+    margin-bottom: 60px;
+    padding-top: 60px;
 }
 
 .month-container::before {
     content: '';
     position: absolute;
-    top: 30px;  /* Move line down a bit */
-    left: -160px;  /* Match header margin */
+    top: 30px;
+    left: -160px;
     right: 0;
     height: 1px;
     background: var(--accent-1);
@@ -316,33 +316,57 @@ body {
 }
 
 /* Add responsive styles */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .show-container {
-        padding: 0 24px;  /* Reduce padding */
+        padding: 0 24px 0 120px;
     }
 
     .month-header {
-        position: static;  /* Remove sticky */
-        margin-left: 0;    /* Reset margin */
-        padding: 20px 0;   /* Add more vertical padding */
-        margin-bottom: 20px;
-        white-space: normal;  /* Allow text to wrap */
-        text-align: left;
-    }
-
-    .month-container {
-        padding-top: 40px;  /* Reduce top padding */
-        margin-bottom: 40px;  /* Reduce bottom margin */
+        margin-left: -100px;
     }
 
     .month-container::before {
-        left: 0;  /* Reset line position */
-        top: 20px;
+        left: -100px;
+    }
+}
+
+@media (max-width: 768px) {
+    .show-container {
+        padding: 0 24px;
+    }
+
+    .month-header {
+        position: static;
+        margin-left: 0;
+        padding: 20px 0;
+        margin-bottom: 20px;
+        white-space: normal;
+        text-align: left;
+        width: 100%;
+        border-bottom: 1px solid var(--accent-1);
+    }
+
+    .month-container {
+        padding-top: 20px;
+        margin-bottom: 40px;
+        gap: 16px;
+    }
+
+    .month-container::before {
+        display: none; /* Remove line since we're using border-bottom on header */
+    }
+
+    .show-box {
+        min-height: 350px;
     }
 }
 
 @media (max-width: 480px) {
     .show-container {
-        padding: 0 16px;  /* Further reduce padding */
+        padding: 0 16px;
+    }
+
+    .month-container {
+        gap: 12px;
     }
 } 

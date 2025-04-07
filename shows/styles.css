@@ -265,7 +265,7 @@ body {
     color: var(--text-color);
     position: sticky;
     top: 120px;
-    margin-left: -160px;  /* Match increased padding */
+    margin-left: -160px;
     text-align: left;
     z-index: 2;
     background: var(--body-bg);
@@ -313,4 +313,36 @@ body {
 /* Update main-content styles */
 .main-content {
     background: var(--body-bg);
+}
+
+/* Add responsive styles */
+@media (max-width: 768px) {
+    .show-container {
+        padding: 0 24px;  /* Reduce padding */
+    }
+
+    .month-header {
+        position: static;  /* Remove sticky */
+        margin-left: 0;    /* Reset margin */
+        padding: 20px 0;   /* Add more vertical padding */
+        margin-bottom: 20px;
+        white-space: normal;  /* Allow text to wrap */
+        text-align: left;
+    }
+
+    .month-container {
+        padding-top: 40px;  /* Reduce top padding */
+        margin-bottom: 40px;  /* Reduce bottom margin */
+    }
+
+    .month-container::before {
+        left: 0;  /* Reset line position */
+        top: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .show-container {
+        padding: 0 16px;  /* Further reduce padding */
+    }
 } 

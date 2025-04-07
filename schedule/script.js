@@ -22,7 +22,7 @@ function addDragToScroll(element) {
         dragStartX = e.pageX;
         startX = e.pageX - element.offsetLeft;
         scrollLeft = element.scrollLeft;
-    });
+    }, { passive: true });
 
     element.addEventListener('mousemove', (e) => {
         if (!dragStartX) return;
@@ -40,20 +40,20 @@ function addDragToScroll(element) {
             const walk = x - startX;
             element.scrollLeft = scrollLeft - walk;
         }
-    });
+    }, { passive: false });
 
     element.addEventListener('mouseup', () => {
         isDragging = false;
         dragStartX = null;
         element.style.cursor = 'grab';
-    });
+    }, { passive: true });
 
     element.addEventListener('mouseleave', () => {
         isDragging = false;
         dragStartX = null;
         element.style.cursor = 'grab';
         hideHoverBoxDuringScroll();
-    });
+    }, { passive: true });
 }
 
 function formatDateLong(date) {
@@ -280,43 +280,45 @@ function createShowElement(show, earliestHour) {
             activeHoverBox = hoverBox;
             hoverBox.style.position = 'fixed';
             hoverBox.style.display = 'block';
+            hoverBox.style.width = '';
 
-            // First set width to calculate proper dimensions
-            hoverBox.style.width = `${showRect.width}px`;
-
-            // Initial position - 5px below top of show
+            // First try to position below the top edge of the show
             let top = showRect.top + 5;
             let left = showRect.left;
 
             // Get hover box dimensions
             const hoverRect = hoverBox.getBoundingClientRect();
 
-            // Adjust vertical position if would go off bottom
+            // If hover box would go off bottom of screen
             if (top + hoverRect.height > window.innerHeight) {
-                // If would go off bottom, position above the show
-                top = showRect.top - hoverRect.height - 5;
+                // Try to position above bottom edge of show
+                top = showRect.bottom - hoverRect.height - 5;
+                
+                // If that would push it above the top of the screen, 
+                // position at top of screen with small margin
+                if (top < 10) {
+                    top = 10;
+                }
             }
 
             // Adjust horizontal position
             if (left + hoverRect.width > window.innerWidth) {
-                // If would go off right edge, align with right edge of screen
                 left = window.innerWidth - hoverRect.width - 10;
             } else if (left < 0) {
-                // If would go off left edge, align with left edge of screen
                 left = 10;
             }
 
             // Apply final position
             hoverBox.style.top = `${top}px`;
             hoverBox.style.left = `${left}px`;
-        });
+        }, { passive: false }); // Explicitly set passive to false since we need preventDefault
 
         showElement.addEventListener('touchend', () => {
             if (activeHoverBox === hoverBox) {
                 activeHoverBox = null;
             }
             hoverBox.style.display = 'none';
-        });
+        }, { passive: true });
     } else {
         // Mouse events for desktop
         showElement.addEventListener('mouseenter', () => {
@@ -325,18 +327,25 @@ function createShowElement(show, earliestHour) {
             activeHoverBox = hoverBox;
             hoverBox.style.position = 'fixed';
             hoverBox.style.display = 'block';
-            hoverBox.style.width = '250px';
+            hoverBox.style.width = '';
 
-            // Initial position - 5px offset from show
+            // First try to position below the top edge of the show
             let top = showRect.top + 5;
             let left = showRect.left + 5;
 
             // Get hover box dimensions
             const hoverRect = hoverBox.getBoundingClientRect();
 
-            // Adjust vertical position if would go off bottom
+            // If hover box would go off bottom of screen
             if (top + hoverRect.height > window.innerHeight) {
-                top = window.innerHeight - hoverRect.height - 10;
+                // Try to position above bottom edge of show
+                top = showRect.bottom - hoverRect.height - 5;
+                
+                // If that would push it above the top of the screen, 
+                // position at top of screen with small margin
+                if (top < 10) {
+                    top = 10;
+                }
             }
 
             // Adjust horizontal position

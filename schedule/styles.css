@@ -81,8 +81,8 @@ body {
 
 .day-block.empty {
     border-color: rgba(237, 253, 250, 0.1);
-    min-width: 128px; /* Doubled from 64px */
-    max-width: 160px; /* Doubled from 80px */
+    min-width: 160px; /* Increased from 128px */
+    max-width: 190px; /* Increased from 160px */
     flex: 0.2;
     opacity: 0.5;
     transition: opacity 0.2s ease;
@@ -103,7 +103,7 @@ body {
     padding: 8px;
     margin-bottom: 10px;
     border: 1px solid var(--text-color);
-    font-size: 18px; /* Increased from 16px */
+    font-size: 18px;
     font-weight: bold;
     display: flex;
     justify-content: space-between;
@@ -111,13 +111,12 @@ body {
     align-items: center;
 }
 
-/* Make empty day headers match regular ones */
+/* Make empty day headers match regular ones but keep lowercase */
 .empty .day-header {
     border-color: rgba(237, 253, 250, 0.1);
     color: rgba(237, 253, 250, 0.3);
-    font-size: 18px; /* Match regular header size */
+    font-size: 18px;
     padding: 8px;
-    text-transform: lowercase;
 }
 
 /* Fix time slot text spacing */
@@ -158,24 +157,25 @@ body {
     flex-direction: column;
     justify-content: center;
     gap: 2px;
+    width: 100%;
+    overflow: hidden;
 }
 
 .show-info b {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    width: 100%; /* Take full width */
+    width: 100%;
 }
 
 .hosted-by {
-    font-size: 15px; /* Increased from 14px */
+    font-size: 15px;
     font-style: italic;
     white-space: nowrap;
-    color: rgba(237, 253, 250, 0.7);
-    width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-align: left;
+    width: 100%;
+    color: rgba(237, 253, 250, 0.7);
     margin-top: 2px;
 }
 
@@ -187,7 +187,7 @@ body {
     border-radius: 4px;
     display: none;
     z-index: 1000;
-    font-size: 16px; /* Increased from 12px */
+    font-size: 16px;
     line-height: 1.4;
     box-shadow: 0 2px 8px rgba(0,0,0,0.5);
     pointer-events: none;
@@ -195,8 +195,10 @@ body {
     overflow-y: auto;
     opacity: 1;
     transition: opacity 0.15s ease;
-    border: 1px solid transparent; /* Add transparent border by default */
-    box-sizing: border-box; /* Prevent border from affecting size */
+    border: 1px solid transparent;
+    box-sizing: border-box;
+    width: 350px !important; /* Force this width and override any inline styles */
+    max-width: 90vw;
 }
 
 .hover-box.hidden {
@@ -223,6 +225,16 @@ body {
     .hover-box {
         margin: 0;
         max-width: none;
+    }
+
+    .day-block {
+        min-width: 320px; /* Larger on mobile but not full desktop size */
+        max-width: 90vw;
+    }
+
+    .day-block.empty {
+        min-width: 120px;
+        max-width: 140px;
     }
 }
 
@@ -259,4 +271,14 @@ body {
 .hover-box.active {
     border-color: rgba(255, 255, 255, 0.2); /* Just change border color */
     box-shadow: 0 2px 12px rgba(0,0,0,0.7);
-} 
+}
+
+/* Desktop sizes */
+@media (min-width: 769px) {
+    .hover-box {
+        width: calc(100% - 20px); /* 10px on each side */
+        min-width: 430px; /* 10px less than day-block min-width */
+        max-width: 590px; /* 10px less than day-block max-width */
+    }
+}
+

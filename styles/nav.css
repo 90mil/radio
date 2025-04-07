@@ -10,7 +10,6 @@ nav {
     display: flex;
     width: 100%;
     padding-right: 90px;
-    transition: all 0.3s ease;
 }
 
 .nav-links a {

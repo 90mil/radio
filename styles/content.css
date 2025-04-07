@@ -195,6 +195,6 @@
 
 @media (max-width: 480px) {
     .about {
-        padding: 20px; /* Reduced padding for smallest screens */
+        padding: 35px 20px 35px 20px; /* Reduced padding for smallest screens */
     }
 } 

@@ -134,7 +134,12 @@
         flex-direction: column;
     }
     
-    .about, .visual {
+    .about {
+        width: 100%;
+        border-right: none; /* Remove border on mobile */
+    }
+    
+    .visual {
         width: 100%;
     }
     

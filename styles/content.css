@@ -1,16 +1,14 @@
 .content {
     display: flex;
-    min-height: calc(100vh - 90px);  /* Adjusted for fixed header */
-    margin-top: 90px;  /* Add margin to clear fixed header */
 }
 
 .about {
     width: 40%;
     padding: 40px;
-    background: rgba(0, 0, 0, 0.7);  /* Darker background */
-    font-size: 16px;  /* Larger body text */
-    line-height: 1.7;  /* Adjusted line height */
-    border-right: 1px solid var(--text-color);  /* Match nav divider */
+    background: var(--body-bg);  
+    font-size: 16px;  
+    line-height: 1.7; 
+    border-right: 1px solid var(--text-color); 
 }
 
 .about h2 {

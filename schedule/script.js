@@ -178,8 +178,9 @@ function createDayBlock(day, shows, showDay, weekEarliestHour, weekLatestHour) {
         const dateStr = formatDateLong(showDay);
         dayHeader.innerHTML = `<span>${dayName}</span><span>${dateStr}</span>`;
 
+        // Add extra padding to total height to prevent micro-scrolling
         const totalHours = weekLatestHour - weekEarliestHour + 1;
-        const containerHeight = (totalHours * 60) + 40; // 60px per hour + header
+        const containerHeight = (totalHours * 60) + 60; // Added extra padding to height
         dayBlock.style.height = `${containerHeight}px`;
 
         shows.forEach(show => {
@@ -200,12 +201,20 @@ function createShowElement(show, earliestHour) {
 
     // Calculate position and height
     const startMinutes = (showStart.getHours() - earliestHour) * 60 + showStart.getMinutes();
-    const endMinutes = (showEnd.getHours() - earliestHour) * 60 + showEnd.getMinutes();
-    const duration = endMinutes - startMinutes;
+    let endMinutes;
 
-    const PIXELS_PER_HOUR = 60; // 1 hour = 60px height
+    // Special case for shows ending at midnight
+    if (showEnd.getHours() === 0 && showEnd.getMinutes() === 0) {
+        // Use 24:00 instead of 00:00
+        endMinutes = (24 - earliestHour) * 60;
+    } else {
+        endMinutes = (showEnd.getHours() - earliestHour) * 60 + showEnd.getMinutes();
+    }
+
+    const duration = endMinutes - startMinutes;
+    const PIXELS_PER_HOUR = 60;
     const HEADER_HEIGHT = 40;
-    
+
     const top = Math.round((startMinutes / 60) * PIXELS_PER_HOUR) + HEADER_HEIGHT;
     const height = Math.max(30, Math.round((duration / 60) * PIXELS_PER_HOUR));
 

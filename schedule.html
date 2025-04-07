@@ -4,14 +4,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="frame-src https://90mil.github.io/;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; 
+        script-src 'self' 'unsafe-inline' https://neunzugmilradio.airtime.pro;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src 'self' https://fonts.gstatic.com;
+        img-src 'self' https: data:;
+        frame-src https://90mil.github.io/;">
     <title>90mil Radio - Schedule</title>
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/nav.css">
     <link rel="stylesheet" href="styles/header.css">
+    <link rel="stylesheet" href="schedule/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Abel&display=swap" rel="stylesheet">
 </head>
 
 <body>
+    <div class="schedule-container">
+        <div class="main-container">
+            <div class="week-schedule-container">
+                <div class="week-header">this week</div>
+                <div id="this-week-container" class="week-section"></div>
+                <div class="week-header">next week</div>
+                <div id="next-week-container" class="week-section"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/nav.js"></script>
+    <script src="schedule/script.js"></script>
 </body>
 
 </html>

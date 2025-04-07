@@ -15,45 +15,57 @@ let scrollLeft;
 let isScrolling;
 let activeHoverBox = null;
 
+const CONFIG = {
+    MARGIN: 10,
+    HOVER_OFFSET: 5,
+    DRAG_THRESHOLD: 3,
+    HEADER_HEIGHT: 40,
+    PIXELS_PER_HOUR: 60,
+    MOBILE_BREAKPOINT: 768
+};
+
 function addDragToScroll(element) {
-    let dragStartX;
+    let dragState = {
+        startX: null,
+        scrollLeft: null,
+        isDragging: false
+    };
 
-    element.addEventListener('mousedown', (e) => {
-        dragStartX = e.pageX;
-        startX = e.pageX - element.offsetLeft;
-        scrollLeft = element.scrollLeft;
-    }, { passive: true });
+    const handlers = {
+        mousedown: (e) => {
+            dragState = {
+                startX: e.pageX,
+                scrollLeft: element.scrollLeft,
+                isDragging: false
+            };
+        },
 
-    element.addEventListener('mousemove', (e) => {
-        if (!dragStartX) return;
+        mousemove: (e) => {
+            if (!dragState.startX) return;
 
-        // Only start dragging if mouse has moved more than 3px
-        if (!isDragging && Math.abs(e.pageX - dragStartX) > 3) {
-            isDragging = true;
-            element.style.cursor = 'grabbing';
-            hideHoverBoxDuringScroll();
+            if (!dragState.isDragging && Math.abs(e.pageX - dragState.startX) > CONFIG.DRAG_THRESHOLD) {
+                dragState.isDragging = true;
+                element.style.cursor = 'grabbing';
+                hideHoverBoxDuringScroll();
+            }
+
+            if (dragState.isDragging) {
+                e.preventDefault();
+                const walk = e.pageX - dragState.startX;
+                element.scrollLeft = dragState.scrollLeft - walk;
+            }
+        },
+
+        mouseup: () => {
+            dragState = { startX: null, scrollLeft: null, isDragging: false };
+            element.style.cursor = 'grab';
         }
+    };
 
-        if (isDragging) {
-            e.preventDefault();
-            const x = e.pageX - element.offsetLeft;
-            const walk = x - startX;
-            element.scrollLeft = scrollLeft - walk;
-        }
-    }, { passive: false });
-
-    element.addEventListener('mouseup', () => {
-        isDragging = false;
-        dragStartX = null;
-        element.style.cursor = 'grab';
-    }, { passive: true });
-
-    element.addEventListener('mouseleave', () => {
-        isDragging = false;
-        dragStartX = null;
-        element.style.cursor = 'grab';
-        hideHoverBoxDuringScroll();
-    }, { passive: true });
+    element.addEventListener('mousedown', handlers.mousedown, { passive: true });
+    element.addEventListener('mousemove', handlers.mousemove, { passive: false });
+    element.addEventListener('mouseup', handlers.mouseup, { passive: true });
+    element.addEventListener('mouseleave', handlers.mouseup, { passive: true });
 }
 
 function formatDateLong(date) {
@@ -194,10 +206,18 @@ function createDayBlock(day, shows, showDay, weekEarliestHour, weekLatestHour) {
 }
 
 function createShowElement(show, earliestHour) {
-    const showStart = new Date(show.start_timestamp);
-    const showEnd = new Date(show.end_timestamp);
+    const showStructure = createBasicShowStructure(show, earliestHour);
+    const hoverBox = createHoverBox(show, showStructure);
+    attachEventHandlers(showStructure.showElement, hoverBox);
+    return showStructure.showElement;
+}
+
+function createBasicShowStructure(show, earliestHour) {
     const showElement = document.createElement('div');
     showElement.className = 'show';
+
+    const showStart = new Date(show.start_timestamp);
+    const showEnd = new Date(show.end_timestamp);
 
     // Calculate position and height
     const startMinutes = (showStart.getHours() - earliestHour) * 60 + showStart.getMinutes();
@@ -205,32 +225,28 @@ function createShowElement(show, earliestHour) {
 
     // Special case for shows ending at midnight
     if (showEnd.getHours() === 0 && showEnd.getMinutes() === 0) {
-        // Use 24:00 instead of 00:00
         endMinutes = (24 - earliestHour) * 60;
     } else {
         endMinutes = (showEnd.getHours() - earliestHour) * 60 + showEnd.getMinutes();
     }
 
     const duration = endMinutes - startMinutes;
-    const PIXELS_PER_HOUR = 60;
-    const HEADER_HEIGHT = 40;
-
-    const top = Math.round((startMinutes / 60) * PIXELS_PER_HOUR) + HEADER_HEIGHT;
-    const height = Math.max(30, Math.round((duration / 60) * PIXELS_PER_HOUR));
+    const top = Math.round((startMinutes / 60) * CONFIG.PIXELS_PER_HOUR) + CONFIG.HEADER_HEIGHT;
+    const height = Math.max(30, Math.round((duration / 60) * CONFIG.PIXELS_PER_HOUR));
 
     showElement.style.top = `${top}px`;
     showElement.style.height = `${height}px`;
 
+    // Create time info
     const timeInfo = document.createElement('div');
     timeInfo.className = 'time-info';
     timeInfo.innerHTML = `${showStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}<br>${showEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}`;
 
+    // Create show info
     const showInfo = document.createElement('div');
     showInfo.className = 'show-info';
 
-    // Create full show info for hover box
-    const timeStr = `${showStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} - ${showEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} · ${formatDateLong(showStart)}`;
-
+    // Parse show name
     let titleStr, hostStr = '';
     if (show.name.toLowerCase().includes('hosted by')) {
         const splitName = show.name.split(/(hosted by)/i);
@@ -245,14 +261,25 @@ function createShowElement(show, earliestHour) {
         showInfo.innerHTML = `<b>${decodeHtmlEntities(titleStr)}</b>`;
     }
 
-    // Check if content is overflowing
+    // Check for text overflow
     setTimeout(() => {
         const isOverflowing = showInfo.scrollWidth > showInfo.clientWidth;
         showInfo.setAttribute('data-overflowing', isOverflowing);
     }, 0);
 
+    showElement.appendChild(timeInfo);
+    showElement.appendChild(showInfo);
+
+    return { showElement, timeInfo, showInfo, titleStr, hostStr };
+}
+
+function createHoverBox(show, { titleStr, hostStr }) {
     const hoverBox = document.createElement('div');
     hoverBox.className = 'hover-box';
+
+    const showStart = new Date(show.start_timestamp);
+    const showEnd = new Date(show.end_timestamp);
+    const timeStr = `${showStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} - ${showEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} · ${formatDateLong(showStart)}`;
 
     const fullShowInfo = document.createElement('div');
     fullShowInfo.className = 'full-show-info';
@@ -262,56 +289,48 @@ function createShowElement(show, earliestHour) {
         <div class="hover-time">${timeStr}</div>
         <div class="hover-description">${decodeHtmlEntities(show.description || 'No description available')}</div>
     `;
-    hoverBox.appendChild(fullShowInfo);
 
-    // Add hover box to the main container
+    hoverBox.appendChild(fullShowInfo);
     document.querySelector('.main-container').appendChild(hoverBox);
 
-    showElement.appendChild(timeInfo);
-    showElement.appendChild(showInfo);
+    return hoverBox;
+}
 
+function attachEventHandlers(showElement, hoverBox) {
     const isMobile = window.innerWidth <= 768;
+
+    // Create a shared positioning function for both mobile and desktop
+    function positionHoverBox(showElement, hoverBox, offset = 5) {
+        const showRect = showElement.getBoundingClientRect();
+        const hoverRect = hoverBox.getBoundingClientRect();
+
+        let top = showRect.top + offset;
+        let left = showRect.left + offset;
+
+        // Vertical positioning
+        if (top + hoverRect.height > window.innerHeight) {
+            top = showRect.bottom - hoverRect.height - offset;
+            top = Math.max(10, top); // Ensure minimum 10px from top
+        }
+
+        // Horizontal positioning
+        left = Math.max(10, Math.min(left, window.innerWidth - hoverRect.width - 10));
+
+        return { top, left };
+    }
 
     if (isMobile) {
         showElement.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Prevent scrolling while touching
-            const showRect = showElement.getBoundingClientRect();
-
+            e.preventDefault();
             activeHoverBox = hoverBox;
             hoverBox.style.position = 'fixed';
             hoverBox.style.display = 'block';
             hoverBox.style.width = '';
 
-            // First try to position below the top edge of the show
-            let top = showRect.top + 5;
-            let left = showRect.left;
-
-            // Get hover box dimensions
-            const hoverRect = hoverBox.getBoundingClientRect();
-
-            // If hover box would go off bottom of screen
-            if (top + hoverRect.height > window.innerHeight) {
-                // Try to position above bottom edge of show
-                top = showRect.bottom - hoverRect.height - 5;
-                
-                // If that would push it above the top of the screen, 
-                // position at top of screen with small margin
-                if (top < 10) {
-                    top = 10;
-                }
-            }
-
-            // Adjust horizontal position
-            if (left + hoverRect.width > window.innerWidth) {
-                left = window.innerWidth - hoverRect.width - 10;
-            } else if (left < 0) {
-                left = 10;
-            }
-
-            // Apply final position
+            const { top, left } = positionHoverBox(showElement, hoverBox);
             hoverBox.style.top = `${top}px`;
             hoverBox.style.left = `${left}px`;
-        }, { passive: false }); // Explicitly set passive to false since we need preventDefault
+        }, { passive: false });
 
         showElement.addEventListener('touchend', () => {
             if (activeHoverBox === hoverBox) {
@@ -320,42 +339,13 @@ function createShowElement(show, earliestHour) {
             hoverBox.style.display = 'none';
         }, { passive: true });
     } else {
-        // Mouse events for desktop
         showElement.addEventListener('mouseenter', () => {
-            const showRect = showElement.getBoundingClientRect();
-
             activeHoverBox = hoverBox;
             hoverBox.style.position = 'fixed';
             hoverBox.style.display = 'block';
             hoverBox.style.width = '';
 
-            // First try to position below the top edge of the show
-            let top = showRect.top + 5;
-            let left = showRect.left + 5;
-
-            // Get hover box dimensions
-            const hoverRect = hoverBox.getBoundingClientRect();
-
-            // If hover box would go off bottom of screen
-            if (top + hoverRect.height > window.innerHeight) {
-                // Try to position above bottom edge of show
-                top = showRect.bottom - hoverRect.height - 5;
-                
-                // If that would push it above the top of the screen, 
-                // position at top of screen with small margin
-                if (top < 10) {
-                    top = 10;
-                }
-            }
-
-            // Adjust horizontal position
-            if (left + hoverRect.width > window.innerWidth) {
-                left = window.innerWidth - hoverRect.width - 10;
-            } else if (left < 0) {
-                left = 10;
-            }
-
-            // Apply final position
+            const { top, left } = positionHoverBox(showElement, hoverBox);
             hoverBox.style.top = `${top}px`;
             hoverBox.style.left = `${left}px`;
         });
@@ -375,6 +365,4 @@ function createShowElement(show, earliestHour) {
             hoverBox.classList.remove('active');
         });
     }
-
-    return showElement;
 } 

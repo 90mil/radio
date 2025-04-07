@@ -8,21 +8,26 @@
     <title>90mil Radio - Shows</title>
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/nav.css">
+    <link rel="stylesheet" href="styles/header.css">
 </head>
 
 <body>
-    <iframe src="https://90mil.github.io/radio-banner/" frameborder="0" scrolling="no"
-        style="zoom: 200%; width:100%; height:60px; border:none;"></iframe>
-    <nav>
-        <a href="https://90mil.berlin">90mil home</a>
-        <a href="index.html">home</a>
-        <a href="radio-shows.html">radio shows</a>
-        <a href="schedule.html">schedule</a>
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSejVzDBVudAlY4jlctyPiwXqQcUM-kM7cDaXZlVHuS4tr81vw/viewform"
-            target="_blank">submit proposal</a>
-    </nav>
-    <iframe src="https://90mil.github.io/radio-shows/index.html" frameborder="0"
-        style="zoom: 180%; width:100%; height:calc(100vh - 77px); border:none; display:block;"></iframe>
+    <div class="fixed-header">
+        <div class="banner-container">
+            <iframe src="https://90mil.github.io/radio-banner/" frameborder="0" scrolling="no"></iframe>
+        </div>
+        <nav>
+            <a href="https://90mil.berlin"><span class="nav-text">90mil home</span></a>
+            <a href="index.html"><span class="nav-text">home</span></a>
+            <a href="radio-shows.html"><span class="nav-text">radio shows</span></a>
+            <a href="schedule.html"><span class="nav-text">schedule</span></a>
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSejVzDBVudAlY4jlctyPiwXqQcUM-kM7cDaXZlVHuS4tr81vw/viewform"
+                target="_blank"><span class="nav-text">submit proposal</span></a>
+        </nav>
+    </div>
+    <div class="main-content">
+        <iframe src="https://90mil.github.io/radio-shows/index.html" frameborder="0"></iframe>
+    </div>
 </body>
 
 </html>

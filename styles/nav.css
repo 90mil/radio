@@ -1,20 +1,61 @@
 nav {
     display: flex;
     background: var(--accent-2);
-    border-bottom: 1px solid rgba(230, 234, 233, 0.1);
+    border-bottom: 1px solid var(--text-color);
+    gap: 0;  /* Remove gap */
+    background-color: var(--text-color);  /* Using actual text color for borders */
+    height: 60px;  /* Set explicit height */
+}
+
+@keyframes glitch {
+    0% {
+        transform: translate(0);
+        text-shadow: none;
+    }
+    10% {
+        transform: translate(8px, 0);
+        text-shadow: -8px 0 rgba(255, 40, 89, 0.7), 4px 0 rgba(0, 255, 170, 0.7);
+    }
+    30% {
+        transform: translate(6px, 0);
+        text-shadow: -6px 0 rgba(255, 40, 89, 0.7), 3px 0 rgba(0, 255, 170, 0.7);
+    }
+    60% {
+        transform: translate(4px, 0);
+        text-shadow: -4px 0 rgba(255, 40, 89, 0.7), 2px 0 rgba(0, 255, 170, 0.7);
+    }
+    85% {
+        transform: translate(2px, 0);
+        text-shadow: -2px 0 rgba(255, 40, 89, 0.7), 1px 0 rgba(0, 255, 170, 0.7);
+    }
+    100% {
+        transform: translate(0);
+        text-shadow: none;
+    }
 }
 
 nav a {
-    padding: 15px 30px;
+    padding: 18px 35px;
     color: var(--text-color);
     text-decoration: none;
-    border-right: 1px solid rgba(230, 234, 233, 0.1);
+    background: var(--accent-2);
     font-family: "Glacial Indifference", sans-serif;
-    font-size: 16px;
+    font-size: 18px;
+    font-weight: bold;
     text-transform: lowercase;
+    transition: all 0.2s ease;
+    border-right: 1px solid var(--text-color);
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 nav a:hover {
-    background: rgba(237, 253, 250, 0.05);
+    background: var(--body-bg);
     text-decoration: none;
+}
+
+nav a:hover .nav-text {
+    animation: glitch 0.8s cubic-bezier(.1,.4,.2,.9) both;
 } 

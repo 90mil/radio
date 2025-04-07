@@ -259,8 +259,12 @@ async function loadMoreShows() {
 
 async function renderShows(shows = null, isAdditional = false) {
     if (!isAdditional) {
-        showContainer.innerHTML = 'Loading shows...';
-        showContainer.classList.remove('loaded');  // Remove loaded class while loading
+        const loadingText = document.createElement('div');
+        loadingText.className = 'month-header';
+        loadingText.textContent = 'Loading shows...';
+        showContainer.innerHTML = '';
+        showContainer.appendChild(loadingText);
+        showContainer.classList.remove('loaded');
     }
 
     try {

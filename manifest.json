@@ -1,0 +1,8 @@
+{
+    "name": "90mil Radio",
+    "short_name": "90mil",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#111411",
+    "theme_color": "#2C4E55"
+} 

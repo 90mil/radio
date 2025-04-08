@@ -183,6 +183,7 @@ function createShowBox(show, fadeIn = true, existingBox = null) {
     uniqueUploads.forEach(upload => {
         const playContainer = document.createElement('div');
         playContainer.classList.add('play-container');
+        playContainer.onclick = () => playShow(upload.key);  // Make whole container clickable
 
         playContainer.appendChild(createPlayButton(upload.key));
 

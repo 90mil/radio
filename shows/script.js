@@ -1,8 +1,8 @@
 // Constants
-const BATCH_SIZE = 50;
+const BATCH_SIZE = 20;
 const BATCH_DELAY = 50; // Milliseconds between batches
 const RANDOM_COLORS = ['#011410', '#003d2f', '#c25d05'];
-const SCROLL_THRESHOLD = 100; // px from bottom to trigger next batch
+const SCROLL_THRESHOLD = 500; // px from bottom to trigger next batch
 let currentOffset = 0;
 let isLoadingMore = false;
 let reachedEnd = false;

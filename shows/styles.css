@@ -124,27 +124,25 @@ body {
 
 .play-bar-container {
     position: fixed;
-    bottom: 10px;
+    bottom: 0;
     left: 0;
     width: 100%;
-    background: rgba(0, 0, 0, 0.9);
-    padding: 10px;
+    background: var(--accent-2);
+    border-top: 1px solid var(--text-color);
+    padding: 0;
     z-index: 1000;
     display: none;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
-    transition: transform 0.3s ease;
 }
 
 .play-bar {
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
-    background-color: transparent;
-    padding: 0;
     width: 100%;
-    max-width: 1200px;
-    border-radius: 0;
+    position: relative;
+    padding-top: 0;
 }
 
 .play-bar iframe {
@@ -153,8 +151,28 @@ body {
     border: none;
 }
 
-.play-bar-container.active {
-    transform: translateY(0);
+.close-player {
+    position: absolute;
+    top: -30px; /* Move above the player */
+    right: 0;
+    width: 30px;
+    height: 30px;
+    background: var(--accent-2);
+    border: 1px solid var(--text-color);
+    border-bottom: none; /* Remove bottom border since it connects with player */
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1001;
+    font-size: 20px;
+    padding: 0;
+    transition: background-color 0.2s ease;
+}
+
+.close-player:hover {
+    background: var(--body-bg);
 }
 
 .show-loading {

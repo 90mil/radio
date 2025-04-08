@@ -201,11 +201,23 @@ function createShowBox(show, fadeIn = true, existingBox = null) {
 
 // Main Functions
 function playShow(showKey) {
-    const showUrl = `https://player-widget.mixcloud.com/widget/iframe/?feed=${showKey}&autoplay=true`;
+    const showUrl = `https://player-widget.mixcloud.com/widget/iframe/?feed=${showKey}&autoplay=true&hide_cover=1&light=0`;
     mixcloudWidget.src = showUrl;
+    
+    // Create close button if it doesn't exist
+    if (!document.querySelector('.close-player')) {
+        const closeButton = document.createElement('button');
+        closeButton.className = 'close-player';
+        closeButton.innerHTML = '×';
+        closeButton.onclick = () => {
+            playBarContainer.style.display = 'none';
+            mixcloudWidget.src = '';
+        };
+        document.querySelector('.play-bar').appendChild(closeButton);
+    }
+    
     playBarContainer.classList.add('active');
     playBarContainer.style.display = 'flex';
-    playBarContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
 }
 
 async function fetchShows() {

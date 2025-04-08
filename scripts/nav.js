@@ -58,15 +58,15 @@ document.addEventListener('DOMContentLoaded', function () {
     if (window.location.pathname.includes('radio-shows')) {
         const mixcloudRow = document.createElement('div');
         mixcloudRow.className = 'mixcloud-row';
-        
+
         const mixcloudLinks = document.createElement('div');
         mixcloudLinks.className = 'nav-links';
-        
+
         const mixcloudLink = document.createElement('a');
         mixcloudLink.href = 'https://www.mixcloud.com/90milradio/';
         mixcloudLink.target = '_blank';
         mixcloudLink.innerHTML = '<span class="nav-text">mixcloud library</span>';
-        
+
         mixcloudLinks.appendChild(mixcloudLink);
         mixcloudRow.appendChild(mixcloudLinks);
         header.appendChild(mixcloudRow);

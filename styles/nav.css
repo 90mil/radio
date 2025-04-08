@@ -121,16 +121,33 @@ nav {
     nav {
         height: 50px;
         justify-content: flex-start;
+        pointer-events: none; /* Prevent nav from capturing clicks */
     }
 
     .menu-toggle {
+        pointer-events: auto; /* Re-enable clicks for menu button */
         display: block;
         z-index: 3;
         margin: 8px 16px;
         margin-left: auto;
     }
 
+    .mobile-header-link {
+        pointer-events: auto; /* Re-enable clicks for mobile header link */
+        display: flex;
+        align-items: center;
+        color: var(--text-color);
+        text-decoration: none;
+        font-family: "Glacial Indifference", sans-serif;
+        font-size: 18px;
+        font-weight: bold;
+        padding: 0 16px;
+        text-transform: lowercase;
+        z-index: 3; /* Ensure it's above other elements */
+    }
+
     .nav-links {
+        pointer-events: auto; /* Re-enable clicks for nav links */
         display: flex;
         transform: translateY(-100%);
         opacity: 0;
@@ -169,18 +186,6 @@ nav {
 
     .nav-links a:last-child {
         border-bottom: none;
-    }
-
-    .mobile-header-link {
-        display: flex;
-        align-items: center;
-        color: var(--text-color);
-        text-decoration: none;
-        font-family: "Glacial Indifference", sans-serif;
-        font-size: 18px;
-        font-weight: bold;
-        padding: 0 16px;
-        text-transform: lowercase;
     }
 
     .mobile-header-link:hover .nav-text {

@@ -143,8 +143,10 @@ fetch(scheduleDataUrl)
                 requestAnimationFrame(() => {
                     const container = weekOffset === 0 ? thisWeekContainer : nextWeekContainer;
                     const containerWidth = container.clientWidth;
-                    const headerMarginPercent = 0.05;
-                    const headerMarginWidth = containerWidth * headerMarginPercent;
+                    
+                    // Use site-wide spacing instead of percentage
+                    const headerMarginWidth = parseInt(getComputedStyle(document.documentElement)
+                        .getPropertyValue('--spacing-content'));
 
                     // Calculate both possible alignments
                     const lastDay = container.lastElementChild;

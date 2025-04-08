@@ -1,0 +1,49 @@
+/* Visual Effects */
+.visual::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        transparent 50%,
+        rgba(0, 0, 0, 0.05) 51%,
+        transparent 52%
+    );
+    background-size: 100% 4px;
+    animation: scanline 6s linear infinite;
+    pointer-events: none;
+}
+
+.visual::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        circle at center,
+        transparent 0%,
+        rgba(32, 128, 32, 0.2) 100%
+    );
+    mix-blend-mode: screen;
+    animation: flicker 4s infinite;
+    pointer-events: none;
+}
+
+/* Contact Info Typography */
+.contact-info h3 {
+    font-family: var(--font-primary);
+    color: var(--text-color);
+    font-size: 18px;
+    margin: 24px 0 12px;
+    text-transform: lowercase;
+}
+
+.contact-info h3:first-child {
+    margin-top: 0;
+}
+
+.contact-info a {
+    display: block;
+    margin: 6px 0;
+    font-size: var(--font-size-base);
+    color: var(--link-color);
+} 

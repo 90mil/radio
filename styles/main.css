@@ -1,88 +1,26 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+/* Base Imports */
+@import 'base/_variables.css';
+@import 'base/_reset.css';
+@import 'base/_typography.css';
+@import 'base/_animations.css';
 
-@font-face {
-    font-family: 'Glacial Indifference';
-    src: url('../assets/fonts/GlacialIndifference-Regular.otf') format('opentype');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
+/* Layout Imports */
+@import 'layouts/_containers.css';
 
-@font-face {
-    font-family: 'Glacial Indifference';
-    src: url('../assets/fonts/GlacialIndifference-Bold.otf') format('opentype');
-    font-weight: bold;
-    font-style: normal;
-    font-display: swap;
-}
+/* Component Imports */
+@import 'components/_header.css';
+@import 'components/_navigation.css';
+@import 'components/_visual.css';
 
-@font-face {
-    font-family: 'Glacial Indifference';
-    src: url('../assets/fonts/GlacialIndifference-Italic.otf') format('opentype');
-    font-weight: normal;
-    font-style: italic;
-    font-display: swap;
-}
-
-:root {
-    /* Design key colors */
-    --body-bg: #111411;      /* Body/Background */
-    --text-color: #E6EAE9;   /* Text/Details */
-    --accent-1: #2C4E55;     /* Accent I */
-    --accent-2: #011411;     /* Accent II */
-}
-
-body {
-    margin: 0;  /* Explicitly override user agent stylesheet */
-    padding: 0;
-    font-family: "Glacial Indifference", -apple-system, system-ui, BlinkMacSystemFont, sans-serif;
-    background: var(--body-bg);
-    color: var(--text-color);
-    min-height: 100vh;
-    font-size: 16px;  /* Base font size increase */
-}
-
-a {
-    color: #edfdfa;
-    text-decoration: none;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-h2 {
-    font-family: "Lora", Georgia, serif;
-    font-style: italic;
-    font-weight: normal;
-    font-size: 32px;  /* Larger heading */
-    margin-bottom: 24px;
-}
-
-h3 {
-    font-weight: normal;
-    font-size: 20px;  /* Larger subheading */
-    margin-bottom: 20px;
-}
-
-.accent {
-    font-family: "Glacial Indifference", sans-serif;
-    font-style: italic;
-    font-weight: bold;
-} 
-
+/* Main Content Styles */
 .main-content {
-    margin-top: 30px;
-    margin-left: 120px;
-    margin-right: 120px;
-    margin-bottom: 30px;
+    margin-top: var(--spacing-main);
+    margin-left: var(--spacing-content);
+    margin-right: var(--spacing-content);
+    margin-bottom: var(--spacing-main);
 }
 
-/* Add responsive styles */
+/* Responsive Styles */
 @media (max-width: 1024px) {
     .main-content {
         margin-left: 60px;

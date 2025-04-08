@@ -1,0 +1,39 @@
+/* Modern CSS Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: var(--body-bg);
+    color: var(--text-color);
+    font-family: var(--font-primary);
+    font-size: var(--font-size-base);
+}
+
+a {
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Remove default styles from buttons */
+button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font: inherit;
+}
+
+/* Make images responsive by default */
+img {
+    max-width: 100%;
+    height: auto;
+} 

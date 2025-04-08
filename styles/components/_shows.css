@@ -35,28 +35,28 @@
     margin: 20px 0 8px;
     font-size: 18px;
     font-weight: bold;
-    font-family: 'Abel', sans-serif;
+    font-family: var(--font-body);
 }
 
 .hosted-by {
     font-style: italic;
     margin: 0 0 8px 0;
     font-size: 14px;
-    font-family: 'Abel', sans-serif;
+    font-family: var(--font-body);
 }
 
 .genres {
     color: var(--text-color);
     margin: 0 0 8px 0;
     font-size: 12px;
-    font-family: 'Abel', sans-serif;
+    font-family: var(--font-body);
     font-style: italic;
 }
 
 .description {
     margin-bottom: 60px;
     font-size: 14px;
-    font-family: 'Abel', sans-serif;
+    font-family: var(--font-body);
     line-height: 1.4;
 }
 
@@ -107,7 +107,7 @@
 
 .play-date {
     font-size: 14px;
-    font-family: 'Abel', sans-serif;
+    font-family: var(--font-body);
     color: var(--text-color);
     white-space: nowrap;
     line-height: 1;

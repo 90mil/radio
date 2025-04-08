@@ -1,0 +1,85 @@
+.schedule-container {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.week-schedule-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    width: 100%;
+    overflow: visible;
+}
+
+.week-section {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: visible;
+    margin-bottom: 30px;
+    padding: 0 25%;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    user-select: none;
+    height: fit-content;
+    position: relative;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.week-section::-webkit-scrollbar {
+    display: none;
+}
+
+.week-header {
+    font-family: var(--font-primary);
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: lowercase;
+    color: var(--text-color);
+    margin: 30px var(--spacing-content) 20px var(--spacing-content);
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--accent-1);
+    height: 50px;
+    display: flex;
+    align-items: center;
+}
+
+/* First week header needs more space from nav */
+.week-header:first-child {
+    margin-top: 40px;
+}
+
+/* Update media queries to match site-wide responsive margins */
+@media (max-width: 1024px) {
+    .week-header {
+        margin-left: 60px;
+        margin-right: 60px;
+    }
+}
+
+@media (max-width: 768px) {
+    
+    .week-header {
+        margin-left: 24px;
+        margin-right: 24px;
+    }
+
+    .week-section {
+        gap: 10px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+@media (max-width: 480px) {
+    .week-schedule-container {
+        padding: 16px;
+    }
+    
+    .week-header {
+        margin-left: 16px;
+        margin-right: 16px;
+    }
+} 

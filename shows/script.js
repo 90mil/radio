@@ -1,6 +1,5 @@
 // Constants
-const CLOUDCAST_API_URL = 'https://api.mixcloud.com/90milradio/cloudcasts/?limit=100';
-const BATCH_SIZE = 6; // Smaller batch size for smoother loading
+const BATCH_SIZE = 20; // Smaller initial batch size
 const BATCH_DELAY = 50; // Milliseconds between batches
 const RANDOM_COLORS = ['#011410', '#003d2f', '#c25d05'];
 const SCROLL_THRESHOLD = 100; // px from bottom to trigger next batch
@@ -9,6 +8,9 @@ let isLoadingMore = false;
 let reachedEnd = false;
 let activeLoadingSpinners = 0;
 const SPINNER_HIDE_DELAY = 300; // ms to keep spinner visible after load
+
+// Update API URL to use Mixcloud directly
+const CLOUDCAST_API_URL = `https://api.mixcloud.com/90milradio/cloudcasts/?limit=${BATCH_SIZE}`;
 
 // DOM Elements
 const showContainer = document.getElementById('show-list');
@@ -94,62 +96,33 @@ function createPlayButton(uploadKey) {
 }
 
 function createShowBox(show, fadeIn = true, existingBox = null) {
-    const showBox = document.createElement('div');
-    showBox.classList.add('show-box');
-    showBox.style.backgroundColor = '#011411';
-    showBox.style.opacity = '1';
+    const showBox = existingBox || document.createElement('div');
+    showBox.className = 'show-box';
 
-    // Create image container first
+    // Image container
     const imageContainer = document.createElement('div');
-    imageContainer.classList.add('image-container');
+    imageContainer.className = 'image-container';
 
-    // Check if we have an existing loaded image to reuse
-    const existingImage = existingBox?.querySelector('.show-image.loaded');
-    if (existingImage) {
-        imageContainer.appendChild(existingImage.cloneNode(true));
-        showBox.appendChild(imageContainer);
-    } else {
-        const loadingDiv = document.createElement('div');
-        loadingDiv.classList.add('show-loading');
-        loadingDiv.innerHTML = '<div class="loading-spinner"></div>';
-        imageContainer.appendChild(loadingDiv);
-        showBox.appendChild(imageContainer);
+    const img = document.createElement('img');
+    img.className = 'show-image';
+    img.src = show.pictures?.large || show.pictures?.medium || show.pictures?.thumbnail || '';
+    img.onload = () => img.classList.add('loaded');
+    imageContainer.appendChild(img);
+    showBox.appendChild(imageContainer);
 
-        const img = document.createElement('img');
-        img.classList.add('show-image');
-        imageContainer.appendChild(img);
+    // Show name
+    const name = document.createElement('div');
+    name.className = 'show-name';
+    name.textContent = show.name.split(' hosted by')[0].trim();
+    showBox.appendChild(name);
 
-        const imageUrl = show.pictures?.large || show.pictures?.medium || show.pictures?.small || '';
-
-        img.addEventListener('load', function () {
-            loadingDiv.classList.add('fade-out');
-            img.classList.add('loaded');
-            setTimeout(() => loadingDiv.remove(), 300);
-        });
-
-        img.addEventListener('error', function () {
-            img.src = 'https://picsum.photos/200/200';
-            loadingDiv.classList.add('fade-out');
-            img.classList.add('loaded');
-            setTimeout(() => loadingDiv.remove(), 300);
-        });
-
-        img.alt = show.name || 'Show image';
-        img.loading = 'lazy';
-        img.src = imageUrl;
+    // Hosted by
+    if (show.hostName) {
+        const hostedBy = document.createElement('div');
+        hostedBy.className = 'hosted-by';
+        hostedBy.textContent = `Hosted by ${show.hostName}`;
+        showBox.appendChild(hostedBy);
     }
-
-    // Add rest of show content immediately
-    const showName = document.createElement('div');
-    showName.classList.add('show-name');
-    showName.textContent = decodeHtmlEntities(show.name);
-    showBox.appendChild(showName);
-
-    // Host name with decoded HTML entities
-    const hostedBy = document.createElement('div');
-    hostedBy.classList.add('hosted-by');
-    hostedBy.textContent = `Hosted by ${decodeHtmlEntities(show.hostName)}`;
-    showBox.appendChild(hostedBy);
 
     // Genres
     if (show.tags?.length > 0) {
@@ -159,33 +132,31 @@ function createShowBox(show, fadeIn = true, existingBox = null) {
         showBox.appendChild(genres);
     }
 
-    // Description container with dynamic margin based on number of uploads
+    // Description
     const description = document.createElement('div');
     description.classList.add('description');
     description.textContent = show.description || 'No description available.';
-    // Add margin based on number of uploads (each date container is ~40px)
+    // Add margin based on number of uploads
     const marginBottom = 20 + (show.uploads.length * 40);
     description.style.marginBottom = `${marginBottom}px`;
     showBox.appendChild(description);
 
-    // Container for all play dates
+    // Container for play dates
     const playDatesContainer = document.createElement('div');
     playDatesContainer.classList.add('play-dates-container');
 
-    // Sort uploads by date (newest first) and remove duplicates
-    const uniqueUploads = [...new Map(show.uploads.map(upload =>
-        [formatDate(upload.created_time), upload]
-    )).values()].sort((a, b) =>
+    // Sort uploads by date (newest first)
+    const sortedUploads = show.uploads.sort((a, b) =>
         new Date(b.created_time) - new Date(a.created_time)
     );
 
-    // Add each unique upload as a separate play container
-    uniqueUploads.forEach(upload => {
+    // Create play container for each upload
+    sortedUploads.forEach(upload => {
         const playContainer = document.createElement('div');
         playContainer.classList.add('play-container');
-        playContainer.onclick = () => playShow(upload.key);  // Make whole container clickable
+        playContainer.onclick = () => playShow(upload.url);
 
-        playContainer.appendChild(createPlayButton(upload.key));
+        playContainer.appendChild(createPlayButton(upload.url));
 
         const playDate = document.createElement('div');
         playDate.classList.add('play-date');
@@ -196,15 +167,14 @@ function createShowBox(show, fadeIn = true, existingBox = null) {
     });
 
     showBox.appendChild(playDatesContainer);
-
     return showBox;
 }
 
 // Main Functions
 function playShow(showKey) {
-    const showUrl = `https://player-widget.mixcloud.com/widget/iframe/?feed=${showKey}&autoplay=true&hide_cover=1&light=0`;
+    const showUrl = `https://player-widget.mixcloud.com/widget/iframe/?feed=${showKey}&autoplay=true`;
     mixcloudWidget.src = showUrl;
-    
+
     // Create close button if it doesn't exist
     if (!document.querySelector('.close-player')) {
         const closeButton = document.createElement('button');
@@ -216,7 +186,7 @@ function playShow(showKey) {
         };
         document.querySelector('.play-bar').appendChild(closeButton);
     }
-    
+
     playBarContainer.classList.add('active');
     playBarContainer.style.display = 'flex';
 }
@@ -241,35 +211,170 @@ function handleScroll() {
     }
 }
 
-// Add function to load more shows
+// Helper function to process shows consistently
+async function processShows(rawShows) {
+    const processedShows = await Promise.all(rawShows.map(async show => {
+        const details = await fetchShowDetails(show.key);
+        const showTitle = show.name.split(' hosted by')[0].trim();
+        const hostName = show.name.match(/hosted by (.+)/i)?.[1] || 'Unknown Host';
+
+        // Group all uploads of the same show
+        const uploads = rawShows
+            .filter(s => s.name === show.name)
+            .map(s => ({
+                key: s.key,
+                url: s.url,
+                created_time: s.created_time
+            }));
+
+        return {
+            ...show,
+            ...details,
+            hostName,
+            name: showTitle,
+            uploads: uploads
+        };
+    }));
+
+    // Remove duplicates (keep only first occurrence of each show)
+    return processedShows.filter((show, index) =>
+        processedShows.findIndex(s => s.name === show.name) === index
+    );
+}
+
+function updatePlayDates(showBox, show) {
+    // Find or create play dates container
+    let playDatesContainer = showBox.querySelector('.play-dates-container');
+    if (!playDatesContainer) {
+        playDatesContainer = document.createElement('div');
+        playDatesContainer.classList.add('play-dates-container');
+        showBox.appendChild(playDatesContainer);
+    }
+
+    // Sort all uploads by date (newest first)
+    const sortedUploads = show.uploads.sort((a, b) =>
+        new Date(b.created_time) - new Date(a.created_time)
+    );
+
+    // Clear existing play dates and add all dates
+    playDatesContainer.innerHTML = '';
+    sortedUploads.forEach(upload => {
+        const playContainer = document.createElement('div');
+        playContainer.classList.add('play-container');
+        playContainer.onclick = () => playShow(upload.url);
+
+        playContainer.appendChild(createPlayButton(upload.url));
+
+        const playDate = document.createElement('div');
+        playDate.classList.add('play-date');
+        playDate.textContent = formatDate(upload.created_time);
+        playContainer.appendChild(playDate);
+
+        playDatesContainer.appendChild(playContainer);
+    });
+
+    // Update description margin based on number of uploads
+    const description = showBox.querySelector('.description');
+    if (description) {
+        const marginBottom = 20 + (sortedUploads.length * 40);
+        description.style.marginBottom = `${marginBottom}px`;
+    }
+}
+
+// Update loadMoreShows to use the common processing
 async function loadMoreShows() {
     if (reachedEnd || isLoadingMore) return;
 
     try {
         isLoadingMore = true;
-        currentOffset += 100;
+        currentOffset += BATCH_SIZE;
 
-        const { data: newShows } = await fetchWithTimeout(
+        const response = await fetchWithTimeout(
             `${CLOUDCAST_API_URL}&offset=${currentOffset}`
         );
 
-        if (newShows.length === 0) {
+        const newShows = response.data;
+
+        if (!newShows || newShows.length === 0) {
             reachedEnd = true;
             return;
         }
 
-        if (newShows.length > 0) {
-            await renderShows(newShows, true);
+        const processedShows = await processShows(newShows);
+
+        // Group shows by month
+        const showsByMonth = new Map();
+        processedShows.forEach(show => {
+            const month = new Date(show.created_time).toLocaleString('en-US', { month: 'long', year: 'numeric' });
+            if (!showsByMonth.has(month)) {
+                showsByMonth.set(month, []);
+            }
+            showsByMonth.get(month).push(show);
+        });
+
+        // Process each month
+        for (const [month, shows] of showsByMonth) {
+            let monthContainer = document.querySelector(`.month-container[data-month="${month}"]`);
+
+            if (!monthContainer) {
+                const monthHeader = document.createElement('h2');
+                monthHeader.className = 'month-header';
+                monthHeader.textContent = month.toLowerCase();
+
+                monthContainer = document.createElement('div');
+                monthContainer.className = 'month-container';
+                monthContainer.setAttribute('data-month', month);
+
+                const existingMonths = Array.from(document.querySelectorAll('.month-container'));
+                const insertPosition = existingMonths.find(existing =>
+                    new Date(existing.getAttribute('data-month')) < new Date(month)
+                );
+
+                if (insertPosition) {
+                    insertPosition.parentNode.insertBefore(monthHeader, insertPosition);
+                    insertPosition.parentNode.insertBefore(monthContainer, insertPosition);
+                } else {
+                    showContainer.appendChild(monthHeader);
+                    showContainer.appendChild(monthContainer);
+                }
+            }
+
+            // Check for existing shows and merge if needed
+            shows.forEach(show => {
+                const existingBox = monthContainer.querySelector(`[data-show-key="${show.name}"]`);
+                if (existingBox) {
+                    // Merge new uploads with existing show
+                    const existingShow = existingBox.__showData;
+                    const newUploads = show.uploads.filter(newUpload =>
+                        !existingShow.uploads.some(existing =>
+                            existing.url === newUpload.url
+                        )
+                    );
+
+                    if (newUploads.length > 0) {
+                        existingShow.uploads.push(...newUploads);
+                        existingBox.__showData = existingShow;
+                        updatePlayDates(existingBox, existingShow);
+                    }
+                } else {
+                    // Create new show box
+                    const newBox = createShowBox(show);
+                    newBox.dataset.showKey = show.name;
+                    newBox.__showData = show;
+                    monthContainer.appendChild(newBox);
+                }
+            });
         }
+
     } catch (error) {
         console.error('Error loading more shows:', error);
-        // On error, reset the offset to try again
-        currentOffset -= 100;
+        currentOffset -= BATCH_SIZE;
     } finally {
         isLoadingMore = false;
     }
 }
 
+// Update renderShows to use the same processing
 async function renderShows(shows = null, isAdditional = false) {
     if (!isAdditional) {
         const loadingText = document.createElement('div');
@@ -281,14 +386,15 @@ async function renderShows(shows = null, isAdditional = false) {
     }
 
     try {
-        const showsToRender = shows || (await fetchShows()).data;
-
-        if (showsToRender.length === 0) {
+        const initialShows = shows || (await fetchShows()).data;
+        if (initialShows.length === 0) {
             if (!isAdditional) {
                 showContainer.innerHTML = 'No shows available at the moment.';
             }
             return;
         }
+
+        const processedShows = await processShows(initialShows);
 
         if (!isAdditional) {
             showContainer.innerHTML = '';
@@ -299,32 +405,29 @@ async function renderShows(shows = null, isAdditional = false) {
         const mergedShows = new Map(); // Track shows across all batches
 
         async function processBatch() {
-            const batchShows = showsToRender.slice(processedCount, processedCount + BATCH_SIZE);
+            const batchShows = processedShows.slice(processedCount, processedCount + BATCH_SIZE);
             if (batchShows.length === 0) return;
 
             const batchPromises = batchShows.map(async (show) => {
-                const showDetails = await fetchShowDetails(show.key);
-                if (!showDetails) return null;
-
-                const showTitle = showDetails.name.split(' hosted by')[0].trim();
-                const hostName = showDetails.name.match(/hosted by (.+)/i)?.[1] || 'Unknown Host';
-                const monthYear = getMonthYear(showDetails.created_time);
+                const showTitle = show.name.split(' hosted by')[0].trim();
+                const hostName = show.name.match(/hosted by (.+)/i)?.[1] || 'Unknown Host';
+                const monthYear = getMonthYear(show.created_time);
                 const showKey = `${showTitle}-${monthYear}`;
 
                 // Create or update show entry for this month
                 if (!mergedShows.has(showKey)) {
                     mergedShows.set(showKey, {
-                        ...showDetails,
+                        ...show,
                         hostName,
                         name: showTitle,
                         monthYear,
-                        uploads: [showDetails],
-                        latestDate: new Date(showDetails.created_time)
+                        uploads: [show],
+                        latestDate: new Date(show.created_time)
                     });
                 } else {
                     const existingShow = mergedShows.get(showKey);
-                    existingShow.uploads.push(showDetails);
-                    const newDate = new Date(showDetails.created_time);
+                    existingShow.uploads.push(show);
+                    const newDate = new Date(show.created_time);
                     if (newDate > existingShow.latestDate) {
                         existingShow.latestDate = newDate;
                     }
@@ -407,7 +510,7 @@ async function renderShows(shows = null, isAdditional = false) {
 
             processedCount += BATCH_SIZE;
 
-            if (processedCount < showsToRender.length) {
+            if (processedCount < processedShows.length) {
                 await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
                 await processBatch();
             }
@@ -421,6 +524,13 @@ async function renderShows(shows = null, isAdditional = false) {
             showContainer.innerHTML = 'Error loading shows. Please try again later.';
         }
     }
+}
+
+function createMonthContainer(month) {
+    const monthContainer = document.createElement('div');
+    monthContainer.className = 'month-container';
+    monthContainer.setAttribute('data-month', month);
+    return monthContainer;
 }
 
 // Initialize

@@ -50,21 +50,21 @@ body {
 .hosted-by {
     font-style: italic;
     margin: 0 0 8px 0;
-    font-size: 14px;  /* Larger */
+    font-size: 14px;
     font-family: 'Abel', sans-serif;
 }
 
 .genres {
     color: #e6eae9;
     margin: 0 0 8px 0;
-    font-size: 8px;
+    font-size: 12px;
     font-family: 'Abel', sans-serif;
     font-style: italic;
 }
 
 .description {
     margin-bottom: 60px;
-    font-size: 14px;  /* Increased from 12px */
+    font-size: 14px;  
     font-family: 'Abel', sans-serif;
     line-height: 1.4;
 }
@@ -88,16 +88,13 @@ body {
     background-color: transparent;
     gap: 8px;
     margin-bottom: 8px;
-    cursor: pointer;  /* Show pointer on whole container */
-    transition: background-color 0.2s ease;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .play-container:hover {
-    background: var(--body-bg);
-}
-
-.play-container:last-child {
-    margin-bottom: 0;
+    background: var(--accent-1);
+    border-color: var(--accent-1);
 }
 
 .play-button {
@@ -110,18 +107,18 @@ body {
 }
 
 .play-button svg {
-    width: 14px;  /* Increased from 10px */
+    width: 14px; 
     height: 14px;
     fill: #e6eae9;
     transition: fill 0.3s ease;
 }
 
 .play-button:hover svg {
-    fill: #e6eae9; /* back to text/details color */
+    fill: #e6eae9;
 }
 
 .play-date {
-    font-size: 14px;  /* Increased from 10px */
+    font-size: 14px;  
     font-family: 'Abel', sans-serif;
     color: #e6eae9;
     white-space: nowrap;
@@ -159,13 +156,13 @@ body {
 
 .close-player {
     position: absolute;
-    top: -30px; /* Move above the player */
+    top: -30px; /* Move above the player to not overlap with mixcloud logo/link*/
     right: 0;
     width: 30px;
     height: 30px;
     background: var(--accent-2);
     border: 1px solid var(--text-color);
-    border-bottom: none; /* Remove bottom border since it connects with player */
+    border-bottom: none; 
     color: var(--text-color);
     display: flex;
     align-items: center;

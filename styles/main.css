@@ -11,6 +11,12 @@
 @import 'components/_header.css';
 @import 'components/_navigation.css';
 @import 'components/_visual.css';
+@import 'components/_shows.css';
+@import 'components/_schedule.css';
+
+/* Page Imports */
+@import 'pages/_shows.css';
+@import 'pages/_schedule.css';
 
 /* Main Content Styles */
 .main-content {
@@ -30,18 +36,18 @@
 
 @media (max-width: 768px) {
     .main-content {
-        margin-left: 24px;
-        margin-right: 24px;
-        margin-top: 24px;
-        margin-bottom: 24px;
+        margin-left: 16px;
+        margin-right: 16px;
+        margin-top: 16px;
+        margin-bottom: 16px;
     }
 }
 
 @media (max-width: 480px) {
     .main-content {
-        margin-left: 16px;
-        margin-right: 16px;
-        margin-top: 16px;
-        margin-bottom: 16px;
+        margin-left: 0px;
+        margin-right: 0px;
+        margin-top: 0px;
+        margin-bottom: 0px;
     }
 }

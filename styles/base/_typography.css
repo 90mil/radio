@@ -23,6 +23,9 @@
     font-display: swap;
 }
 
+/* Add Abel font import if not using Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Abel&display=swap');
+
 /* Typography Styles */
 h2 {
     font-family: var(--font-secondary);

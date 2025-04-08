@@ -9,6 +9,7 @@
     /* Typography */
     --font-primary: "Glacial Indifference", -apple-system, system-ui, BlinkMacSystemFont, sans-serif;
     --font-secondary: "Lora", Georgia, serif;
+    --font-body: "Abel", sans-serif;
     --font-size-base: 16px;
     --font-size-h2: 32px;
     --font-size-h3: 20px;

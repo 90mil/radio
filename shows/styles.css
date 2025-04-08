@@ -335,22 +335,8 @@ body {
     background: var(--body-bg);
 }
 
-/* Add responsive styles */
+
 @media (max-width: 1024px) {
-    .show-container {
-        padding: 0 24px 0 120px;
-    }
-
-    .month-header {
-        margin-left: -100px;
-    }
-
-    .month-container::before {
-        left: -100px;
-    }
-}
-
-@media (max-width: 768px) {
     .show-container {
         padding: 0 24px;
     }

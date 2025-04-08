@@ -1,0 +1,60 @@
+/* Visual Effects Animations */
+@keyframes scanline {
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(100%);
+    }
+}
+
+@keyframes flicker {
+    0% { opacity: 0.8; }
+    5% { opacity: 0.85; }
+    10% { opacity: 0.9; }
+    15% { opacity: 0.85; }
+    20% { opacity: 0.95; }
+    25% { opacity: 0.85; }
+    30% { opacity: 0.9; }
+    35% { opacity: 0.95; }
+    40% { opacity: 0.85; }
+    45% { opacity: 0.9; }
+    50% { opacity: 0.95; }
+    55% { opacity: 0.85; }
+    60% { opacity: 0.9; }
+    65% { opacity: 0.85; }
+    70% { opacity: 0.9; }
+    75% { opacity: 0.85; }
+    80% { opacity: 0.9; }
+    85% { opacity: 0.95; }
+    90% { opacity: 0.9; }
+    95% { opacity: 0.85; }
+    100% { opacity: 0.8; }
+}
+
+@keyframes glitch {
+    0% {
+        transform: translate(0);
+        text-shadow: none;
+    }
+    10% {
+        transform: translate(8px, 0);
+        text-shadow: -8px 0 rgba(255, 40, 89, 0.7), 4px 0 rgba(0, 255, 170, 0.7);
+    }
+    30% {
+        transform: translate(6px, 0);
+        text-shadow: -6px 0 rgba(255, 40, 89, 0.7), 3px 0 rgba(0, 255, 170, 0.7);
+    }
+    60% {
+        transform: translate(4px, 0);
+        text-shadow: -4px 0 rgba(255, 40, 89, 0.7), 2px 0 rgba(0, 255, 170, 0.7);
+    }
+    85% {
+        transform: translate(2px, 0);
+        text-shadow: -2px 0 rgba(255, 40, 89, 0.7), 1px 0 rgba(0, 255, 170, 0.7);
+    }
+    100% {
+        transform: translate(0);
+        text-shadow: none;
+    }
+} 

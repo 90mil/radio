@@ -16,10 +16,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
     lazyImages.forEach(img => imageObserver.observe(img));
 });
-
-// Register service worker
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js');
-    });
-} 

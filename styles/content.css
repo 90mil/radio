@@ -126,12 +126,12 @@
     top: 40px;
     right: 40px;
     background: rgba(0, 0, 0, 0.9);
-    padding: 30px;
+    padding: var(--spacing-main);
     border-radius: 0;
 }
 
 .contact-info h3 {
-    font-family: "Glacial Indifference", sans-serif;
+    font-family: var(--font-primary);
     color: var(--text-color);
     font-size: 18px;
     margin: 24px 0 12px;
@@ -145,8 +145,8 @@
 .contact-info a {
     display: block;
     margin: 6px 0;
-    font-size: 16px;
-    color: rgba(237, 253, 250, 0.8);
+    font-size: var(--font-size-base);
+    color: var(--link-color);
 }
 
 @media (max-width: 1024px) {

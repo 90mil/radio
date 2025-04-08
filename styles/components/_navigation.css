@@ -1,4 +1,4 @@
-/* Move mobile-header-link base style to top */
+/* Main Navigation */
 .mobile-header-link {
     display: none;
 }
@@ -34,9 +34,9 @@ nav {
     justify-content: center;
 }
 
-/* Special styling for first link */
+/* Navigation Variations */
 .nav-links a:first-child {
-    margin-left: 120px;
+    margin-left: var(--spacing-content);
     justify-content: flex-start;
     padding-left: 18px;
     padding-right: 18px;
@@ -46,6 +46,7 @@ nav {
     border-right: none;
 }
 
+/* Mobile Menu Toggle */
 .menu-toggle {
     display: none;
     width: 36px;
@@ -58,6 +59,7 @@ nav {
     position: relative;
 }
 
+/* Menu Icon */
 .menu-icon {
     position: relative;
     display: block;
@@ -86,7 +88,7 @@ nav {
     bottom: -7px;
 }
 
-/* Menu open state */
+/* Menu States */
 .menu-open .menu-icon {
     background: transparent;
 }
@@ -101,6 +103,37 @@ nav {
     transform: rotate(-45deg);
 }
 
+/* Hover Effects */
+.nav-links a:hover {
+    background: var(--body-bg);
+    text-decoration: none;
+}
+
+.nav-links a:hover .nav-text {
+    animation: glitch 0.8s cubic-bezier(.1,.4,.2,.9) both;
+}
+
+/* Mixcloud Navigation Row */
+.mixcloud-row {
+    display: flex;
+    height: var(--nav-height);
+    border-bottom: 1px solid var(--text-color);
+    background: var(--accent-2);
+}
+
+.mixcloud-row .nav-links {
+    display: flex;
+    width: 100%;
+    padding-right: 90px;
+}
+
+.mixcloud-row .nav-links a {
+    justify-content: flex-start;
+    padding-left: 18px;
+    padding-right: 18px;
+}
+
+/* Responsive Styles */
 @media (max-width: 1024px) {
     .nav-links {
         padding-right: 60px;
@@ -118,8 +151,9 @@ nav {
 }
 
 @media (max-width: 768px) {
+    /* Mobile Navigation Styles */
     nav {
-        height: 50px;
+        height: var(--nav-height);
         justify-content: flex-start;
         pointer-events: none;
     }
@@ -138,7 +172,7 @@ nav {
         align-items: center;
         color: var(--text-color);
         text-decoration: none;
-        font-family: "Glacial Indifference", sans-serif;
+        font-family: var(--font-primary);
         font-size: 18px;
         font-weight: bold;
         padding: 0 16px;
@@ -167,7 +201,8 @@ nav {
         opacity: 1;
     }
 
-    .nav-links a {
+    .nav-links a,
+    .nav-links a:first-child {
         margin: 0;
         padding: 15px;
         width: 100%;
@@ -175,12 +210,6 @@ nav {
         border-bottom: 1px solid var(--text-color);
         font-size: 16px;
         text-align: center;
-        justify-content: center;
-    }
-
-    .nav-links a:first-child {
-        margin: 0;
-        padding: 15px;
         justify-content: center;
     }
 
@@ -206,58 +235,5 @@ nav {
     .nav-links a:last-child {
         margin-right: 0;
         padding-right: 16px;
-    }
-}
-
-.nav-links a:hover {
-    background: var(--body-bg);
-    text-decoration: none;
-}
-
-.nav-links a:hover .nav-text {
-    animation: glitch 0.8s cubic-bezier(.1,.4,.2,.9) both;
-}
-
-.mixcloud-row {
-    display: flex;
-    height: 50px;
-    border-bottom: 1px solid var(--text-color);
-    background: var(--accent-2);
-}
-
-.mixcloud-row .nav-links {
-    display: flex;
-    width: 100%;
-    padding-right: 90px;
-}
-
-.mixcloud-row .nav-links a {
-    justify-content: flex-start;
-    padding-left: 18px;
-    padding-right: 18px;
-}
-
-@media (max-width: 768px) {
-    .mixcloud-row {
-        position: sticky;
-        top: 50px;
-        z-index: 98;
-    }
-
-    .mixcloud-row .nav-links {
-        padding-right: 0;
-        transform: none;
-        opacity: 1;
-        position: relative;
-        flex-direction: row;
-        border-bottom: none;
-    }
-
-    .mixcloud-row .nav-links a {
-        margin: 0;
-        padding: 15px;
-        width: 100%;
-        border-right: none;
-        justify-content: center;
     }
 } 

@@ -64,9 +64,9 @@ body {
 
 .description {
     margin-bottom: 60px;
-    font-size: 12px;  /* Larger */
+    font-size: 14px;  /* Increased from 12px */
     font-family: 'Abel', sans-serif;
-    line-height: 1.4;  /* Better readability */
+    line-height: 1.4;
 }
 
 .play-dates-container {
@@ -87,7 +87,13 @@ body {
     box-sizing: border-box;
     background-color: transparent;
     gap: 8px;
-    margin-bottom: 8px;  /* Add space between multiple dates */
+    margin-bottom: 8px;
+    cursor: pointer;  /* Show pointer on whole container */
+    transition: background-color 0.2s ease;
+}
+
+.play-container:hover {
+    background: var(--body-bg);
 }
 
 .play-container:last-child {
@@ -104,9 +110,9 @@ body {
 }
 
 .play-button svg {
-    width: 10px;
-    height: 10px;
-    fill: #e6eae9; /* text/details */
+    width: 14px;  /* Increased from 10px */
+    height: 14px;
+    fill: #e6eae9;
     transition: fill 0.3s ease;
 }
 
@@ -115,9 +121,9 @@ body {
 }
 
 .play-date {
-    font-size: 10px;
+    font-size: 14px;  /* Increased from 10px */
     font-family: 'Abel', sans-serif;
-    color: #e6eae9; /* text/details */
+    color: #e6eae9;
     white-space: nowrap;
     line-height: 1;
 }

@@ -65,17 +65,14 @@ body {
 
 .day-block {
     border: 1px solid var(--text-color);
-    padding: 10px;
     background: var(--body-bg);
-    min-width: 440px; /* Doubled from 220px */
-    max-width: 600px; /* Doubled from 300px */
+    min-width: 440px;
+    max-width: 600px;
     flex: 1;
     display: flex;
     flex-direction: column;
     position: relative;
-    height: auto;
-    min-height: 200px; /* Doubled from 100px */
-    padding-top: 40px; /* Space for header */
+    min-height: 200px;
     overflow: visible;
 }
 
@@ -93,21 +90,17 @@ body {
 }
 
 .day-header {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    position: relative;
     z-index: 2;
     background: var(--accent-2);
     color: #edfdfa;
-    padding: 8px;
+    padding: 12px 16px 12px 16px;
     margin-bottom: 10px;
     border: 1px solid var(--text-color);
     font-size: 18px;
     font-weight: bold;
     display: flex;
     justify-content: space-between;
-    height: 40px;
     align-items: center;
 }
 
@@ -116,7 +109,6 @@ body {
     border-color: rgba(237, 253, 250, 0.1);
     color: rgba(237, 253, 250, 0.3);
     font-size: 18px;
-    padding: 8px;
 }
 
 /* Fix time slot text spacing */
@@ -290,4 +282,3 @@ body {
     --day-block-min-width: 440px;
     --day-block-max-width: 600px;
 }
-

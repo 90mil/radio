@@ -19,7 +19,7 @@ const CONFIG = {
     MARGIN: 10,
     HOVER_OFFSET: 5,
     DRAG_THRESHOLD: 3,
-    HEADER_HEIGHT: 40,
+    HEADER_HEIGHT: 52,
     PIXELS_PER_HOUR: 60,
     MOBILE_BREAKPOINT: 768
 };
@@ -182,6 +182,7 @@ function createDayBlock(day, shows, showDay, weekEarliestHour, weekLatestHour) {
 
     const dayHeader = document.createElement('div');
     dayHeader.className = 'day-header';
+    dayBlock.appendChild(dayHeader);
 
     if (shows.length === 0) {
         dayHeader.textContent = day.charAt(0).toUpperCase() + day.slice(1);
@@ -190,18 +191,22 @@ function createDayBlock(day, shows, showDay, weekEarliestHour, weekLatestHour) {
         const dateStr = formatDateLong(showDay);
         dayHeader.innerHTML = `<span>${dayName}</span><span>${dateStr}</span>`;
 
-        // Add extra padding to total height to prevent micro-scrolling
+        const showsContainer = document.createElement('div');
+        showsContainer.className = 'shows-container';
+
+        // Set height of shows container only
         const totalHours = weekLatestHour - weekEarliestHour + 1;
-        const containerHeight = (totalHours * 60) + 60; // Added extra padding to height
-        dayBlock.style.height = `${containerHeight}px`;
+        const containerHeight = totalHours * 60;
+        showsContainer.style.height = `${containerHeight}px`;
 
         shows.forEach(show => {
             const showElement = createShowElement(show, weekEarliestHour);
-            dayBlock.appendChild(showElement);
+            showsContainer.appendChild(showElement);
         });
+
+        dayBlock.appendChild(showsContainer);
     }
 
-    dayBlock.appendChild(dayHeader);
     return dayBlock;
 }
 

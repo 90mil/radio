@@ -264,7 +264,7 @@ body {
     margin: 0;
     color: var(--text-color);
     position: sticky;
-    top: 120px;
+    top: 150px;
     margin-left: -160px;
     text-align: left;
     z-index: 2;

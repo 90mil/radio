@@ -1,5 +1,5 @@
 // Constants
-const BATCH_SIZE = 20; // Smaller initial batch size
+const BATCH_SIZE = 50;
 const BATCH_DELAY = 50; // Milliseconds between batches
 const RANDOM_COLORS = ['#011410', '#003d2f', '#c25d05'];
 const SCROLL_THRESHOLD = 100; // px from bottom to trigger next batch
@@ -218,7 +218,6 @@ async function processShows(rawShows) {
         const showTitle = show.name.split(' hosted by')[0].trim();
         const hostName = show.name.match(/hosted by (.+)/i)?.[1] || 'Unknown Host';
 
-        // Group all uploads of the same show
         const uploads = rawShows
             .filter(s => s.name === show.name)
             .map(s => ({
@@ -236,14 +235,12 @@ async function processShows(rawShows) {
         };
     }));
 
-    // Remove duplicates (keep only first occurrence of each show)
     return processedShows.filter((show, index) =>
         processedShows.findIndex(s => s.name === show.name) === index
     );
 }
 
 function updatePlayDates(showBox, show) {
-    // Find or create play dates container
     let playDatesContainer = showBox.querySelector('.play-dates-container');
     if (!playDatesContainer) {
         playDatesContainer = document.createElement('div');
@@ -251,12 +248,18 @@ function updatePlayDates(showBox, show) {
         showBox.appendChild(playDatesContainer);
     }
 
-    // Sort all uploads by date (newest first)
-    const sortedUploads = show.uploads.sort((a, b) =>
-        new Date(b.created_time) - new Date(a.created_time)
-    );
+    // Deduplicate uploads from the same day
+    const uniqueUploads = show.uploads.reduce((acc, upload) => {
+        const date = new Date(upload.created_time).toDateString();
+        if (!acc.has(date)) {
+            acc.set(date, upload);
+        }
+        return acc;
+    }, new Map());
 
-    // Clear existing play dates and add all dates
+    const sortedUploads = Array.from(uniqueUploads.values())
+        .sort((a, b) => new Date(b.created_time) - new Date(a.created_time));
+
     playDatesContainer.innerHTML = '';
     sortedUploads.forEach(upload => {
         const playContainer = document.createElement('div');
@@ -273,7 +276,6 @@ function updatePlayDates(showBox, show) {
         playDatesContainer.appendChild(playContainer);
     });
 
-    // Update description margin based on number of uploads
     const description = showBox.querySelector('.description');
     if (description) {
         const marginBottom = 20 + (sortedUploads.length * 40);
@@ -302,22 +304,28 @@ async function loadMoreShows() {
 
         const processedShows = await processShows(newShows);
 
-        // Group shows by month
+        // Group shows by month using actual upload dates
         const showsByMonth = new Map();
         processedShows.forEach(show => {
-            const month = new Date(show.created_time).toLocaleString('en-US', { month: 'long', year: 'numeric' });
-            if (!showsByMonth.has(month)) {
-                showsByMonth.set(month, []);
-            }
-            showsByMonth.get(month).push(show);
+            show.uploads.forEach(upload => {
+                const month = new Date(upload.created_time).toLocaleString('en-US', { month: 'long', year: 'numeric' });
+                if (!showsByMonth.has(month)) {
+                    showsByMonth.set(month, new Map());
+                }
+                const monthShows = showsByMonth.get(month);
+                if (!monthShows.has(show.name)) {
+                    monthShows.set(show.name, { ...show, uploads: [] });
+                }
+                monthShows.get(show.name).uploads.push(upload);
+            });
         });
 
         // Process each month
-        for (const [month, shows] of showsByMonth) {
+        for (const [month, monthShows] of showsByMonth) {
             let monthContainer = document.querySelector(`.month-container[data-month="${month}"]`);
 
             if (!monthContainer) {
-                const monthHeader = document.createElement('h2');
+                const monthHeader = document.createElement('div');
                 monthHeader.className = 'month-header';
                 monthHeader.textContent = month.toLowerCase();
 
@@ -339,11 +347,10 @@ async function loadMoreShows() {
                 }
             }
 
-            // Check for existing shows and merge if needed
-            shows.forEach(show => {
+            // Process shows in this month
+            for (const show of monthShows.values()) {
                 const existingBox = monthContainer.querySelector(`[data-show-key="${show.name}"]`);
                 if (existingBox) {
-                    // Merge new uploads with existing show
                     const existingShow = existingBox.__showData;
                     const newUploads = show.uploads.filter(newUpload =>
                         !existingShow.uploads.some(existing =>
@@ -357,13 +364,12 @@ async function loadMoreShows() {
                         updatePlayDates(existingBox, existingShow);
                     }
                 } else {
-                    // Create new show box
                     const newBox = createShowBox(show);
                     newBox.dataset.showKey = show.name;
                     newBox.__showData = show;
                     monthContainer.appendChild(newBox);
                 }
-            });
+            }
         }
 
     } catch (error) {

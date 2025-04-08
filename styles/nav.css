@@ -121,11 +121,11 @@ nav {
     nav {
         height: 50px;
         justify-content: flex-start;
-        pointer-events: none; /* Prevent nav from capturing clicks */
+        pointer-events: none;
     }
 
     .menu-toggle {
-        pointer-events: auto; /* Re-enable clicks for menu button */
+        pointer-events: auto;
         display: block;
         z-index: 3;
         margin: 8px 16px;
@@ -133,7 +133,7 @@ nav {
     }
 
     .mobile-header-link {
-        pointer-events: auto; /* Re-enable clicks for mobile header link */
+        pointer-events: auto;
         display: flex;
         align-items: center;
         color: var(--text-color);
@@ -143,11 +143,11 @@ nav {
         font-weight: bold;
         padding: 0 16px;
         text-transform: lowercase;
-        z-index: 3; /* Ensure it's above other elements */
+        z-index: 3;
     }
 
     .nav-links {
-        pointer-events: auto; /* Re-enable clicks for nav links */
+        pointer-events: auto;
         display: flex;
         transform: translateY(-100%);
         opacity: 0;
@@ -192,7 +192,6 @@ nav {
         animation: glitch 0.8s cubic-bezier(.1,.4,.2,.9) both;
     }
 
-    /* Hide mixcloud row on mobile */
     .mixcloud-row {
         display: none !important;
     }
@@ -269,8 +268,8 @@ nav {
 @media (max-width: 768px) {
     .mixcloud-row {
         position: sticky;
-        top: 50px; /* Height of nav */
-        z-index: 98; /* Just below main nav */
+        top: 50px;
+        z-index: 98;
     }
 
     .mixcloud-row .nav-links {

@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
     menuToggle.innerHTML = '<span class="menu-icon"></span>';
 
     // Add mobile header link for shows page
-    if (window.location.pathname.includes('radio-shows')) {
+    if (window.location.pathname.includes('shows')) {
         const mobileHeaderLink = document.createElement('a');
         mobileHeaderLink.className = 'mobile-header-link';
         mobileHeaderLink.href = 'https://www.mixcloud.com/90milradio/';
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const links = [
         { href: 'https://90mil.berlin', text: '90mil home' },
         { href: '/radio/', text: 'home' },
-        { href: '/radio/radio-shows', text: 'shows' },
+        { href: '/radio/shows', text: 'shows' },
         { href: '/radio/schedule', text: 'schedule' },
         { href: 'https://docs.google.com/forms/d/e/1FAIpQLSejVzDBVudAlY4jlctyPiwXqQcUM-kM7cDaXZlVHuS4tr81vw/viewform', text: 'submit proposal' }
     ];
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
     header.appendChild(nav);
 
     // Add Mixcloud link if we're on the shows page
-    if (window.location.pathname.includes('radio-shows')) {
+    if (window.location.pathname.includes('shows')) {
         const mixcloudRow = document.createElement('div');
         mixcloudRow.className = 'mixcloud-row';
 

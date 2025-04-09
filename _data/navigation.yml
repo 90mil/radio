@@ -3,8 +3,8 @@
 - text:   home   
   url: /
 - text:   shows   
-  url: /radio-shows
+  url: /shows
 - text:  schedule 
   url: /schedule
 - text: submit proposal
-  url: https://docs.google.com/forms/d/e/1FAIpQLSejVzDBVudAlY4jlctyPiwXqQcUM-kM7cDaXZlVHuS4tr81vw/viewform 
+  url: https://docs.goole.com/forms/d/e/1FAIpQLSejVzDBVudAlY4jlctyPiwXqQcUM-kM7cDaXZlVHuS4tr81vw/viewform 

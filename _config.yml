@@ -3,3 +3,32 @@ sass:
   load_paths:
     - _sass
   style: compressed
+  sourcemap: never
+
+# Jekyll Optimization
+compress_html:
+  clippings: all
+  comments: ["<!-- ", " -->"]
+  endings: all
+  ignore:
+    envs: [development]
+  blanklines: false
+  profile: false
+  startings: [html, head, body]
+
+# Exclude unnecessary files from build
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .sass-cache
+  - .jekyll-cache
+  - .git
+  - README.md
+
+# Image optimization
+picture:
+  source: "assets/images"
+  output: "generated"
+  suppress_warnings: true

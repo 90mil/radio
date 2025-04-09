@@ -21,7 +21,7 @@ nav {
         padding: 18px var(--nav-padding);
         color: var(--text-color);
         text-decoration: none;
-        background: var(--accent-2);
+        background: var(--body-bg);
         font-family: var(--font-primary);
         font-size: 18px;
         font-weight: bold;
@@ -56,7 +56,7 @@ nav {
 
 /* Navigation Variations */
 .nav-links a:hover {
-    background: var(--body-bg);
+    background: var(--accent-2);
     text-decoration: none;
 }
 
@@ -167,16 +167,26 @@ nav {
 @media (max-width: 768px) {
     nav {
         height: var(--nav-height);
-        justify-content: space-between;
+        justify-content: flex-end;
         pointer-events: none;
+        padding: 0 16px;
+    }
+
+    .menu-toggle {
+        pointer-events: auto;
+        display: block;
+        z-index: var(--z-modal);
+        margin: 8px 0;
+        flex: 0 0 auto;
+        order: 2;
     }
 
     .mixcloud-row {
         display: none !important;
     }
 
-    /* Only show mobile mixcloud link on mobile when mixcloud row is hidden */
-    .mixcloud-row+nav .mobile-mixcloud-link {
+    /* Mobile mixcloud link styling */
+    .mobile-mixcloud-link {
         display: flex;
         pointer-events: auto;
         color: var(--text-color);
@@ -186,42 +196,32 @@ nav {
         font-weight: bold;
         padding: 15px;
         text-transform: lowercase;
-        z-index: var(--z-modal);
-        background: var(--accent-2);
+        z-index: var(--z-overlay);
+        background: var(--body-bg);
         transition: all 0.2s ease;
-        flex: 1;
-        text-align: center;
+        order: 1;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
+        margin-right: auto;
+        white-space: nowrap;
+        min-width: 0;
 
         &:hover {
-            background: var(--body-bg);
+            background: var(--accent-2);
             text-decoration: none;
-
-            .nav-text {
-                animation: glitch 0.8s cubic-bezier(.1, .4, .2, .9) both;
-            }
         }
-    }
-
-    .menu-toggle {
-        pointer-events: auto;
-        display: block;
-        z-index: var(--z-modal);
-        margin: 8px 16px;
-        flex: 0 0 auto;
     }
 
     .nav-links {
         pointer-events: none;
         display: none;
         position: absolute;
-        top: 100%;
+        top: 0;
         left: 0;
         right: 0;
         flex-direction: column;
-        background: var(--accent-2);
-        z-index: var(--z-overlay);
+        background: var(--body-bg);
+        z-index: calc(var(--z-overlay) + 1);
         padding: 0;
         border-bottom: 1px solid var(--text-color);
 
@@ -233,11 +233,15 @@ nav {
             border-right: none;
             border-bottom: 1px solid var(--text-color);
             text-align: center;
+            background: var(--body-bg);
 
             &:first-child {
                 margin-left: 0;
                 padding-left: 15px;
                 justify-content: center;
+                height: var(--nav-height);
+                display: flex;
+                align-items: center;
             }
 
             &:last-child {
@@ -245,6 +249,10 @@ nav {
                 margin-right: 0;
                 padding-right: 15px;
                 justify-content: center;
+            }
+
+            &:hover {
+                background: var(--accent-2);
             }
         }
     }

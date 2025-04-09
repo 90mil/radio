@@ -182,18 +182,23 @@
     }
 
     .show-name {
-        font-size: 13px;
+        font-size: 16px;
+    }
+
+    .hosted-by {
+        font-size: 14px;
     }
 
     .description {
-        font-size: 7px;
+        font-size: 14px;
+        line-height: 1.4;
     }
 
     .play-container {
-        padding: 6px 8px;
+        padding: 8px 12px;
     }
 
     .play-date {
-        font-size: 9px;
+        font-size: 14px;
     }
 }

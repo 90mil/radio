@@ -90,6 +90,10 @@
     width: 100%;
     overflow: hidden;
 
+    >* {
+        margin: 0;
+    }
+
     b {
         white-space: nowrap;
         overflow: hidden;

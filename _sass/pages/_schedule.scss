@@ -40,10 +40,6 @@
     height: 50px;
     display: flex;
     align-items: center;
-
-    &:first-child {
-        margin-top: 40px;
-    }
 }
 
 @media (max-width: 1024px) {

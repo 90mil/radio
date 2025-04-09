@@ -24,13 +24,7 @@
 }
 
 .about h2 {
-    font-family: var(--font-secondary);
-    font-style: italic;
-    font-size: 24px;
-    margin-bottom: 30px;
-    text-transform: lowercase;
-    font-weight: normal;
-    color: var(--text-color);
+    @extend .section-header;
 }
 
 .about p {
@@ -128,4 +122,15 @@
     .about {
         padding: 40px var(--margin-mobile);
     }
+}
+
+/* Section Headers */
+.section-header {
+    font-family: var(--section-header-font);
+    font-size: var(--section-header-size);
+    font-style: var(--section-header-style);
+    color: var(--section-header-color);
+    font-weight: var(--section-header-weight);
+    text-transform: var(--section-header-transform);
+    margin: var(--section-header-margin);
 }

@@ -59,4 +59,13 @@
 
     /* Layout Dimensions */
     --about-min-width: 528px;
+
+    /* Typography Styles */
+    --section-header-font: var(--font-secondary);
+    --section-header-size: 24px;
+    --section-header-style: italic;
+    --section-header-color: var(--text-color);
+    --section-header-weight: normal;
+    --section-header-transform: lowercase;
+    --section-header-margin: 0 0 30px 0;
 }

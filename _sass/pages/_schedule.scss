@@ -66,15 +66,28 @@
 
 @media (max-width: 480px) {
     .week-schedule-container {
-        padding: var(--margin-mobile);
+        padding: 0;
     }
 
     .week-header {
         margin-left: var(--margin-mobile);
         margin-right: var(--margin-mobile);
+        padding: 15px 0;
+        border-bottom: 1px solid var(--accent-1);
     }
 
     .week-section {
         padding: 0;
+        margin: 0;
+    }
+
+    .day-block {
+        min-width: 320px;
+        max-width: none;
+
+        &.empty {
+            min-width: 120px;
+            max-width: 140px;
+        }
     }
 }

@@ -342,7 +342,7 @@ function attachEventHandlers(showElement, hoverBox) {
         showElement.addEventListener('touchstart', (e) => {
             touchStartTime = Date.now();
             hasMoved = false;
-            
+
             // Show hover box immediately
             activeHoverBox = hoverBox;
             hoverBox.style.position = 'fixed';

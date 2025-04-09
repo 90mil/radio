@@ -1,3 +1,4 @@
+baseurl: "/radio"
 sass:
   load_paths:
     - _sass

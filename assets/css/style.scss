@@ -1,22 +1,18 @@
-/* Base Imports */
-@import 'base/_variables.css';
-@import 'base/_reset.css';
-@import 'base/_typography.css';
-@import 'base/_animations.css';
+---
+---
 
-/* Layout Imports */
-@import 'layouts/_containers.css';
-
-/* Component Imports */
-@import 'components/_header.css';
-@import 'components/_navigation.css';
-@import 'components/_visual.css';
-@import 'components/_shows.css';
-@import 'components/_schedule.css';
-
-/* Page Imports */
-@import 'pages/_shows.css';
-@import 'pages/_schedule.css';
+@import "base/variables";
+@import "base/reset";
+@import "base/typography";
+@import "base/animations";
+@import "layouts/containers";
+@import "components/header";
+@import "components/navigation";
+@import "components/visual";
+@import "components/shows";
+@import "components/schedule";
+@import "pages/shows";
+@import "pages/schedule";
 
 /* Main Content Styles */
 .main-content {
@@ -51,3 +47,5 @@
         margin-bottom: 16px;
     }
 }
+
+/* Rest of your styles... */

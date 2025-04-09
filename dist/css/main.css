@@ -1,0 +1,14 @@
+/* Base Styles */
+:root {
+  --body-bg: #111411;
+  /* ... rest of your existing variables ... */
+}
+
+/* Reset Styles */
+* {
+  margin: 0;
+  padding: 0;
+  /* ... rest of your existing reset styles ... */
+}
+
+/* Continue with all your existing main.css content */ 

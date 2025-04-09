@@ -142,11 +142,6 @@ nav {
 
     a {
         background: var(--body-bg);
-        /* Ensure background is set */
-
-        &:hover {
-            background: var(--accent-2);
-        }
     }
 }
 
@@ -214,11 +209,6 @@ nav {
         margin-right: auto;
         white-space: nowrap;
         min-width: 0;
-
-        &:hover {
-            background: var(--accent-2);
-            text-decoration: none;
-        }
     }
 
     .nav-links {
@@ -260,9 +250,6 @@ nav {
                 justify-content: center;
             }
 
-            &:hover {
-                background: var(--accent-2);
-            }
         }
     }
 

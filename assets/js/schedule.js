@@ -79,6 +79,7 @@ function addDragToScroll(element) {
         }
     };
 
+    // Mouse events only
     element.addEventListener('mousedown', handlers.mousedown, { passive: true });
     element.addEventListener('mousemove', handlers.mousemove, { passive: false });
     element.addEventListener('mouseup', handlers.mouseup, { passive: true });
@@ -318,7 +319,6 @@ function createHoverBox(show, { titleStr, hostStr }) {
 function attachEventHandlers(showElement, hoverBox) {
     const isMobile = window.innerWidth <= 768;
 
-    // Create a shared positioning function for both mobile and desktop
     function positionHoverBox(showElement, hoverBox, offset = 5) {
         const showRect = showElement.getBoundingClientRect();
         const hoverRect = hoverBox.getBoundingClientRect();
@@ -326,21 +326,24 @@ function attachEventHandlers(showElement, hoverBox) {
         let top = showRect.top + offset;
         let left = showRect.left + offset;
 
-        // Vertical positioning
         if (top + hoverRect.height > window.innerHeight) {
             top = showRect.bottom - hoverRect.height - offset;
-            top = Math.max(10, top); // Ensure minimum 10px from top
+            top = Math.max(10, top);
         }
 
-        // Horizontal positioning
         left = Math.max(10, Math.min(left, window.innerWidth - hoverRect.width - 10));
-
         return { top, left };
     }
 
     if (isMobile) {
+        let touchStartTime;
+        let hasMoved = false;
+
         showElement.addEventListener('touchstart', (e) => {
-            e.preventDefault();
+            touchStartTime = Date.now();
+            hasMoved = false;
+            
+            // Show hover box immediately
             activeHoverBox = hoverBox;
             hoverBox.style.position = 'fixed';
             hoverBox.style.display = 'block';
@@ -349,13 +352,26 @@ function attachEventHandlers(showElement, hoverBox) {
             const { top, left } = positionHoverBox(showElement, hoverBox);
             hoverBox.style.top = `${top}px`;
             hoverBox.style.left = `${left}px`;
-        }, { passive: false });
+        }, { passive: true });
+
+        showElement.addEventListener('touchmove', () => {
+            hasMoved = true;
+            // Keep hover box visible while scrolling
+        }, { passive: true });
 
         showElement.addEventListener('touchend', () => {
+            // Hide hover box on touch release
             if (activeHoverBox === hoverBox) {
                 activeHoverBox = null;
+                hoverBox.style.display = 'none';
             }
-            hoverBox.style.display = 'none';
+        }, { passive: true });
+
+        showElement.addEventListener('touchcancel', () => {
+            if (activeHoverBox === hoverBox) {
+                activeHoverBox = null;
+                hoverBox.style.display = 'none';
+            }
         }, { passive: true });
     } else {
         showElement.addEventListener('mouseenter', () => {

@@ -1,20 +1,26 @@
 /* Main Content Layout */
 .content {
-    display: flex;
+    display: grid;
+    grid-template-columns: fit-content(50%) 1fr;
+    /* First column fits content up to 50% */
     height: calc(100vh - 90px);
 }
 
 /* About Section */
 .about {
-    width: 40%;
-    padding: 60px var(--spacing-content);
-    background: var(--body-bg);  
-    font-size: var(--font-size-base);  
-    line-height: 1.7; 
-    border-right: 1px solid var(--text-color); 
+    width: fit-content;
+    min-width: var(--about-min-width);
+    max-width: 674px;
+    padding: 60px var(--margin-desktop);
+    background: var(--body-bg);
+    font-size: var(--font-size-base);
+    line-height: 1.7;
+    border-right: 1px solid var(--text-color);
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--accent-1) transparent;
+    box-sizing: border-box;
+    /* Include padding in width calculation */
 }
 
 .about h2 {
@@ -50,65 +56,76 @@
 
 /* Visual Section */
 .visual {
-    position: fixed;
-    right: 0;
-    top: 90px;
-    width: 60%;
-    height: calc(100vh - 90px);
+    position: relative;
+    /* Container for absolute positioning */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-color: rgba(0, 0, 0, 0.2);
     background-blend-mode: darken;
     overflow: hidden;
+    height: 100%;
+    /* Fill grid cell height */
 }
 
 /* Contact Info */
 .contact-info {
-    position: absolute;
-    top: 40px;
+    position: fixed;
+    top: calc(var(--nav-height) + var(--banner-height) + 40px);
     right: 40px;
-    background: rgba(0, 0, 0, 0.9);
+    width: 360px;
+    background: rgba(0, 0, 0, 0.85);
     padding: var(--spacing-main);
     border-radius: 0;
+    z-index: var(--z-overlay);
 }
 
 /* Responsive Layouts */
 @media (max-width: 1024px) {
     .about {
-        padding: 60px 60px 40px 90px;
+        padding: 60px var(--margin-laptop);
+    }
+
+    .contact-info {
+        /* Position relative to about section with smaller margins */
+        left: calc(var(--about-min-width) + 3%);
+        right: 3%;
+        width: auto;
+        /* Width will be determined by left/right positioning */
+        margin: 0;
     }
 }
 
 @media (max-width: 768px) {
     .content {
-        flex-direction: column;
+        grid-template-columns: 1fr;
         height: auto;
     }
-    
+
     .about {
         width: 100%;
-        padding: 40px;
+        min-width: 0;
+        max-width: none;
+        padding: 40px var(--margin-tablet);
         border-right: none;
     }
-    
+
     .visual {
-        position: relative;
-        top: 0;
-        width: 100%;
         height: 60vh;
     }
-    
+
     .contact-info {
         position: relative;
         top: 0;
-        right: 0;
+        left: auto;
+        right: auto;
+        width: auto;
         margin: 20px;
     }
 }
 
 @media (max-width: 480px) {
     .about {
-        padding: 40px 25px;
+        padding: 40px var(--margin-mobile);
     }
-} 
+}

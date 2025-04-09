@@ -1,11 +1,15 @@
 :root {
     /* Color System */
-    --body-bg: #111411;      /* Body/Background */
-    --text-color: #E6EAE9;   /* Text/Details */
-    --accent-1: #2C4E55;     /* Accent I */
-    --accent-2: #011411;     /* Accent II */
+    --body-bg: #111411;
+    /* Body/Background */
+    --text-color: #E6EAE9;
+    /* Text/Details */
+    --accent-1: #2C4E55;
+    /* Accent I */
+    --accent-2: #011411;
+    /* Accent II */
     --link-color: #edfdfa;
-    
+
     /* Typography */
     --font-primary: "Glacial Indifference", -apple-system, system-ui, BlinkMacSystemFont, sans-serif;
     --font-secondary: "Lora", Georgia, serif;
@@ -13,22 +17,46 @@
     --font-size-base: 16px;
     --font-size-h2: 32px;
     --font-size-h3: 20px;
-    
+
     /* Spacing */
     --spacing-main: 30px;
     --spacing-large: 40px;
-    --spacing-content: 120px;
-    
+    --spacing-nav: 10px;
+
+    /* Responsive Margins */
+    --margin-desktop: 120px;
+    /* Was spacing-content */
+    --margin-laptop: 60px;
+    /* 1024px breakpoint */
+    --margin-tablet: 24px;
+    /* 768px breakpoint */
+    --margin-mobile: 16px;
+    /* 480px breakpoint */
+
+    /* Content Padding */
+    --padding-nav: clamp(12px, 5vw, 150px);
+
     /* Layout */
     --nav-height: 50px;
     --banner-height: 40px;
-    
+
     /* Z-index layers */
     --z-header: 100;
     --z-overlay: 101;
     --z-modal: 102;
-    
+
     /* Effect Colors */
-    --glitch-color-1: rgba(255, 40, 89, 0.7);   /* Pink/Red glitch */
-    --glitch-color-2: rgba(0, 255, 170, 0.7);   /* Cyan/Green glitch */
-} 
+    --glitch-color-1: rgba(255, 40, 89, 0.7);
+    /* Pink/Red glitch */
+    --glitch-color-2: rgba(0, 255, 170, 0.7);
+    /* Cyan/Green glitch */
+
+    /* Breakpoints */
+    --bp-mobile: 480px;
+    --bp-tablet: 768px;
+    --bp-laptop: 1024px;
+    --bp-desktop: 1200px; // Add this if needed for larger screens
+
+    /* Layout Dimensions */
+    --about-min-width: 528px;
+}

@@ -24,6 +24,24 @@ const CONFIG = {
     MOBILE_BREAKPOINT: 768
 };
 
+// Add this helper function
+function getResponsiveMargin() {
+    const styles = getComputedStyle(document.documentElement);
+    const defaultMargin = parseInt(styles.getPropertyValue('--spacing-content'));
+    const mediaQuery1024 = window.matchMedia('(max-width: 1024px)');
+    const mediaQuery768 = window.matchMedia('(max-width: 768px)');
+    const mediaQuery480 = window.matchMedia('(max-width: 480px)');
+
+    if (mediaQuery480.matches) {
+        return parseInt(styles.getPropertyValue('--spacing-mobile') || '16');
+    } else if (mediaQuery768.matches) {
+        return parseInt(styles.getPropertyValue('--spacing-tablet') || '24');
+    } else if (mediaQuery1024.matches) {
+        return parseInt(styles.getPropertyValue('--spacing-laptop') || '60');
+    }
+    return defaultMargin;
+}
+
 function addDragToScroll(element) {
     let dragState = {
         startX: null,
@@ -143,17 +161,11 @@ fetch(scheduleDataUrl)
                 requestAnimationFrame(() => {
                     const container = weekOffset === 0 ? thisWeekContainer : nextWeekContainer;
                     const containerWidth = container.clientWidth;
-                    
-                    // Use site-wide spacing instead of percentage
-                    const headerMarginWidth = parseInt(getComputedStyle(document.documentElement)
-                        .getPropertyValue('--spacing-content'));
+                    const headerMarginWidth = getResponsiveMargin();
 
                     // Calculate both possible alignments
                     const lastDay = container.lastElementChild;
-
-                    // Calculate actual content width from first content to last day
                     const contentWidth = lastDay.offsetLeft + lastDay.offsetWidth - firstDayWithContent.offsetLeft;
-
                     const lastDayAlignment = lastDay.offsetLeft - (containerWidth - lastDay.offsetWidth - headerMarginWidth);
                     const firstContentAlignment = firstDayWithContent.offsetLeft - headerMarginWidth;
 

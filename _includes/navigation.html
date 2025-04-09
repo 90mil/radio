@@ -3,6 +3,11 @@
         <iframe src="https://90mil.github.io/radio-banner/" frameborder="0" scrolling="no"></iframe>
     </div>
     <nav>
+        {% if page.url contains 'radio-shows' %}
+        <a href="https://www.mixcloud.com/90milradio/" target="_blank" class="mobile-mixcloud-link">
+            <span class="nav-text">mixcloud library</span>
+        </a>
+        {% endif %}
         <button class="menu-toggle">
             <span class="menu-icon"></span>
         </button>
@@ -23,4 +28,4 @@
         </div>
     </div>
     {% endif %}
-</div> 
+</div>

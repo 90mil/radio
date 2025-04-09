@@ -1,10 +1,10 @@
 - text: 90mil home
   url: https://90mil.berlin
-- text: home
+- text:   home   
   url: /
-- text: shows
+- text:   shows   
   url: /radio-shows
-- text: schedule
+- text:  schedule 
   url: /schedule
 - text: submit proposal
   url: https://docs.google.com/forms/d/e/1FAIpQLSejVzDBVudAlY4jlctyPiwXqQcUM-kM7cDaXZlVHuS4tr81vw/viewform 

@@ -172,22 +172,20 @@ function createShowBox(show, fadeIn = true, existingBox = null) {
 
 // Main Functions
 function playShow(showKey) {
-    const showUrl = `https://player-widget.mixcloud.com/widget/iframe/?feed=${showKey}&autoplay=true`;
+    const showUrl = `https://player-widget.mixcloud.com/widget/iframe/?feed=${showKey}&autoplay=1&hide_cover=1`;
     mixcloudWidget.src = showUrl;
 
     // Create close button if it doesn't exist
-    if (!document.querySelector('.close-player')) {
+    if (!document.querySelector('.close-button')) {
         const closeButton = document.createElement('button');
-        closeButton.className = 'close-player';
-        closeButton.innerHTML = '×';
+        closeButton.className = 'close-button';
         closeButton.onclick = () => {
             playBarContainer.style.display = 'none';
             mixcloudWidget.src = '';
         };
-        document.querySelector('.play-bar').appendChild(closeButton);
+        playBarContainer.querySelector('.play-bar').appendChild(closeButton);
     }
 
-    playBarContainer.classList.add('active');
     playBarContainer.style.display = 'flex';
 }
 
@@ -539,6 +537,28 @@ function createMonthContainer(month) {
     return monthContainer;
 }
 
+function closePlayer() {
+    const player = document.querySelector('.play-bar-container');
+    if (player) {
+        player.style.display = 'none';
+        const iframe = player.querySelector('iframe');
+        if (iframe) {
+            iframe.src = '';
+        }
+    }
+}
+
 // Initialize
-renderShows();
-window.addEventListener('scroll', handleScroll); 
+document.addEventListener('DOMContentLoaded', () => {
+    renderShows();
+    window.addEventListener('scroll', handleScroll);
+
+    // Add close button to player container
+    const player = document.querySelector('.play-bar-container');
+    if (player) {
+        const closeButton = document.createElement('button');
+        closeButton.className = 'close-button';
+        closeButton.addEventListener('click', closePlayer);
+        player.querySelector('.play-bar').appendChild(closeButton);
+    }
+}); 

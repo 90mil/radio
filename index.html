@@ -1,5 +1,7 @@
 ---
 layout: default
+scripts:
+- /assets/js/main.js
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -31,7 +33,7 @@ layout: default
     <meta name="twitter:image" content="https://90mil.berlin/radio/assets/images/og-image.jpg">
 
     <!-- Add this line -->
-    <link rel="icon" type="image/png" href="/assets/icons/favicon.png">
+    <link rel="icon" type="image/png" href="{{ '/assets/icons/favicon.png' | relative_url }}">
 </head>
 
 <body>
@@ -74,8 +76,7 @@ layout: default
         </div>
     </div>
 
-    <script src="scripts/main.js"></script>
-    <script src="scripts/nav.js"></script>
+    <script src="{{ '/scripts/main.js' | relative_url }}"></script>
 </body>
 
 </html>

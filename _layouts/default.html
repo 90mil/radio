@@ -1,1 +1,19 @@
-{{ content }} 
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% include head.html %}
+</head>
+
+<body>
+    {% include navigation.html %}
+    {{ content }}
+    <script src="{{ '/assets/js/menu.js' | relative_url }}"></script>
+    {% if page.scripts %}
+    {% for script in page.scripts %}
+    <script src="{{ script | relative_url }}"></script>
+    {% endfor %}
+    {% endif %}
+</body>
+
+</html>

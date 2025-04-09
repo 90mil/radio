@@ -1,5 +1,7 @@
 ---
 layout: default
+scripts:
+- /assets/js/schedule.js
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -14,7 +16,7 @@ layout: default
         img-src 'self' https: data:;
         frame-src https://90mil.github.io/;">
     <title>90mil Radio - Schedule</title>
-    <link rel="icon" type="image/png" href="/assets/icons/favicon.png">
+    <link rel="icon" type="image/png" href="{{ '/assets/icons/favicon.png' | relative_url }}">
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
     <link href="https://fonts.googleapis.com/css2?family=Abel&display=swap" rel="stylesheet">
 </head>
@@ -31,8 +33,7 @@ layout: default
         </div>
     </div>
 
-    <script src="scripts/nav.js"></script>
-    <script src="scripts/schedule.js"></script>
+    <script src="{{ '/scripts/schedule.js' | relative_url }}"></script>
 </body>
 
 </html>

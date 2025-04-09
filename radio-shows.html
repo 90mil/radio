@@ -1,5 +1,8 @@
 ---
 layout: default
+scripts:
+- https://widget.mixcloud.com/media/js/widgetApi.js
+- /assets/js/shows.js
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -14,7 +17,7 @@ layout: default
         img-src 'self' https: data:;
         frame-src https://90mil.github.io/ https://www.mixcloud.com https://player-widget.mixcloud.com;">
     <title>90mil Radio - Shows</title>
-    <link rel="icon" type="image/png" href="/assets/icons/favicon.png">
+    <link rel="icon" type="image/png" href="{{ '/assets/icons/favicon.png' | relative_url }}">
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,10 +33,6 @@ layout: default
             </div>
         </div>
     </div>
-
-    <script src="scripts/nav.js"></script>
-    <script src="https://widget.mixcloud.com/media/js/widgetApi.js"></script>
-    <script src="scripts/shows.js"></script>
 </body>
 
 </html>

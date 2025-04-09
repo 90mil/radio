@@ -132,13 +132,22 @@ nav {
     display: flex;
     height: var(--nav-height);
     border-bottom: 1px solid var(--text-color);
-    background: var(--accent-2);
+    background: var(--body-bg);
 }
 
 .mixcloud-row .nav-links {
     display: flex;
     width: 100%;
     padding-right: 90px;
+
+    a {
+        background: var(--body-bg);
+        /* Ensure background is set */
+
+        &:hover {
+            background: var(--accent-2);
+        }
+    }
 }
 
 .mixcloud-row .nav-links a {

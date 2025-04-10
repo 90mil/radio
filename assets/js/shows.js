@@ -213,8 +213,10 @@ function handleScroll() {
 async function processShows(rawShows) {
     const processedShows = await Promise.all(rawShows.map(async show => {
         const details = await fetchShowDetails(show.key);
+        console.log('Raw show name:', show.name);
         const showTitle = show.name.split(' hosted by')[0].trim();
         const hostName = show.name.match(/hosted by (.+)/i)?.[1] || 'Unknown Host';
+        console.log('Extracted host:', hostName);
 
         const uploads = rawShows
             .filter(s => s.name === show.name)
@@ -413,17 +415,14 @@ async function renderShows(shows = null, isAdditional = false) {
             if (batchShows.length === 0) return;
 
             const batchPromises = batchShows.map(async (show) => {
-                const showTitle = show.name.split(' hosted by')[0].trim();
-                const hostName = show.name.match(/hosted by (.+)/i)?.[1] || 'Unknown Host';
+                // Use the hostName that was already extracted in processShows
                 const monthYear = getMonthYear(show.created_time);
-                const showKey = `${showTitle}-${monthYear}`;
+                const showKey = `${show.name}-${monthYear}`;
 
                 // Create or update show entry for this month
                 if (!mergedShows.has(showKey)) {
                     mergedShows.set(showKey, {
                         ...show,
-                        hostName,
-                        name: showTitle,
                         monthYear,
                         uploads: [show],
                         latestDate: new Date(show.created_time)

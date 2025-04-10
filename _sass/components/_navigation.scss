@@ -125,6 +125,49 @@ nav {
 /* Hide mobile mixcloud link by default at all screen sizes */
 .mobile-mixcloud-link {
     display: none;
+    pointer-events: auto;
+    color: var(--text-color);
+    text-decoration: none;
+    font-family: var(--font-primary);
+    font-size: 18px;
+    font-weight: bold;
+    padding: 15px;
+    text-transform: lowercase;
+    z-index: var(--z-overlay);
+    background: var(--body-bg);
+    transition: all 0.2s ease;
+    order: 1;
+    align-items: center;
+    justify-content: flex-start;
+    margin-right: auto;
+    white-space: nowrap;
+    min-width: 0;
+
+    &:hover {
+        .nav-text {
+            animation: glitch 0.4s linear infinite;
+            position: relative;
+
+            &::before,
+            &::after {
+                content: attr(data-text);
+                position: absolute;
+                left: 0;
+            }
+
+            &::before {
+                animation: glitch-top 0.4s linear infinite;
+                clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+                -webkit-clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+            }
+
+            &::after {
+                animation: glitch-bottom 0.4s linear infinite;
+                clip-path: polygon(0 67%, 100% 67%, 100% 100%, 0 100%);
+                -webkit-clip-path: polygon(0 67%, 100% 67%, 100% 100%, 0 100%);
+            }
+        }
+    }
 }
 
 /* Mixcloud Navigation Row */
@@ -173,7 +216,7 @@ nav {
         height: var(--nav-height);
         justify-content: flex-end;
         pointer-events: none;
-        padding: 0 16px;
+        padding: 0 30px;
     }
 
     .menu-toggle {
@@ -189,26 +232,8 @@ nav {
         display: none !important;
     }
 
-    /* Mobile mixcloud link styling */
     .mobile-mixcloud-link {
-        display: flex;
-        pointer-events: auto;
-        color: var(--text-color);
-        text-decoration: none;
-        font-family: var(--font-primary);
-        font-size: 18px;
-        font-weight: bold;
-        padding: 15px;
-        text-transform: lowercase;
-        z-index: var(--z-overlay);
-        background: var(--body-bg);
-        transition: all 0.2s ease;
-        order: 1;
-        align-items: center;
-        justify-content: flex-start;
-        margin-right: auto;
-        white-space: nowrap;
-        min-width: 0;
+        display: block;
     }
 
     .nav-links {
@@ -260,6 +285,9 @@ nav {
 }
 
 @media (max-width: 480px) {
+    nav {
+        padding: 0 16px;
+    }
 
     .nav-links a:first-child,
     .nav-links a:last-child {

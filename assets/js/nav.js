@@ -34,9 +34,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Define navigation items with correct paths
     const links = [
         { href: 'https://90mil.berlin', text: '90mil home' },
-        { href: '/radio/', text: 'home' },
-        { href: '/radio/shows', text: 'shows' },
-        { href: '/radio/schedule', text: 'schedule' },
+        { href: '/', text: 'home' },
+        { href: '/shows', text: 'shows' },
+        { href: '/schedule', text: 'schedule' },
         { href: 'https://docs.google.com/forms/d/e/1FAIpQLSejVzDBVudAlY4jlctyPiwXqQcUM-kM7cDaXZlVHuS4tr81vw/viewform', text: 'submit proposal' }
     ];
 

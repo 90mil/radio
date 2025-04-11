@@ -15,18 +15,25 @@ const CLOUDCAST_API_URL = `https://api.mixcloud.com/90milradio/cloudcasts/?limit
 let showContainer;
 
 window.addEventListener('message', function (event) {
-    if (event.data === 'bannerPlaying') {
-        // Pause any playing show
-        const player = document.querySelector('#player-iframe');
-        if (player) {
-            player.contentWindow.postMessage('pause', '*');
+    // Check if message is from Mixcloud widget
+    if (event.origin === 'https://player-widget.mixcloud.com') {
+        try {
+            const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+
+            // Use the ready event since widget autoplays
+            if (data.type === 'ready') {
+                const bannerFrame = document.querySelector('.banner-container iframe');
+                if (bannerFrame) {
+                    bannerFrame.contentWindow.postMessage('pause', '*');
+                }
+            }
+        } catch (e) {
+            // Handle potential JSON parse errors
         }
     }
 });
 
 window.showsInit = function () {
-    console.log('Initializing Shows...');
-
     // Clear state
     currentOffset = 0;
     isLoadingMore = false;
@@ -40,7 +47,6 @@ window.showsInit = function () {
         return;
     }
 
-    console.log('Shows container found, rendering shows...');
     showContainer.innerHTML = ''; // Clear previous content
 
     // Add load more trigger
@@ -62,8 +68,6 @@ window.showsInit = function () {
         closeButton.addEventListener('click', closePlayer);
         player.querySelector('.play-bar').appendChild(closeButton);
     }
-
-    console.log('Shows initialization complete');
 };
 
 function createLoadMoreTrigger() {
@@ -240,8 +244,6 @@ function createShowBox(show, fadeIn = true, existingBox = null) {
 
 // Main Functions
 function playShow(showUrl) {
-    console.log(`Playing show: ${showUrl}`);
-
     // Get player container from the DOM
     const playBarContainer = document.getElementById('bottom-player') ||
         document.querySelector('.play-bar-container');
@@ -269,25 +271,11 @@ function playShow(showUrl) {
         document.body.appendChild(container);
     }
 
-    // Construct the player URL with autoplay
-    const playerUrl = `https://player-widget.mixcloud.com/widget/iframe/?feed=${showUrl}&autoplay=1&hide_cover=1`;
+    // Construct the player URL with autoplay and events API enabled
+    const playerUrl = `https://player-widget.mixcloud.com/widget/iframe/?feed=${showUrl}&hide_cover=1&autoplay=1&enable_api=1`;
 
     // Set iframe source
     mixcloudWidget.src = playerUrl;
-
-    // Tell banner to pause
-    const bannerFrame = document.querySelector('.banner-container iframe');
-    if (bannerFrame) {
-        bannerFrame.contentWindow.postMessage('pause', '*');
-    }
-
-    // Create close button if it doesn't exist
-    if (!document.querySelector('.close-button')) {
-        const closeButton = document.createElement('button');
-        closeButton.className = 'close-button';
-        closeButton.onclick = closePlayer;
-        playBarContainer.querySelector('.play-bar').appendChild(closeButton);
-    }
 
     // Show the player
     playBarContainer.style.display = 'flex';
@@ -318,8 +306,6 @@ function handleScroll() {
 window.renderShows = async function (isAdditional = false) {
     if (isLoadingMore) return;
     isLoadingMore = true;
-
-    console.log(`Rendering shows with offset ${currentOffset}`);
 
     if (!isAdditional) {
         const loadingText = document.createElement('div');
@@ -415,8 +401,6 @@ window.renderShows = async function (isAdditional = false) {
 
 // Helper function to process shows consistently
 async function processShows(rawShows) {
-    console.log('Processing shows:', rawShows);
-
     // First, group shows by their name to collect all uploads
     const showGroups = new Map();
 
@@ -476,7 +460,6 @@ async function processShows(rawShows) {
         })
     );
 
-    console.log('Processed shows:', processedShows);
     return processedShows;
 }
 

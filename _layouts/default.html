@@ -11,7 +11,9 @@ layout: compress
 
 <body>
     {% include navigation.html %}
-    {{ content }}
+    <main id="content-container">
+        {{ content }}
+    </main>
     <script src="{{ '/assets/js/menu.js' | relative_url }}"></script>
     {% if page.scripts %}
     {% for script in page.scripts %}

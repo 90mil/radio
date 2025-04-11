@@ -98,98 +98,104 @@ function hideHoverBoxDuringScroll() {
     }
 }
 
-fetch(scheduleDataUrl)
-    .then(response => response.json())
-    .then(data => {
-        const thisWeekContainer = document.getElementById('this-week-container');
-        const nextWeekContainer = document.getElementById('next-week-container');
-        const now = new Date();
-        const daysOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+// Add a global initialization function
+window.scheduleInit = function () {
+    fetch(scheduleDataUrl)
+        .then(response => response.json())
+        .then(data => {
+            const thisWeekContainer = document.getElementById('this-week-container');
+            const nextWeekContainer = document.getElementById('next-week-container');
+            const now = new Date();
+            const daysOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-        // Add drag scrolling to both containers
-        addDragToScroll(thisWeekContainer);
-        addDragToScroll(nextWeekContainer);
+            // Add drag scrolling to both containers
+            addDragToScroll(thisWeekContainer);
+            addDragToScroll(nextWeekContainer);
 
-        // Set initial cursor style
-        thisWeekContainer.style.cursor = 'grab';
-        nextWeekContainer.style.cursor = 'grab';
+            // Set initial cursor style
+            thisWeekContainer.style.cursor = 'grab';
+            nextWeekContainer.style.cursor = 'grab';
 
-        // Populate the schedule for both weeks
-        for (let weekOffset = 0; weekOffset < 2; weekOffset++) {
-            const container = weekOffset === 0 ? thisWeekContainer : nextWeekContainer;
-            let firstDayWithContent = null;
+            // Populate the schedule for both weeks
+            for (let weekOffset = 0; weekOffset < 2; weekOffset++) {
+                const container = weekOffset === 0 ? thisWeekContainer : nextWeekContainer;
+                let firstDayWithContent = null;
 
-            // Calculate earliest and latest times for the week
-            let weekEarliestHour = 23;
-            let weekLatestHour = 0;
+                // Calculate earliest and latest times for the week
+                let weekEarliestHour = 23;
+                let weekLatestHour = 0;
 
-            // First pass: find earliest and latest times across all days
-            daysOrder.forEach(day => {
-                const currentDayData = data[weekOffset === 0 ? day : `next${day}`] || [];
-                const non90milShows = currentDayData.filter(show => show.name !== "90mil Radio");
+                // First pass: find earliest and latest times across all days
+                daysOrder.forEach(day => {
+                    const currentDayData = data[weekOffset === 0 ? day : `next${day}`] || [];
+                    const non90milShows = currentDayData.filter(show => show.name !== "90mil Radio");
 
-                non90milShows.forEach(show => {
-                    const startHour = new Date(show.start_timestamp).getHours();
-                    const endHour = new Date(show.end_timestamp).getHours();
-                    weekEarliestHour = Math.min(weekEarliestHour, startHour);
-                    weekLatestHour = Math.max(weekLatestHour, endHour);
-                });
-            });
-
-            // Second pass: create day blocks with consistent timing
-            daysOrder.forEach(day => {
-                const currentDayData = data[weekOffset === 0 ? day : `next${day}`] || [];
-                const non90milShows = currentDayData.filter(show => show.name !== "90mil Radio");
-
-                const showDay = new Date(now);
-                const dayIndex = daysOrder.indexOf(day);
-                const todayIndex = (now.getDay() + 6) % 7;
-                const dayDifference = (dayIndex - todayIndex) + (weekOffset * 7);
-                showDay.setDate(now.getDate() + dayDifference);
-
-                const dayBlock = createDayBlock(day, non90milShows, showDay, weekEarliestHour, weekLatestHour);
-
-                if (non90milShows.length > 0 && !firstDayWithContent) {
-                    firstDayWithContent = dayBlock;
-                }
-
-                container.appendChild(dayBlock);
-            });
-
-            // Modify scroll behavior to align with headers
-            if (firstDayWithContent) {
-                requestAnimationFrame(() => {
-                    const container = weekOffset === 0 ? thisWeekContainer : nextWeekContainer;
-                    const containerWidth = container.clientWidth;
-                    const margin = getResponsiveMargin();
-                    const lastDay = container.lastElementChild;
-
-                    // Calculate content dimensions
-                    const firstContentOffset = firstDayWithContent.offsetLeft;
-                    const contentWidth = lastDay.offsetLeft + lastDay.offsetWidth - firstContentOffset;
-
-                    let scrollAmount;
-                    if (contentWidth <= containerWidth - (margin * 2)) {
-                        // If content fits within viewport, align Sunday with right margin
-                        scrollAmount = lastDay.offsetLeft - (containerWidth - lastDay.offsetWidth - margin);
-                    } else {
-                        // If content is too wide, align first day with content to left margin
-                        scrollAmount = Math.max(0, firstContentOffset - margin);
-                    }
-
-                    container.scrollTo({
-                        left: scrollAmount,
-                        behavior: 'smooth'
+                    non90milShows.forEach(show => {
+                        const startHour = new Date(show.start_timestamp).getHours();
+                        const endHour = new Date(show.end_timestamp).getHours();
+                        weekEarliestHour = Math.min(weekEarliestHour, startHour);
+                        weekLatestHour = Math.max(weekLatestHour, endHour);
                     });
                 });
-            }
-        }
 
-        // Add scroll listeners to both week containers
-        thisWeekContainer.addEventListener('scroll', hideHoverBoxDuringScroll);
-        nextWeekContainer.addEventListener('scroll', hideHoverBoxDuringScroll);
-    })
-    .catch(error => console.error('Error fetching schedule data:', error));
+                // Second pass: create day blocks with consistent timing
+                daysOrder.forEach(day => {
+                    const currentDayData = data[weekOffset === 0 ? day : `next${day}`] || [];
+                    const non90milShows = currentDayData.filter(show => show.name !== "90mil Radio");
+
+                    const showDay = new Date(now);
+                    const dayIndex = daysOrder.indexOf(day);
+                    const todayIndex = (now.getDay() + 6) % 7;
+                    const dayDifference = (dayIndex - todayIndex) + (weekOffset * 7);
+                    showDay.setDate(now.getDate() + dayDifference);
+
+                    const dayBlock = createDayBlock(day, non90milShows, showDay, weekEarliestHour, weekLatestHour);
+
+                    if (non90milShows.length > 0 && !firstDayWithContent) {
+                        firstDayWithContent = dayBlock;
+                    }
+
+                    container.appendChild(dayBlock);
+                });
+
+                // Modify scroll behavior to align with headers
+                if (firstDayWithContent) {
+                    requestAnimationFrame(() => {
+                        const container = weekOffset === 0 ? thisWeekContainer : nextWeekContainer;
+                        const containerWidth = container.clientWidth;
+                        const margin = getResponsiveMargin();
+                        const lastDay = container.lastElementChild;
+
+                        // Calculate content dimensions
+                        const firstContentOffset = firstDayWithContent.offsetLeft;
+                        const contentWidth = lastDay.offsetLeft + lastDay.offsetWidth - firstContentOffset;
+
+                        let scrollAmount;
+                        if (contentWidth <= containerWidth - (margin * 2)) {
+                            // If content fits within viewport, align Sunday with right margin
+                            scrollAmount = lastDay.offsetLeft - (containerWidth - lastDay.offsetWidth - margin);
+                        } else {
+                            // If content is too wide, align first day with content to left margin
+                            scrollAmount = Math.max(0, firstContentOffset - margin);
+                        }
+
+                        container.scrollTo({
+                            left: scrollAmount,
+                            behavior: 'smooth'
+                        });
+                    });
+                }
+            }
+
+            // Add scroll listeners to both week containers
+            thisWeekContainer.addEventListener('scroll', hideHoverBoxDuringScroll);
+            nextWeekContainer.addEventListener('scroll', hideHoverBoxDuringScroll);
+        })
+        .catch(error => console.error('Error fetching schedule data:', error));
+};
+
+// Auto-initialize on regular page load
+document.addEventListener('DOMContentLoaded', window.scheduleInit);
 
 function createDayBlock(day, shows, showDay, weekEarliestHour, weekLatestHour) {
     const dayBlock = document.createElement('div');

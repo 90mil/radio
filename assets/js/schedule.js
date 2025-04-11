@@ -21,7 +21,9 @@ const CONFIG = {
     DRAG_THRESHOLD: 3,
     HEADER_HEIGHT: 52,
     PIXELS_PER_HOUR: 60,
-    MOBILE_BREAKPOINT: 768
+    MOBILE_BREAKPOINT: 768,
+    HOVER_DELAY: 300,
+    SCROLL_THRESHOLD: 15
 };
 
 // Add this helper function
@@ -68,8 +70,8 @@ function addDragToScroll(element) {
 
             if (dragState.isDragging) {
                 e.preventDefault();
-                const walk = e.pageX - dragState.startX;
-                element.scrollLeft = dragState.scrollLeft - walk;
+                const walkX = e.pageX - dragState.startX;
+                element.scrollLeft = dragState.scrollLeft - walkX;
             }
         },
 
@@ -320,9 +322,14 @@ function createHoverBox(show, { titleStr, hostStr }) {
 }
 
 function attachEventHandlers(showElement, hoverBox) {
-    const isMobile = window.innerWidth <= 768;
+    const isMobile = window.innerWidth <= CONFIG.MOBILE_BREAKPOINT;
+    let hoverTimeout = null;
+    let isHoverBoxVisible = false;
+    let touchStartY = 0;
+    let touchStartX = 0;
+    let isScrolling = false;
 
-    function positionHoverBox(showElement, hoverBox, offset = 5) {
+    function positionHoverBox(showElement, hoverBox, offset = CONFIG.HOVER_OFFSET) {
         const showRect = showElement.getBoundingClientRect();
         const hoverRect = hoverBox.getBoundingClientRect();
 
@@ -338,69 +345,115 @@ function attachEventHandlers(showElement, hoverBox) {
         return { top, left };
     }
 
-    // Touch handlers
-    let touchStartTime;
-    let hasMoved = false;
+    function showHoverBox(e) {
+        activeHoverBox = hoverBox;
+        hoverBox.style.position = 'fixed';
+        hoverBox.style.display = 'block';
+        hoverBox.style.width = '';
 
+        const { top, left } = positionHoverBox(showElement, hoverBox);
+        hoverBox.style.top = `${top}px`;
+        hoverBox.style.left = `${left}px`;
+        hoverBox.classList.add('active');
+        isHoverBoxVisible = true;
+    }
+
+    function hideHoverBox() {
+        if (hoverTimeout) {
+            clearTimeout(hoverTimeout);
+            hoverTimeout = null;
+        }
+        if (activeHoverBox === hoverBox) {
+            activeHoverBox = null;
+            hoverBox.style.display = 'none';
+            hoverBox.classList.remove('active');
+        }
+        isHoverBoxVisible = false;
+    }
+
+    function showHoverWithDelay(e) {
+        if (hoverTimeout) {
+            clearTimeout(hoverTimeout);
+        }
+        hoverTimeout = setTimeout(() => showHoverBox(e), CONFIG.HOVER_DELAY);
+    }
+
+    // Add scroll handler to hide hover box
+    const weekContainer = showElement.closest('.week-section');
+    if (weekContainer) {
+        weekContainer.addEventListener('scroll', () => {
+            if (isHoverBoxVisible) {
+                hideHoverBox();
+            }
+        }, { passive: true });
+    }
+
+    // Touch handlers - allow scrolling
     showElement.addEventListener('touchstart', (e) => {
-        touchStartTime = Date.now();
-        hasMoved = false;
+        touchStartY = e.touches[0].clientY;
+        touchStartX = e.touches[0].pageX;
+        isScrolling = false;
+    });
 
-        // Show hover box immediately
-        activeHoverBox = hoverBox;
-        hoverBox.style.position = 'fixed';
-        hoverBox.style.display = 'block';
-        hoverBox.style.width = '';
+    showElement.addEventListener('touchmove', (e) => {
+        if (!isScrolling) {
+            const touchCurrentY = e.touches[0].clientY;
+            const touchCurrentX = e.touches[0].pageX;
+            const scrollDistanceY = Math.abs(touchCurrentY - touchStartY);
+            const scrollDistanceX = Math.abs(touchCurrentX - touchStartX);
 
-        const { top, left } = positionHoverBox(showElement, hoverBox);
-        hoverBox.style.top = `${top}px`;
-        hoverBox.style.left = `${left}px`;
-    }, { passive: true });
-
-    showElement.addEventListener('touchmove', () => {
-        hasMoved = true;
-        // Keep hover box visible while scrolling
-    }, { passive: true });
-
-    showElement.addEventListener('touchend', () => {
-        // Hide hover box on touch release
-        if (activeHoverBox === hoverBox) {
-            activeHoverBox = null;
-            hoverBox.style.display = 'none';
+            if (scrollDistanceY > CONFIG.SCROLL_THRESHOLD || scrollDistanceX > CONFIG.SCROLL_THRESHOLD) {
+                isScrolling = true;
+                hideHoverBox();
+            }
         }
     }, { passive: true });
 
-    showElement.addEventListener('touchcancel', () => {
-        if (activeHoverBox === hoverBox) {
-            activeHoverBox = null;
-            hoverBox.style.display = 'none';
+    showElement.addEventListener('touchend', (e) => {
+        if (!isScrolling) {
+            // Only toggle hover box if we weren't scrolling
+            if (isHoverBoxVisible && activeHoverBox === hoverBox) {
+                hideHoverBox();
+            } else {
+                if (activeHoverBox) {
+                    activeHoverBox.style.display = 'none';
+                    activeHoverBox.classList.remove('active');
+                }
+                showHoverBox(e);
+            }
         }
-    }, { passive: true });
+        isScrolling = false;
+    });
 
-    // Mouse handlers (for all screen sizes)
-    showElement.addEventListener('mouseenter', () => {
-        activeHoverBox = hoverBox;
-        hoverBox.style.position = 'fixed';
-        hoverBox.style.display = 'block';
-        hoverBox.style.width = '';
-
-        const { top, left } = positionHoverBox(showElement, hoverBox);
-        hoverBox.style.top = `${top}px`;
-        hoverBox.style.left = `${left}px`;
+    // Mouse handlers - with delay
+    showElement.addEventListener('mouseenter', (e) => {
+        if (!isMobile) { // Only handle mouse events on desktop
+            showHoverWithDelay(e);
+        }
     });
 
     showElement.addEventListener('mouseleave', () => {
-        if (activeHoverBox === hoverBox) {
-            activeHoverBox = null;
+        if (!isMobile) {
+            hideHoverBox();
         }
-        hoverBox.style.display = 'none';
     });
 
     showElement.addEventListener('mousedown', () => {
-        hoverBox.classList.add('active');
+        if (!isMobile) {
+            hoverBox.classList.add('active');
+        }
     });
 
     showElement.addEventListener('mouseup', () => {
-        hoverBox.classList.remove('active');
+        if (!isMobile) {
+            hoverBox.classList.remove('active');
+        }
     });
+
+    // Add global scroll handler for vertical scrolling
+    document.addEventListener('scroll', () => {
+        if (isHoverBoxVisible) {
+            hideHoverBox();
+        }
+    }, { passive: true });
 } 

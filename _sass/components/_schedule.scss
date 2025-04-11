@@ -121,8 +121,8 @@
     background-color: rgba(0, 0, 0, 0.95);
     color: var(--hover-text-color);
     width: calc(100% - 20px);
-    min-width: 430px;
-    max-width: 590px;
+    min-width: calc(min(400px, 90vw));
+    max-width: 560px;
     padding: 16px;
     border-radius: 4px;
     display: none;
@@ -133,8 +133,9 @@
     pointer-events: none;
     max-height: 80vh;
     overflow-y: auto;
-    opacity: 1;
-    transition: opacity 0.15s ease;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
     border: 1px solid transparent;
     font-family: var(--font-body);
 
@@ -143,8 +144,17 @@
     }
 
     &.active {
+        opacity: 1;
+        visibility: visible;
         border-color: rgba(255, 255, 255, 0.2);
         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+    }
+
+    @media (max-width: 768px) {
+        margin: 0;
+        max-width: calc(90vw - 20px);
+        width: 100%;
+        min-width: 300px;
     }
 }
 
@@ -176,23 +186,4 @@
     font-size: 16px;
     line-height: 1.5;
     color: rgba(255, 255, 255, 0.9);
-}
-
-@media (max-width: 768px) {
-    .day-block {
-        min-width: 320px;
-        max-width: 90vw;
-
-        &.empty {
-            min-width: 120px;
-            max-width: 140px;
-        }
-    }
-
-    .hover-box {
-        margin: 0;
-        max-width: none;
-        width: 100%;
-        min-width: auto;
-    }
 }

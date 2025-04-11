@@ -422,11 +422,20 @@ async function processShows(rawShows) {
 
     // First pass - group shows by name and collect their uploads
     rawShows.forEach(show => {
-        const showName = show.name.split(' hosted by')[0].trim();
+        // Get the full show name first and decode it
+        const fullName = decodeHtmlEntities(show.name);
+        // Extract show name and host name
+        const hostMatch = fullName.match(/hosted by (.+)/i);
+        const hostName = hostMatch ?
+            decodeHtmlEntities(hostMatch[1].trim()) :
+            decodeHtmlEntities(show.user?.name) || 'Unknown Host';
+        const showName = decodeHtmlEntities(fullName.split(' hosted by')[0].trim());
+
         if (!showGroups.has(showName)) {
             showGroups.set(showName, {
                 key: show.key,
                 name: showName,
+                hostName: hostName,
                 pictures: show.pictures,
                 user: show.user,
                 uploads: []
@@ -447,11 +456,8 @@ async function processShows(rawShows) {
             // Fetch additional details using the first upload's key
             const details = await fetchShowDetails(show.key);
 
-            // Extract host name from the show name
-            const hostName = show.name.match(/hosted by (.+)/i)?.[1] || show.user?.name || 'Unknown Host';
-
             // Get description and tags from details
-            const description = details?.description || 'No description available';
+            const description = decodeHtmlEntities(details?.description || 'No description available');
             const tags = details?.tags || [];
 
             // Sort uploads by date (newest first)
@@ -462,11 +468,9 @@ async function processShows(rawShows) {
             return {
                 ...show,
                 ...details,
-                hostName,
                 description,
                 tags,
                 uploads: sortedUploads,
-                // Use the most recent upload date as the show's date
                 created_time: sortedUploads[0].created_time
             };
         })

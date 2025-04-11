@@ -2,12 +2,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="
     default-src 'self' https:;
-    script-src 'self' 'unsafe-inline' https://neunzugmilradio.airtime.pro https://api.mixcloud.com https://widget.mixcloud.com;
-    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    script-src 'self' 'unsafe-inline' https://neunzugmilradio.airtime.pro https://api.mixcloud.com https://widget.mixcloud.com https://90mil.github.io;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://90mil.github.io;
     font-src 'self' https://fonts.gstatic.com;
     img-src 'self' https: data:;
     frame-src https://90mil.github.io/ https://www.mixcloud.com https://player-widget.mixcloud.com/;
-    connect-src 'self' https://api.mixcloud.com https://neunzugmilradio.airtime.pro;
+    connect-src 'self' https://api.mixcloud.com https://neunzugmilradio.airtime.pro https://90mil.github.io;
 ">
 <title>{% if page.title %}{{ page.title }} - {% endif %}90mil Radio</title>
 <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
@@ -25,15 +25,15 @@
 <meta name="keywords" content="radio, berlin, experimental, art, music, culture">
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://90mil.berlin/radio">
+<meta property="og:url" content="https://radio.90mil.berlin">
 <meta property="og:title" content="90mil Radio">
 <meta property="og:description" content="Independent radio platform for experimental arts and culture">
-<meta property="og:image" content="https://90mil.berlin/radio/assets/images/og-image.jpg">
+<meta property="og:image" content="https://radio.90mil.berlin/assets/images/og-image.jpg">
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="90mil Radio">
 <meta name="twitter:description" content="Independent radio platform for experimental arts and culture">
-<meta name="twitter:image" content="https://90mil.berlin/radio/assets/images/og-image.jpg">
+<meta name="twitter:image" content="https://radio.90mil.berlin/assets/images/og-image.jpg">
 {% endif %}
 <link rel="stylesheet" href="{{ '/assets/css/spa.css' | relative_url }}">
 <script src="{{ '/assets/js/page-init.js' | relative_url }}"></script>

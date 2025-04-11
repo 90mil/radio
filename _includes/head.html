@@ -1,5 +1,37 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="
+    default-src 'self' https:;
+    script-src 'self' 'unsafe-inline' https://neunzugmilradio.airtime.pro https://api.mixcloud.com https://widget.mixcloud.com;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src 'self' https://fonts.gstatic.com;
+    img-src 'self' https: data:;
+    frame-src https://90mil.github.io/ https://www.mixcloud.com https://player-widget.mixcloud.com/;
+    connect-src 'self' https://api.mixcloud.com https://neunzugmilradio.airtime.pro;
+">
 <title>{% if page.title %}{{ page.title }} - {% endif %}90mil Radio</title>
 <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
-<link rel="icon" type="image/png" href="{{ '/assets/icons/favicon.png' | relative_url }}"> 
+<link rel="icon" type="image/png" href="{{ '/assets/icons/favicon.png' | relative_url }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+{% if page.url == "/" %}
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital@0;1&display=swap&text=about/" rel="stylesheet">
+{% else %}
+<link href="https://fonts.googleapis.com/css2?family=Abel&display=swap" rel="stylesheet">
+{% endif %}
+{% if page.url == "/" %}
+<meta name="description"
+    content="90mil Radio - Independent platform for artists, makers, and creatives exploring unconventional modes of expression">
+<meta name="keywords" content="radio, berlin, experimental, art, music, culture">
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://90mil.berlin/radio">
+<meta property="og:title" content="90mil Radio">
+<meta property="og:description" content="Independent radio platform for experimental arts and culture">
+<meta property="og:image" content="https://90mil.berlin/radio/assets/images/og-image.jpg">
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="90mil Radio">
+<meta name="twitter:description" content="Independent radio platform for experimental arts and culture">
+<meta name="twitter:image" content="https://90mil.berlin/radio/assets/images/og-image.jpg">
+{% endif %}

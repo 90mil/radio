@@ -194,9 +194,6 @@ window.scheduleInit = function () {
         .catch(error => console.error('Error fetching schedule data:', error));
 };
 
-// Auto-initialize on regular page load
-document.addEventListener('DOMContentLoaded', window.scheduleInit);
-
 function createDayBlock(day, shows, showDay, weekEarliestHour, weekLatestHour) {
     const dayBlock = document.createElement('div');
     dayBlock.className = `day-block${shows.length === 0 ? ' empty' : ''}`;

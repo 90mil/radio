@@ -28,7 +28,7 @@ window.PageInit = (function () {
                     this.schedulePage();
                     state.scheduleInitialized = true;
                 }
-            } else if (path === '/' || path === '/radio/' || path.endsWith('/radio')) {
+            } else if (path === '/') {
                 this.homePage();
             }
         },
@@ -75,7 +75,7 @@ window.PageInit = (function () {
                 showContainer.innerHTML = '';
             }
 
-            this.loadScriptIfNeeded('/radio/assets/js/shows.js', () => {
+            this.loadScriptIfNeeded('/assets/js/shows.js', () => {
                 setTimeout(() => {
                     if (typeof window.showsInit === 'function') {
                         window.showsInit();
@@ -90,7 +90,7 @@ window.PageInit = (function () {
          * Initialize the schedule page
          */
         schedulePage: function () {
-            this.loadScriptIfNeeded('/radio/assets/js/schedule.js', () => {
+            this.loadScriptIfNeeded('/assets/js/schedule.js', () => {
                 if (typeof window.scheduleInit === 'function') {
                     window.scheduleInit();
                 }

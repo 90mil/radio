@@ -1,37 +1,16 @@
 ---
 layout: default
+title: Schedule
 scripts:
 - /assets/js/schedule.js
 ---
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; 
-        script-src 'self' 'unsafe-inline' https://neunzugmilradio.airtime.pro;
-        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-        font-src 'self' https://fonts.gstatic.com;
-        img-src 'self' https: data:;
-        frame-src https://90mil.github.io/;">
-    <title>90mil Radio - Schedule</title>
-    <link rel="icon" type="image/png" href="{{ '/assets/icons/favicon.png' | relative_url }}">
-    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
-    <link href="https://fonts.googleapis.com/css2?family=Abel&display=swap" rel="stylesheet">
-</head>
-
-<body>
-    <div class="schedule-container">
-        <div class="main-container">
-            <div class="week-schedule-container">
-                <div class="week-header">this week</div>
-                <div id="this-week-container" class="week-section"></div>
-                <div class="week-header">next week</div>
-                <div id="next-week-container" class="week-section"></div>
-            </div>
+<div class="schedule-container">
+    <div class="main-container">
+        <div class="week-schedule-container">
+            <div class="week-header">this week</div>
+            <div id="this-week-container" class="week-section"></div>
+            <div class="week-header">next week</div>
+            <div id="next-week-container" class="week-section"></div>
         </div>
     </div>
-</body>
-
-</html>
+</div>

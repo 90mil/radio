@@ -1,5 +1,5 @@
-baseurl: "/radio"
-url: "https://90mil.github.io"
+baseurl: ""
+url: "https://90mil.github.io/radio"
 sass:
   load_paths:
     - _sass

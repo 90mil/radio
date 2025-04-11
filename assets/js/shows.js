@@ -35,11 +35,9 @@ window.addEventListener('message', function (event) {
                 // Pause Mixcloud player when banner plays
                 const mixcloudPlayer = document.getElementById('player-iframe');
                 if (mixcloudPlayer) {
-                    // Use Mixcloud Widget API
-                    const widget = Mixcloud.PlayerWidget(mixcloudPlayer);
-                    widget.ready.then(function () {
-                        widget.pause();
-                    });
+                    mixcloudPlayer.contentWindow.postMessage(JSON.stringify({
+                        command: 'pause'
+                    }), MIXCLOUD_ORIGIN);
                 }
             }
         } catch (e) {

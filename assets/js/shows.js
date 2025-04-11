@@ -213,10 +213,8 @@ function handleScroll() {
 async function processShows(rawShows) {
     const processedShows = await Promise.all(rawShows.map(async show => {
         const details = await fetchShowDetails(show.key);
-        console.log('Raw show name:', show.name);
         const showTitle = show.name.split(' hosted by')[0].trim();
         const hostName = show.name.match(/hosted by (.+)/i)?.[1] || 'Unknown Host';
-        console.log('Extracted host:', hostName);
 
         const uploads = rawShows
             .filter(s => s.name === show.name)

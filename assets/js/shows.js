@@ -7,6 +7,8 @@ let isLoadingMore = false;
 let reachedEnd = false;
 let activeLoadingSpinners = 0;
 const SPINNER_HIDE_DELAY = 300; // ms to keep spinner visible after load
+const BANNER_ORIGIN = 'https://90mil.github.io';
+const MIXCLOUD_ORIGIN = 'https://player-widget.mixcloud.com';
 
 // Update API URL to use Mixcloud directly
 const CLOUDCAST_API_URL = `https://api.mixcloud.com/90milradio/cloudcasts/?limit=${BATCH_SIZE}`;
@@ -15,20 +17,32 @@ const CLOUDCAST_API_URL = `https://api.mixcloud.com/90milradio/cloudcasts/?limit
 let showContainer;
 
 window.addEventListener('message', function (event) {
-    // Check if message is from Mixcloud widget
-    if (event.origin === 'https://player-widget.mixcloud.com') {
+    // Check if message is from Mixcloud widget or banner
+    if (event.origin === MIXCLOUD_ORIGIN || event.origin === BANNER_ORIGIN) {
         try {
             const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
 
-            // Use the ready event since widget autoplays
-            if (data.type === 'ready') {
+            // Handle Mixcloud widget events
+            if (event.origin === MIXCLOUD_ORIGIN && data.type === 'play') {
+                // Pause banner player when Mixcloud plays
                 const bannerFrame = document.querySelector('.banner-container iframe');
                 if (bannerFrame) {
                     bannerFrame.contentWindow.postMessage('pause', '*');
                 }
             }
+
+            // Handle banner player events
+            if (event.origin === BANNER_ORIGIN && data.type === 'play') {
+                // Pause Mixcloud player when banner plays
+                const mixcloudPlayer = document.getElementById('player-iframe');
+                if (mixcloudPlayer) {
+                    mixcloudPlayer.contentWindow.postMessage(JSON.stringify({
+                        method: 'pause'
+                    }), MIXCLOUD_ORIGIN);
+                }
+            }
         } catch (e) {
-            // Handle potential JSON parse errors
+            console.error('Error processing message:', e);
         }
     }
 });

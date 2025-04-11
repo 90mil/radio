@@ -23,8 +23,7 @@ window.addEventListener('message', function (event) {
             const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
 
             // Handle Mixcloud widget events
-            if (event.origin === MIXCLOUD_ORIGIN && data.type === 'play') {
-                // Pause banner player when Mixcloud plays
+            if (event.origin === MIXCLOUD_ORIGIN && data.type === 'ready') {
                 const bannerFrame = document.querySelector('.banner-container iframe');
                 if (bannerFrame) {
                     bannerFrame.contentWindow.postMessage('pause', '*');
@@ -36,9 +35,11 @@ window.addEventListener('message', function (event) {
                 // Pause Mixcloud player when banner plays
                 const mixcloudPlayer = document.getElementById('player-iframe');
                 if (mixcloudPlayer) {
-                    mixcloudPlayer.contentWindow.postMessage(JSON.stringify({
-                        method: 'pause'
-                    }), MIXCLOUD_ORIGIN);
+                    // Use Mixcloud Widget API
+                    const widget = Mixcloud.PlayerWidget(mixcloudPlayer);
+                    widget.ready.then(function () {
+                        widget.pause();
+                    });
                 }
             }
         } catch (e) {

@@ -288,11 +288,12 @@ async function fetchShows() {
 
 // Add scroll handler
 function handleScroll() {
-    const scrollPosition = window.innerHeight + window.scrollY;
-    const documentHeight = document.documentElement.scrollHeight;
+    if (isLoadingMore || reachedEnd) return;
 
-    // Start loading when we're within 500px of the bottom
-    if (scrollPosition > documentHeight - 500 && !isLoadingMore && !reachedEnd) {
+    const scrollPosition = window.scrollY + window.innerHeight;
+    const totalHeight = document.documentElement.scrollHeight;
+
+    if (totalHeight - scrollPosition < SCROLL_THRESHOLD) {
         loadMoreShows();
     }
 }
@@ -304,59 +305,95 @@ window.renderShows = async function (isAdditional = false) {
 
     console.log(`Rendering shows with offset ${currentOffset}`);
 
+    if (!isAdditional) {
+        const loadingText = document.createElement('div');
+        loadingText.className = 'month-header';
+        loadingText.textContent = 'Loading shows...';
+        showContainer.innerHTML = '';
+        showContainer.appendChild(loadingText);
+        showContainer.classList.remove('loaded');
+    }
+
     try {
-        // Show loading indicator
-        const loadingSpinner = showLoadingSpinner();
-
-        // Fetch shows
-        const response = await fetch(`${CLOUDCAST_API_URL}&offset=${currentOffset}`);
-        const data = await response.json();
-
-        if (!data || !data.data || data.data.length === 0) {
-            console.log('No more shows found');
-            hideLoadingSpinner(loadingSpinner);
-            isLoadingMore = false;
-            reachedEnd = true;
+        const initialShows = (await fetchShows()).data;
+        if (initialShows.length === 0) {
+            if (!isAdditional) {
+                showContainer.innerHTML = 'No shows available at the moment.';
+            }
             return;
         }
 
-        console.log(`Fetched ${data.data.length} shows`);
+        const processedShows = await processShows(initialShows);
 
-        // Process shows
-        const processedShows = await processShows(data.data);
-        console.log('Processed shows:', processedShows);
+        if (!isAdditional) {
+            showContainer.innerHTML = '';
+            showContainer.classList.add('loaded');
+        }
 
-        // Create a Map to group shows by month
-        const showsByMonth = new Map();
-        processedShows.forEach(show => {
-            const date = new Date(show.created_time);
-            const monthYear = formatMonthYear(date);
+        let processedCount = 0;
+        const mergedShows = new Map(); // Track shows across all batches
 
-            if (!showsByMonth.has(monthYear)) {
-                showsByMonth.set(monthYear, []);
-            }
-            showsByMonth.get(monthYear).push({
-                ...show,
-                latestDate: date
+        async function processBatch() {
+            const batchShows = processedShows.slice(processedCount, processedCount + BATCH_SIZE);
+            if (batchShows.length === 0) return;
+
+            const batchPromises = batchShows.map(async (show) => {
+                const monthYear = getMonthYear(show.created_time);
+                const showKey = `${show.name}-${monthYear}`;
+
+                if (!mergedShows.has(showKey)) {
+                    mergedShows.set(showKey, {
+                        ...show,
+                        monthYear,
+                        uploads: [show],
+                        latestDate: new Date(show.created_time)
+                    });
+                } else {
+                    const existingShow = mergedShows.get(showKey);
+                    existingShow.uploads.push(show);
+                    const newDate = new Date(show.created_time);
+                    if (newDate > existingShow.latestDate) {
+                        existingShow.latestDate = newDate;
+                    }
+                }
+                return showKey;
             });
-        });
 
-        // Render the shows
-        await renderInBatches(showsByMonth, isAdditional);
+            await Promise.all(batchPromises);
+
+            // Group shows by month
+            const showsByMonth = new Map();
+            Array.from(mergedShows.values()).forEach(show => {
+                const monthYear = formatMonthYear(show.latestDate);
+                if (!showsByMonth.has(monthYear)) {
+                    showsByMonth.set(monthYear, []);
+                }
+                showsByMonth.get(monthYear).push(show);
+            });
+
+            // Render this batch
+            await renderInBatches(showsByMonth, isAdditional);
+
+            processedCount += BATCH_SIZE;
+
+            if (processedCount < processedShows.length) {
+                await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
+                await processBatch();
+            }
+        }
+
+        await processBatch();
 
         // Update offset for next fetch
-        currentOffset += data.data.length;
-
-        // Hide loading spinner
-        hideLoadingSpinner(loadingSpinner);
+        currentOffset += initialShows.length;
 
     } catch (error) {
         console.error('Error rendering shows:', error);
-        isLoadingMore = false;
-        const loadingSpinner = document.querySelector('.loading-spinner');
-        if (loadingSpinner) {
-            hideLoadingSpinner(loadingSpinner);
+        if (!isAdditional) {
+            showContainer.innerHTML = 'Error loading shows. Please try again later.';
         }
+    } finally {
+        isLoadingMore = false;
     }
 };
 
@@ -472,8 +509,6 @@ async function loadMoreShows() {
 
     try {
         isLoadingMore = true;
-        currentOffset += BATCH_SIZE;
-
         const response = await fetchWithTimeout(
             `${CLOUDCAST_API_URL}&offset=${currentOffset}`
         );
@@ -490,70 +525,18 @@ async function loadMoreShows() {
         // Group shows by month using actual upload dates
         const showsByMonth = new Map();
         processedShows.forEach(show => {
-            show.uploads.forEach(upload => {
-                const month = new Date(upload.created_time).toLocaleString('en-US', { month: 'long', year: 'numeric' });
-                if (!showsByMonth.has(month)) {
-                    showsByMonth.set(month, new Map());
-                }
-                const monthShows = showsByMonth.get(month);
-                if (!monthShows.has(show.name)) {
-                    monthShows.set(show.name, { ...show, uploads: [] });
-                }
-                monthShows.get(show.name).uploads.push(upload);
-            });
+            const monthYear = formatMonthYear(new Date(show.created_time));
+            if (!showsByMonth.has(monthYear)) {
+                showsByMonth.set(monthYear, []);
+            }
+            showsByMonth.get(monthYear).push(show);
         });
 
-        // Process each month
-        for (const [month, monthShows] of showsByMonth) {
-            let monthContainer = document.querySelector(`.month-container[data-month="${month}"]`);
+        // Render the additional shows
+        await renderInBatches(showsByMonth, true);
 
-            if (!monthContainer) {
-                const monthHeader = document.createElement('div');
-                monthHeader.className = 'month-header';
-                monthHeader.textContent = month.toLowerCase();
-
-                monthContainer = document.createElement('div');
-                monthContainer.className = 'month-container';
-                monthContainer.setAttribute('data-month', month);
-
-                const existingMonths = Array.from(document.querySelectorAll('.month-container'));
-                const insertPosition = existingMonths.find(existing =>
-                    new Date(existing.getAttribute('data-month')) < new Date(month)
-                );
-
-                if (insertPosition) {
-                    insertPosition.parentNode.insertBefore(monthHeader, insertPosition);
-                    insertPosition.parentNode.insertBefore(monthContainer, insertPosition);
-                } else {
-                    showContainer.appendChild(monthHeader);
-                    showContainer.appendChild(monthContainer);
-                }
-            }
-
-            // Process shows in this month
-            for (const show of monthShows.values()) {
-                const existingBox = monthContainer.querySelector(`[data-show-key="${show.name}"]`);
-                if (existingBox) {
-                    const existingShow = existingBox.__showData;
-                    const newUploads = show.uploads.filter(newUpload =>
-                        !existingShow.uploads.some(existing =>
-                            existing.url === newUpload.url
-                        )
-                    );
-
-                    if (newUploads.length > 0) {
-                        existingShow.uploads.push(...newUploads);
-                        existingBox.__showData = existingShow;
-                        updatePlayDates(existingBox, existingShow);
-                    }
-                } else {
-                    const newBox = createShowBox(show);
-                    newBox.dataset.showKey = show.name;
-                    newBox.__showData = show;
-                    monthContainer.appendChild(newBox);
-                }
-            }
-        }
+        // Update offset for next fetch
+        currentOffset += BATCH_SIZE;
 
     } catch (error) {
         console.error('Error loading more shows:', error);
@@ -579,45 +562,6 @@ function closePlayer() {
             iframe.src = '';
         }
     }
-}
-
-// Modified to be a global function
-window.loadMoreShows = function () {
-    if (!isLoadingMore && !reachedEnd) {
-        renderShows(true);
-    }
-};
-
-// Add the missing loading spinner functions
-function showLoadingSpinner() {
-    const spinner = document.createElement('div');
-    spinner.className = 'loading-spinner';
-    spinner.innerHTML = '<div class="spinner"></div>';
-    spinner.style.position = 'fixed';
-    spinner.style.top = '50%';
-    spinner.style.left = '50%';
-    spinner.style.transform = 'translate(-50%, -50%)';
-    spinner.style.zIndex = '1000';
-
-    document.body.appendChild(spinner);
-    activeLoadingSpinners++;
-
-    return spinner;
-}
-
-function hideLoadingSpinner(spinner) {
-    if (!spinner) return;
-
-    // Keep spinner visible for a short delay to prevent flickering for fast loads
-    setTimeout(() => {
-        spinner.remove();
-        activeLoadingSpinners--;
-    }, SPINNER_HIDE_DELAY);
-
-    // Always allow loading more shows after a delay
-    setTimeout(() => {
-        isLoadingMore = false;
-    }, SPINNER_HIDE_DELAY + 100);
 }
 
 // Helper function to group shows by month
@@ -711,16 +655,4 @@ async function renderInBatches(showsByMonth, isAdditional) {
             }
         });
     });
-}
-
-// Handle scroll events for infinite loading
-function handleScroll() {
-    if (isLoadingMore || reachedEnd) return;
-
-    const scrollPosition = window.scrollY + window.innerHeight;
-    const totalHeight = document.body.offsetHeight;
-
-    if (totalHeight - scrollPosition < SCROLL_THRESHOLD) {
-        loadMoreShows();
-    }
 } 

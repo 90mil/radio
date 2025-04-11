@@ -14,6 +14,16 @@ const CLOUDCAST_API_URL = `https://api.mixcloud.com/90milradio/cloudcasts/?limit
 // DOM Elements
 let showContainer;
 
+window.addEventListener('message', function (event) {
+    if (event.data === 'bannerPlaying') {
+        // Pause any playing show
+        const player = document.querySelector('#player-iframe');
+        if (player) {
+            player.contentWindow.postMessage('pause', '*');
+        }
+    }
+});
+
 window.showsInit = function () {
     console.log('Initializing Shows...');
 
@@ -259,11 +269,17 @@ function playShow(showUrl) {
         document.body.appendChild(container);
     }
 
-    // Construct the correct player URL
+    // Construct the player URL with autoplay
     const playerUrl = `https://player-widget.mixcloud.com/widget/iframe/?feed=${showUrl}&autoplay=1&hide_cover=1`;
 
     // Set iframe source
     mixcloudWidget.src = playerUrl;
+
+    // Tell banner to pause
+    const bannerFrame = document.querySelector('.banner-container iframe');
+    if (bannerFrame) {
+        bannerFrame.contentWindow.postMessage('pause', '*');
+    }
 
     // Create close button if it doesn't exist
     if (!document.querySelector('.close-button')) {

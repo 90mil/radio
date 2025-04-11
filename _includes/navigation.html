@@ -3,29 +3,15 @@
         <iframe src="https://90mil.github.io/radio-banner/" frameborder="0" scrolling="no"></iframe>
     </div>
     <nav>
-        {% if page.url contains 'shows' %}
-        <a href="https://www.mixcloud.com/90milradio/" target="_blank" class="mobile-mixcloud-link">
-            <span class="nav-text">mixcloud library</span>
-        </a>
-        {% endif %}
         <button class="menu-toggle">
             <span class="menu-icon"></span>
         </button>
         <div class="nav-links">
             {% for item in site.data.navigation %}
-            <a href="{{ item.url | relative_url }}">
+            <a href="{{ item.url | relative_url }}" {% if item.external %}target="_blank" {% endif %}>
                 <span class="nav-text">{{ item.text }}</span>
             </a>
             {% endfor %}
         </div>
     </nav>
-    {% if page.url contains 'shows' %}
-    <div class="mixcloud-row">
-        <div class="nav-links">
-            <a href="https://www.mixcloud.com/90milradio/" target="_blank">
-                <span class="nav-text">mixcloud library</span>
-            </a>
-        </div>
-    </div>
-    {% endif %}
 </div>

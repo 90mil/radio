@@ -16,18 +16,18 @@ window.PageInit = (function () {
          * Initialize a page based on its path
          */
         byPath: function (path) {
-            console.log(`Initializing page for path: ${path}`);
-            // Reset state when navigating to a new page
             this.reset();
 
             if (path.includes('/shows')) {
-                // Only initialize if not already initialized
                 if (!state.showsInitialized) {
                     this.showsPage();
                     state.showsInitialized = true;
                 }
             } else if (path.includes('/schedule')) {
-                this.schedulePage();
+                if (!state.scheduleInitialized) {
+                    this.schedulePage();
+                    state.scheduleInitialized = true;
+                }
             } else if (path === '/' || path === '/radio/' || path.endsWith('/radio')) {
                 this.homePage();
             }
@@ -42,6 +42,11 @@ window.PageInit = (function () {
                 if (observer) observer.disconnect();
             });
             state.observers = {};
+
+            // Clean up schedule if it was initialized
+            if (state.scheduleInitialized && typeof window.scheduleCleanup === 'function') {
+                window.scheduleCleanup();
+            }
 
             // Reset global variables that might be set by page scripts
             window.isLoadingMore = false;
@@ -59,42 +64,25 @@ window.PageInit = (function () {
 
             // Clear event handlers that might be duplicated
             window.removeEventListener('scroll', window.handleScroll);
-
-            console.log('Page state reset');
         },
 
         /**
          * Initialize the shows page
          */
         showsPage: function () {
-            console.log('Initializing Shows page');
-
-            // Clear any existing content first
             const showContainer = document.querySelector('#show-list');
             if (showContainer) {
                 showContainer.innerHTML = '';
             }
 
-            // Load shows.js if needed
             this.loadScriptIfNeeded('/radio/assets/js/shows.js', () => {
-                console.log('Shows script loaded');
-
-                // Initialize shows page after a short delay
                 setTimeout(() => {
                     if (typeof window.showsInit === 'function') {
-                        console.log('Calling shows init function');
                         window.showsInit();
-                    } else {
-                        console.error('Shows init function not found!');
-                        // Fallback - try to call render directly
-                        if (typeof window.renderShows === 'function') {
-                            console.log('Falling back to direct renderShows call');
-                            window.renderShows();
-                        } else {
-                            console.error('Shows rendering function not found!');
-                        }
+                    } else if (typeof window.renderShows === 'function') {
+                        window.renderShows();
                     }
-                }, 100); // Short delay to ensure DOM is ready
+                }, 100);
             });
         },
 
@@ -102,14 +90,9 @@ window.PageInit = (function () {
          * Initialize the schedule page
          */
         schedulePage: function () {
-            console.log('Initializing Schedule page');
-
             this.loadScriptIfNeeded('/radio/assets/js/schedule.js', () => {
-                // Directly call schedule initialization here or through a global function
                 if (typeof window.scheduleInit === 'function') {
                     window.scheduleInit();
-                } else {
-                    console.error('Schedule init function not found!');
                 }
             });
         },
@@ -118,35 +101,35 @@ window.PageInit = (function () {
          * Initialize the home page
          */
         homePage: function () {
-            console.log('Initializing Home page');
-            // Add any home page specific initialization
+            // Home page initialization if needed
         },
 
         /**
          * Load a script if it hasn't been loaded yet
          */
         loadScriptIfNeeded: function (src, callback) {
-            // Check if script is already loaded
             const isLoaded = Array.from(document.scripts).some(script =>
                 script.src && script.src.includes(src.split('/').pop())
             );
 
             if (isLoaded) {
-                console.log(`Script ${src} already loaded, calling callback directly`);
                 callback();
             } else {
-                console.log(`Loading script: ${src}`);
                 const script = document.createElement('script');
                 script.src = src;
-                script.onload = () => {
-                    console.log(`Script loaded: ${src}`);
-                    callback();
-                };
-                script.onerror = (err) => {
-                    console.error(`Error loading script ${src}:`, err);
-                };
+                script.onload = callback;
                 document.head.appendChild(script);
             }
         }
     };
-})(); 
+})();
+
+// Initial setup
+document.addEventListener('DOMContentLoaded', () => {
+    PageInit.byPath(window.location.pathname);
+});
+
+// Handle SPA navigation
+window.addEventListener('popstate', () => {
+    PageInit.byPath(window.location.pathname);
+}); 

@@ -1,10 +1,15 @@
-- text: 90mil home
+- text: 90mil
   url: https://90mil.berlin
-- text:   home   
+  external: true
+- text: home   
   url: /
-- text:   shows   
+- text: shows   
   url: /shows
-- text:  schedule 
+- text: schedule 
   url: /schedule
-- text: submit proposal
-  url: https://docs.goole.com/forms/d/e/1FAIpQLSejVzDBVudAlY4jlctyPiwXqQcUM-kM7cDaXZlVHuS4tr81vw/viewform 
+- text: mixcloud
+  url: https://www.mixcloud.com/90milradio/
+  external: true
+- text: submit
+  url: https://docs.goole.com/forms/d/e/1FAIpQLSejVzDBVudAlY4jlctyPiwXqQcUM-kM7cDaXZlVHuS4tr81vw/viewform
+  external: true 

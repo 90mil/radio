@@ -338,69 +338,69 @@ function attachEventHandlers(showElement, hoverBox) {
         return { top, left };
     }
 
-    if (isMobile) {
-        let touchStartTime;
-        let hasMoved = false;
+    // Touch handlers
+    let touchStartTime;
+    let hasMoved = false;
 
-        showElement.addEventListener('touchstart', (e) => {
-            touchStartTime = Date.now();
-            hasMoved = false;
+    showElement.addEventListener('touchstart', (e) => {
+        touchStartTime = Date.now();
+        hasMoved = false;
 
-            // Show hover box immediately
-            activeHoverBox = hoverBox;
-            hoverBox.style.position = 'fixed';
-            hoverBox.style.display = 'block';
-            hoverBox.style.width = '';
+        // Show hover box immediately
+        activeHoverBox = hoverBox;
+        hoverBox.style.position = 'fixed';
+        hoverBox.style.display = 'block';
+        hoverBox.style.width = '';
 
-            const { top, left } = positionHoverBox(showElement, hoverBox);
-            hoverBox.style.top = `${top}px`;
-            hoverBox.style.left = `${left}px`;
-        }, { passive: true });
+        const { top, left } = positionHoverBox(showElement, hoverBox);
+        hoverBox.style.top = `${top}px`;
+        hoverBox.style.left = `${left}px`;
+    }, { passive: true });
 
-        showElement.addEventListener('touchmove', () => {
-            hasMoved = true;
-            // Keep hover box visible while scrolling
-        }, { passive: true });
+    showElement.addEventListener('touchmove', () => {
+        hasMoved = true;
+        // Keep hover box visible while scrolling
+    }, { passive: true });
 
-        showElement.addEventListener('touchend', () => {
-            // Hide hover box on touch release
-            if (activeHoverBox === hoverBox) {
-                activeHoverBox = null;
-                hoverBox.style.display = 'none';
-            }
-        }, { passive: true });
-
-        showElement.addEventListener('touchcancel', () => {
-            if (activeHoverBox === hoverBox) {
-                activeHoverBox = null;
-                hoverBox.style.display = 'none';
-            }
-        }, { passive: true });
-    } else {
-        showElement.addEventListener('mouseenter', () => {
-            activeHoverBox = hoverBox;
-            hoverBox.style.position = 'fixed';
-            hoverBox.style.display = 'block';
-            hoverBox.style.width = '';
-
-            const { top, left } = positionHoverBox(showElement, hoverBox);
-            hoverBox.style.top = `${top}px`;
-            hoverBox.style.left = `${left}px`;
-        });
-
-        showElement.addEventListener('mouseleave', () => {
-            if (activeHoverBox === hoverBox) {
-                activeHoverBox = null;
-            }
+    showElement.addEventListener('touchend', () => {
+        // Hide hover box on touch release
+        if (activeHoverBox === hoverBox) {
+            activeHoverBox = null;
             hoverBox.style.display = 'none';
-        });
+        }
+    }, { passive: true });
 
-        showElement.addEventListener('mousedown', () => {
-            hoverBox.classList.add('active');
-        });
+    showElement.addEventListener('touchcancel', () => {
+        if (activeHoverBox === hoverBox) {
+            activeHoverBox = null;
+            hoverBox.style.display = 'none';
+        }
+    }, { passive: true });
 
-        showElement.addEventListener('mouseup', () => {
-            hoverBox.classList.remove('active');
-        });
-    }
+    // Mouse handlers (for all screen sizes)
+    showElement.addEventListener('mouseenter', () => {
+        activeHoverBox = hoverBox;
+        hoverBox.style.position = 'fixed';
+        hoverBox.style.display = 'block';
+        hoverBox.style.width = '';
+
+        const { top, left } = positionHoverBox(showElement, hoverBox);
+        hoverBox.style.top = `${top}px`;
+        hoverBox.style.left = `${left}px`;
+    });
+
+    showElement.addEventListener('mouseleave', () => {
+        if (activeHoverBox === hoverBox) {
+            activeHoverBox = null;
+        }
+        hoverBox.style.display = 'none';
+    });
+
+    showElement.addEventListener('mousedown', () => {
+        hoverBox.classList.add('active');
+    });
+
+    showElement.addEventListener('mouseup', () => {
+        hoverBox.classList.remove('active');
+    });
 } 

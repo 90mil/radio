@@ -259,11 +259,11 @@ function playShow(showUrl) {
         document.body.appendChild(container);
     }
 
-    // Extract Mixcloud key from URL
-    const mixcloudKey = showUrl.replace('https://www.mixcloud.com/', '');
+    // Construct the correct player URL
+    const playerUrl = `https://player-widget.mixcloud.com/widget/iframe/?feed=${showUrl}&autoplay=1&hide_cover=1`;
 
     // Set iframe source
-    mixcloudWidget.src = `https://www.mixcloud.com/widget/iframe/?hide_cover=1&mini=1&autoplay=1&feed=${encodeURIComponent(mixcloudKey)}`;
+    mixcloudWidget.src = playerUrl;
 
     // Create close button if it doesn't exist
     if (!document.querySelector('.close-button')) {

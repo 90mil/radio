@@ -224,12 +224,11 @@ function createShowBox(show, fadeIn = true, existingBox = null) {
         playDatesContainer.innerHTML = ''; // Clear existing dates
     }
 
-    // Sort uploads by date (newest first)
+    // Sort uploads by date and create play containers
     const sortedUploads = show.uploads.sort((a, b) =>
         new Date(b.created_time) - new Date(a.created_time)
     );
 
-    // Create play container for each upload
     sortedUploads.forEach(upload => {
         const playContainer = document.createElement('div');
         playContainer.classList.add('play-container');
@@ -244,13 +243,6 @@ function createShowBox(show, fadeIn = true, existingBox = null) {
 
         playDatesContainer.appendChild(playContainer);
     });
-
-    // Update description margin based on number of uploads
-    const description = showBox.querySelector('.description');
-    if (description) {
-        const marginBottom = 20 + (sortedUploads.length * 40);
-        description.style.marginBottom = `${marginBottom}px`;
-    }
 
     return showBox;
 }

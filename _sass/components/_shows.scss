@@ -4,20 +4,20 @@
     border: 1px solid var(--text-color);
     padding: 20px;
     position: relative;
-    min-height: 380px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     z-index: 3;
+    gap: 8px;
 }
 
 /* Show Content Styles */
 .image-container {
     position: relative;
-    width: 90%;
+    width: 100%;
     aspect-ratio: 1;
-    margin: 20px auto 0;
+    margin: 0 auto;
     background: var(--accent-2);
     overflow: hidden;
 
@@ -46,6 +46,7 @@
     object-fit: cover;
     opacity: 0;
     transition: opacity 0.3s ease;
+    padding: 5%;
 
     &.loaded {
         opacity: 1;
@@ -58,7 +59,7 @@
 
 /* Show Info Typography */
 .show-name {
-    margin: 20px 0 8px;
+    margin: 12px 0 4px;
     font-size: 18px;
     font-weight: bold;
     font-family: var(--font-body);
@@ -66,33 +67,30 @@
 
 .hosted-by {
     font-style: italic;
-    margin: 0 0 8px 0;
+    margin: 0 0 4px 0;
     font-size: 14px;
     font-family: var(--font-body);
 }
 
 .genres {
     color: var(--text-color);
-    margin: 0 0 8px 0;
+    margin: 0 0 4px 0;
     font-size: 12px;
     font-family: var(--font-body);
     font-style: italic;
 }
 
 .description {
-    margin-bottom: 60px;
     font-size: 14px;
     font-family: var(--font-body);
     line-height: 1.4;
+    margin-bottom: 12px;
 }
 
 /* Play Controls */
 .play-dates-container {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    right: 20px;
-    width: auto;
+    width: 100%;
+    margin-top: auto;
 }
 
 .play-container {
@@ -108,6 +106,10 @@
     margin-bottom: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
+
+    &:last-child {
+        margin-bottom: 4px;
+    }
 
     &:hover {
         background: var(--accent-1);
@@ -223,11 +225,17 @@
     opacity: 0.7;
     will-change: transform;
 }
+@media (max-width: 1024px) {
+    .show-box {
+        padding: 16px;
+    }
+}
 
 @media (max-width: 768px) {
     .show-box {
         width: 100%;
         min-height: 350px;
+        padding: 12px;
     }
 
     .show-name {

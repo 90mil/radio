@@ -1,5 +1,5 @@
 // Constants
-const BATCH_SIZE = 20;
+const BATCH_SIZE = 50;
 const BATCH_DELAY = 50; // Milliseconds between batches
 const SCROLL_THRESHOLD = 500; // px from bottom to trigger next batch
 let currentOffset = 0;
@@ -10,7 +10,7 @@ const SPINNER_HIDE_DELAY = 300; // ms to keep spinner visible after load
 const BANNER_ORIGIN = 'https://90mil.github.io';
 const MIXCLOUD_ORIGIN = 'https://player-widget.mixcloud.com';
 
-// Update API URL to use Mixcloud directly
+// Update API URL to use new batch size
 const CLOUDCAST_API_URL = `https://api.mixcloud.com/90milradio/cloudcasts/?limit=${BATCH_SIZE}`;
 
 // DOM Elements

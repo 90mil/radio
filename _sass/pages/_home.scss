@@ -25,13 +25,9 @@
     @media (min-width: 768px) {
         width: 400px;
         height: calc(100vh - var(--nav-height) - var(--banner-height) - var(--footer-height) - 40px);
+        min-height: 400px;
         position: sticky;
         top: 20px;
-    }
-
-    @media (max-width: 767px) {
-        // Ensure enough height on mobile even with browser UI
-        min-height: calc(100vh - var(--nav-height) - var(--banner-height) - var(--footer-height) - 200px);
     }
 }
 

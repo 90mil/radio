@@ -10,7 +10,6 @@ const SPINNER_HIDE_DELAY = 300; // ms to keep spinner visible after load
 const BANNER_ORIGIN = 'https://90mil.github.io';
 const MIXCLOUD_ORIGIN = 'https://player-widget.mixcloud.com';
 
-// Update API URL to use new batch size
 const CLOUDCAST_API_URL = `https://api.mixcloud.com/90milradio/cloudcasts/?limit=${BATCH_SIZE}`;
 
 // DOM Elements

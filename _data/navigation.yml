@@ -1,7 +1,7 @@
 - text: 90mil
   url: https://90mil.berlin
   external: true
-- text: home   
+- text: about   
   url: /
 - text: shows   
   url: /shows

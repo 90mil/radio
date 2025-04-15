@@ -1,9 +1,9 @@
 /* Main Content Layout */
-.content {
+.about-content {
     display: grid;
     grid-template-columns: fit-content(50%) 1fr;
     /* First column fits content up to 50% */
-    height: calc(100vh - var(--nav-height) - var(--banner-height));
+    height: calc(100vh - var(--nav-height) - var(--banner-height) - var(--footer-height));
 }
 
 /* About Section */
@@ -90,7 +90,7 @@
 }
 
 @media (max-width: 768px) {
-    .content {
+    .about-content {
         grid-template-columns: 1fr;
         height: auto;
     }

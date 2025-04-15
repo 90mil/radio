@@ -1,0 +1,32 @@
+.site-footer {
+    height: var(--footer-height);
+    background: var(--accent-2);
+    border-top: 1px solid var(--text-color);
+    padding: 0 var(--margin-desktop);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    a {
+        color: var(--text-color);
+        opacity: 0.7;
+        transition: opacity 0.2s ease;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
+
+    @media (max-width: 1024px) {
+        padding: 0 var(--margin-laptop);
+    }
+
+    @media (max-width: 768px) {
+        padding: 0 var(--margin-tablet);
+        border-top: none;
+    }
+
+    @media (max-width: 480px) {
+        padding: 0 var(--margin-mobile);
+    }
+}

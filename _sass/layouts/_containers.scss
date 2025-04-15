@@ -3,7 +3,7 @@
     display: grid;
     grid-template-columns: fit-content(50%) 1fr;
     /* First column fits content up to 50% */
-    height: calc(100vh - 90px);
+    height: calc(100vh - var(--nav-height) - var(--banner-height));
 }
 
 /* About Section */

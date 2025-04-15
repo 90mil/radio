@@ -41,6 +41,7 @@
     --banner-height: 40px;
 
     /* Z-index layers */
+    --z-footer: 90;  // Below modal (100) but above most content
     --z-header: 100;
     --z-overlay: 101;
     --z-modal: 102;

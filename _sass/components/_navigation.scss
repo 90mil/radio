@@ -15,13 +15,13 @@ nav {
     display: flex;
     margin-right: auto;
     gap: var(--spacing-nav);
-    background: var(--accent-2);
 
     a {
         --nav-padding: var(--padding-nav);
         padding: 18px var(--nav-padding);
         color: var(--text-color);
         text-decoration: none;
+        background: var(--accent-2);
         font-family: var(--font-primary);
         font-size: 18px;
         font-weight: bold;
@@ -169,6 +169,7 @@ nav {
         left: 0;
         right: 0;
         flex-direction: column;
+        background: var(--body-bg);
         z-index: calc(var(--z-header) - 1);
         padding: 0;
         border-bottom: 1px solid var(--text-color);

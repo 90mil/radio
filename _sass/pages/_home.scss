@@ -19,14 +19,19 @@
     position: relative;
     background-size: cover;
     background-position: center;
-    min-height: 400px; // Minimum height for mobile
+    min-height: 400px;
     width: 100%;
 
     @media (min-width: 768px) {
         width: 400px;
-        height: calc(100vh - 40px); // Account for padding
+        height: calc(100vh - var(--nav-height) - var(--banner-height) - var(--footer-height) - 40px);
         position: sticky;
         top: 20px;
+    }
+
+    @media (max-width: 767px) {
+        // Ensure enough height on mobile even with browser UI
+        min-height: calc(100vh - var(--nav-height) - var(--banner-height) - var(--footer-height) - 200px);
     }
 }
 
@@ -37,7 +42,7 @@
     box-sizing: border-box;
 
     @media (max-width: 767px) {
-        margin-bottom: 60px; // Add extra space at bottom on mobile
-        padding-bottom: 40px; // More padding at bottom
+        margin-bottom: 20px;
+        padding-bottom: 20px;
     }
 } 

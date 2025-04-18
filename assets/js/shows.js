@@ -150,11 +150,12 @@ function formatMonthYear(date) {
     return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
 }
 
-// Add this helper function
+// Decode HTML entities using the browser's native parser
 function decodeHtmlEntities(text) {
-    const textarea = document.createElement('textarea');
-    textarea.innerHTML = text;
-    return textarea.value;
+    if (!text) return '';
+    const doc = new DOMParser();
+    const txt = doc.parseFromString(text, 'text/html');
+    return txt.body.textContent;
 }
 
 // UI Components
@@ -184,17 +185,18 @@ function createShowBox(show, fadeIn = true, existingBox = null) {
         imageContainer.appendChild(img);
         showBox.appendChild(imageContainer);
 
-        // Show name
+        // Show name - decode before splitting
         const name = document.createElement('div');
         name.className = 'show-name';
-        name.textContent = show.name.split(' hosted by')[0].trim();
+        const decodedName = decodeHtmlEntities(show.name);
+        name.textContent = decodedName.split(' hosted by')[0].trim();
         showBox.appendChild(name);
 
-        // Hosted by
+        // Hosted by - decode host name
         if (show.hostName) {
             const hostedBy = document.createElement('div');
             hostedBy.className = 'hosted-by';
-            hostedBy.textContent = `Hosted by ${show.hostName}`;
+            hostedBy.textContent = `Hosted by ${decodeHtmlEntities(show.hostName)}`;
             showBox.appendChild(hostedBy);
         }
 
@@ -414,16 +416,17 @@ async function processShows(rawShows) {
         const fullName = decodeHtmlEntities(show.name);
         // Extract show name and host name
         const hostMatch = fullName.match(/hosted by (.+)/i);
-        const hostName = hostMatch ?
-            decodeHtmlEntities(hostMatch[1].trim()) :
+        const hostName = hostMatch ? 
+            hostMatch[1].trim() : 
             decodeHtmlEntities(show.user?.name) || 'Unknown Host';
-        const showName = decodeHtmlEntities(fullName.split(' hosted by')[0].trim());
+        const showName = fullName.split(' hosted by')[0].trim();
 
+        // Use decoded showName as key
         if (!showGroups.has(showName)) {
             showGroups.set(showName, {
                 key: show.key,
-                name: showName,
-                hostName: hostName,
+                name: showName,  // Already decoded
+                hostName: hostName,  // Already decoded
                 pictures: show.pictures,
                 user: show.user,
                 uploads: []

@@ -192,11 +192,11 @@ function createShowBox(show, fadeIn = true, existingBox = null) {
         name.textContent = decodedName.split(' hosted by')[0].trim();
         showBox.appendChild(name);
 
-        // Hosted by - decode host name
-        if (show.hostName) {
+        // Only add hosted-by if there's actually a host
+        if (show.hostName && show.hostName.length > 0) {
             const hostedBy = document.createElement('div');
             hostedBy.className = 'hosted-by';
-            hostedBy.textContent = `Hosted by ${decodeHtmlEntities(show.hostName)}`;
+            hostedBy.textContent = `Hosted by ${show.hostName}`;
             showBox.appendChild(hostedBy);
         }
 
@@ -412,21 +412,16 @@ async function processShows(rawShows) {
 
     // First pass - group shows by name and collect their uploads
     rawShows.forEach(show => {
-        // Get the full show name first and decode it
         const fullName = decodeHtmlEntities(show.name);
-        // Extract show name and host name
         const hostMatch = fullName.match(/hosted by (.+)/i);
-        const hostName = hostMatch ? 
-            hostMatch[1].trim() : 
-            decodeHtmlEntities(show.user?.name) || 'Unknown Host';
+        const hostName = hostMatch ? hostMatch[1].trim() : ''; // Just empty string if no host
         const showName = fullName.split(' hosted by')[0].trim();
 
-        // Use decoded showName as key
         if (!showGroups.has(showName)) {
             showGroups.set(showName, {
                 key: show.key,
-                name: showName,  // Already decoded
-                hostName: hostName,  // Already decoded
+                name: showName,
+                hostName: hostName, // Will be empty string if no host
                 pictures: show.pictures,
                 user: show.user,
                 uploads: []

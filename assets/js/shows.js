@@ -69,8 +69,15 @@ window.showsInit = function () {
     renderShows();
 
     // Set up scroll handler
+    const mainContainer = document.getElementById('content-container');
     window.removeEventListener('scroll', handleScroll);
     window.addEventListener('scroll', handleScroll);
+    
+    // Also listen to the main container's scroll since it's the scrolling element
+    if (mainContainer) {
+        mainContainer.removeEventListener('scroll', handleScroll);
+        mainContainer.addEventListener('scroll', handleScroll);
+    }
 
     // Set up player close button if needed
     const player = document.querySelector('.play-bar-container');
@@ -303,8 +310,10 @@ async function fetchShows() {
 function handleScroll() {
     if (isLoadingMore || reachedEnd) return;
 
-    const scrollPosition = window.scrollY + window.innerHeight;
-    const totalHeight = document.documentElement.scrollHeight;
+    // Get the main content container since it's now the scrolling element
+    const mainContainer = document.getElementById('content-container');
+    const scrollPosition = mainContainer ? mainContainer.scrollTop + mainContainer.clientHeight : window.scrollY + window.innerHeight;
+    const totalHeight = mainContainer ? mainContainer.scrollHeight : document.documentElement.scrollHeight;
 
     if (totalHeight - scrollPosition < SCROLL_THRESHOLD) {
         loadMoreShows();

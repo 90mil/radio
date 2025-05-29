@@ -73,6 +73,10 @@ window.PageInit = (function () {
 
             // Clear event handlers that might be duplicated
             window.removeEventListener('scroll', window.handleScroll);
+            const mainContainer = document.getElementById('content-container');
+            if (mainContainer && window.handleScroll) {
+                mainContainer.removeEventListener('scroll', window.handleScroll);
+            }
         },
 
         /**

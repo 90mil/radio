@@ -108,7 +108,7 @@ class NowPlayingWidget {
                 </div>
                 <div class="live-indicator">
                     <span class="live-dot"></span>
-                    <span class="live-text">LIVE</span>
+                    <span class="live-text">ON AIR</span>
                 </div>
             </div>
         `;
@@ -117,7 +117,6 @@ class NowPlayingWidget {
     renderOffAir() {
         this.container.innerHTML = `
             <div class="now-playing-content">
-                <h2>Now Playing</h2>
                 <div class="show-info">
                     <div class="show-title">Off Air</div>
                     <div class="show-description">No scheduled programming at the moment</div>
@@ -132,14 +131,9 @@ class NowPlayingWidget {
     renderFallback() {
         this.container.innerHTML = `
             <div class="now-playing-content">
-                <h2>Now Playing</h2>
                 <div class="show-info">
                     <div class="show-title">90mil Radio</div>
-                    <div class="show-description">Independent experimental radio from Berlin</div>
-                </div>
-                <div class="live-indicator">
-                    <span class="live-dot"></span>
-                    <span class="live-text">LIVE</span>
+                    <div class="show-description">This is a test</div>
                 </div>
             </div>
         `;

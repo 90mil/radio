@@ -1,19 +1,22 @@
 .site-footer {
-    height: var(--footer-height);
-    background: var(--accent-2);
-    border-top: 1px solid var(--text-color);
-    padding: 0 var(--margin-desktop);
+    position: relative;
+    border-top: 1px solid var(--border-soft);
+    background: var(--body-bg);
+    padding: 10px var(--margin-desktop);
+    z-index: var(--z-footer);
+    text-align: center;
+    font-size: 14px;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 30px;
 
     a {
         color: var(--text-color);
-        opacity: 0.7;
-        transition: opacity 0.2s ease;
+        text-decoration: none;
+        font-family: var(--font-body);
 
         &:hover {
-            opacity: 1;
+            color: var(--link-color);
         }
     }
 

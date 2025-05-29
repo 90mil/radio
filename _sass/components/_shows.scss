@@ -1,7 +1,7 @@
 /* Show Box and Card Styles */
 .show-box {
     background: var(--accent-2);
-    border: 1px solid var(--text-color);
+    border: 1px solid var(--border-medium);
     padding: 20px;
     position: relative;
     display: flex;
@@ -94,7 +94,7 @@
 }
 
 .play-container {
-    border: 2px solid var(--text-color);
+    border: 1px solid var(--border-medium);
     display: flex;
     justify-content: flex-start;
     align-items: center;
@@ -148,7 +148,7 @@
     left: 0;
     width: 100%;
     background: var(--accent-2);
-    border-top: 1px solid var(--text-color);
+    border-top: 1px solid var(--border-medium);
     padding: 0;
     z-index: var(--z-modal);
     display: none;

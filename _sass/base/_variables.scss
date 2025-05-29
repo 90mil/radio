@@ -10,6 +10,14 @@
     /* Accent II */
     --link-color: #edfdfa;
 
+    /* Analog/Retro Border Colors */
+    --border-soft: rgba(230, 234, 233, 0.15);
+    /* Very subtle borders */
+    --border-medium: rgba(230, 234, 233, 0.25);
+    /* Medium visibility borders */
+    --border-warm: rgba(237, 253, 250, 0.2);
+    /* Slightly warmer, muted borders */
+
     /* Typography */
     --font-primary: "Glacial Indifference", -apple-system, system-ui, BlinkMacSystemFont, sans-serif;
     --font-secondary: "Lora", Georgia, serif;

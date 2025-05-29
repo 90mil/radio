@@ -80,6 +80,9 @@ window.showsInit = function () {
         closeButton.addEventListener('click', closePlayer);
         player.querySelector('.play-bar').appendChild(closeButton);
     }
+
+    // Check for hash to auto-play specific show
+    checkForAutoPlay();
 };
 
 function createLoadMoreTrigger() {
@@ -660,4 +663,14 @@ async function renderInBatches(showsByMonth, isAdditional) {
             }
         });
     });
+}
+
+function checkForAutoPlay() {
+    const hash = window.location.hash.substring(1); // Remove the #
+    if (hash === 'circling-the-whuhula') {
+        // Wait a bit for the shows to load, then trigger the play
+        setTimeout(() => {
+            playShow('https://www.mixcloud.com/90milradio/circling-the-whuhula-tales-of-our-i/');
+        }, 1000);
+    }
 } 

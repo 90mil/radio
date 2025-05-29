@@ -3,22 +3,145 @@ layout: default
 title: 90mil Radio
 description: An independent platform amplifying underrepresented voices in Berlin's sonic landscape. Supporting femme and queer artists, storytellers, and activists through experimental arts, sound, and interdisciplinary practice.
 ---
+<script>
+// Fetch featured show data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    fetchFeaturedShow();
+});
+
+async function fetchFeaturedShow() {
+    try {
+        const response = await fetch('https://api.mixcloud.com/90milradio/circling-the-whuhula-tales-of-our-i/');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const showData = await response.json();
+        
+        // Update the show image
+        const showImage = document.getElementById('featured-show-image');
+        
+        // Try to get the largest available image
+        let imageUrl = null;
+        if (showData.pictures) {
+            imageUrl = showData.pictures.extra_large ||
+                      showData.pictures.large ||
+                      showData.pictures.medium_large ||
+                      showData.pictures.medium ||
+                      showData.pictures.small ||
+                      showData.pictures.thumbnail;
+        }
+        
+        if (imageUrl) {
+            showImage.src = imageUrl;
+            showImage.alt = `${showData.name} artwork`;
+            showImage.style.display = 'block';
+            showImage.style.opacity = '1';
+            
+            showImage.onload = function() {
+                this.classList.add('loaded');
+            };
+            
+            showImage.onerror = function() {
+                this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz4KPHN2ZyB4PSI0MCIgeT0iNDAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJ3aGl0ZSI+CjxwYXRoIGQ9Ik0zIDIyVjJsMTggMTBMMCAyMnoiLz4KPC9zdmc+Cjwvc3ZnPgo=';
+            };
+            
+        } else {
+            showImage.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz4KPHN2ZyB4PSI0MCIgeT0iNDAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJ3aGl0ZSI+CjxwYXRoIGQ9Ik0zIDIyVjJsMTggMTBMMCAyMnoiLz4KPC9zdmc+Cjwvc3ZnPgo=';
+        }
+        
+        // Update the show title
+        const title = showData.name.split(' (')[0];
+        const subtitle = showData.name.includes('(') ? showData.name.match(/\(([^)]+)\)/)?.[1] : '';
+        document.getElementById('featured-show-title').textContent = title;
+        
+        // Update the description
+        document.getElementById('featured-show-description').textContent = showData.description || 'A concept series imagined by Random Kingdom.';
+        
+        // Update the genres
+        const genres = showData.tags?.map(tag => tag.name).join(', ') || 'Ambient, Poetry, Soundscape, Radio, Electroacoustic';
+        document.getElementById('featured-show-genres').textContent = `Genres: ${genres}`;
+        
+        // Add subtitle if it exists
+        if (subtitle) {
+            const titleElement = document.getElementById('featured-show-title');
+            const existingSubtitle = titleElement.parentNode.querySelector('.subtitle');
+            if (!existingSubtitle) {
+                const subtitleElement = document.createElement('h4');
+                subtitleElement.className = 'subtitle';
+                subtitleElement.textContent = subtitle;
+                subtitleElement.style.margin = '0 0 12px 0';
+                subtitleElement.style.fontSize = '1.2rem';
+                subtitleElement.style.fontStyle = 'italic';
+                subtitleElement.style.opacity = '0.9';
+                titleElement.parentNode.insertBefore(subtitleElement, titleElement.nextSibling);
+            }
+        }
+        
+    } catch (error) {
+        // Fallback content
+        document.getElementById('featured-show-title').textContent = 'Circling the Whuhula';
+        document.getElementById('featured-show-description').textContent = 'A concept series imagined by Random Kingdom.';
+        document.getElementById('featured-show-genres').textContent = 'Genres: Ambient, Poetry, Soundscape, Radio, Electroacoustic';
+        
+        const showImage = document.getElementById('featured-show-image');
+        showImage.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz4KPHN2ZyB4PSI0MCIgeT0iNDAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJ3aGl0ZSI+CjxwYXRoIGQ9Ik0zIDIyVjJsMTggMTBMMCAyMnoiLz4KPC9zdmc+Cjwvc3ZnPgo=';
+    }
+}
+</script>
 <div class="hero-section">
     <picture>
         <source 
-            srcset="assets/images/forest/forest-320.webp 320w,
-                    assets/images/forest/forest-640.webp 640w,
-                    assets/images/forest/forest-1024.webp 1024w,
-                    assets/images/forest/forest-1920.webp 1920w"
+            srcset="assets/images/darkwater/darkwater-320.webp 320w,
+                    assets/images/darkwater/darkwater-640.webp 640w,
+                    assets/images/darkwater/darkwater-1024.webp 1024w,
+                    assets/images/darkwater/darkwater-1920.webp 1920w"
             sizes="(max-width: 320px) 320px,
                    (max-width: 640px) 640px,
                    (max-width: 1024px) 1024px,
                    1920px"
             type="image/webp">
-        <img src="assets/images/forest/forest-1920.webp" alt="Forest lithograph" class="hero-image">
+        <img src="assets/images/darkwater/darkwater-1920.webp" alt="Dark water background" class="hero-image">
     </picture>
-    <div class="featured-show">
-        <!-- Featured show widget will be added here -->
+    <div class="featured-container">
+        <div class="featured-left">
+            <div class="featured-event">
+                <h2>Featured Event</h2>
+                <div class="featured-poster">
+                    <img src="assets/images/pollen-detailed.jpg" alt="Pollen detailed poster" class="poster-image">
+                </div>
+                <div class="featured-info">
+                    <p>An immersive audio-visual experience exploring the intersection of nature and technology through experimental sound and interdisciplinary practice.</p>
+                    <div class="featured-actions">
+                        <a href="/shows" class="cta-button">Learn More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="featured-right">
+            <div class="now-playing">
+                <h2>Now Playing</h2>
+                <p>Live stream placeholder</p>
+            </div>
+            
+            <div class="featured-show">
+                <h2>Featured Show</h2>
+                <div class="show-content">
+                    <img id="featured-show-image" src="" alt="Show artwork" class="featured-show-image" style="display: block; min-height: 180px; min-width: 180px; background: rgba(255,255,255,0.1);">
+                    <div class="show-text">
+                        <h3 id="featured-show-title">Loading...</h3>
+                        <p id="featured-show-description" class="show-description">Loading show details...</p>
+                        <p id="featured-show-genres" class="genres">Loading genres...</p>
+                        <div class="featured-actions">
+                            <a href="/shows#circling-the-whuhula" class="cta-button">Listen Now</a>
+                            <a href="/shows" class="cta-secondary">More Shows</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <footer class="site-footer">

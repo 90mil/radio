@@ -1,8 +1,7 @@
-- text: 90mil
-  url: https://90mil.berlin
-  external: true
-- text: about   
+- text: home
   url: /
+- text: about   
+  url: /about
 - text: shows   
   url: /shows
 - text: schedule 
@@ -12,4 +11,7 @@
   external: true
 - text: submit
   url: https://docs.google.com/forms/d/e/1FAIpQLSejVzDBVudAlY4jlctyPiwXqQcUM-kM7cDaXZlVHuS4tr81vw/viewform
-  external: true 
+  external: true
+- text: 90mil
+  url: https://90mil.berlin
+  external: true

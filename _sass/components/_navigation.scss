@@ -9,12 +9,14 @@ nav {
     border-top: 1px solid var(--text-color);
     border-bottom: 1px solid var(--text-color);
     position: relative;
+    width: 100%;
 }
 
 .nav-links {
     display: flex;
     margin-right: auto;
-    gap: var(--spacing-nav);
+    gap: 0;
+    width: 100%;
 
     a {
         --nav-padding: var(--padding-nav);
@@ -31,19 +33,23 @@ nav {
         align-items: center;
         justify-content: center;
         white-space: nowrap;
+        flex: 1;
+        min-width: fit-content;
 
         &:first-child {
-            margin-left: var(--margin-desktop);
-            padding-left: 0;
+            margin-left: 0;
+            padding-left: var(--margin-desktop);
             padding-right: var(--nav-padding);
             justify-content: flex-start;
+            flex: 0 0 auto;
         }
 
         &:last-child {
             border-right: none;
             padding-left: var(--nav-padding);
-            padding-right: calc(var(--nav-padding) * 2);
+            padding-right: var(--margin-desktop);
             justify-content: flex-end;
+            flex: 0 0 auto;
         }
 
         &:hover {
@@ -131,13 +137,14 @@ nav {
 @media (max-width: 1024px) {
     .nav-links a {
         font-size: 16px;
+        padding: 18px 12px;
         
         &:first-child {
-            margin-left: var(--margin-laptop);
+            padding-left: var(--margin-laptop);
         }
 
         &:last-child {
-            margin-right: 60px;
+            padding-right: var(--margin-laptop);
         }
     }
 

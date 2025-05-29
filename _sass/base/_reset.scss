@@ -36,4 +36,10 @@ button {
 img {
     max-width: 100%;
     height: auto;
+}
+
+/* Fixed Header Layout Guard */
+main#content-container {
+    margin-top: calc(var(--nav-height) + var(--banner-height));
+    min-height: calc(100vh - var(--nav-height) - var(--banner-height));
 } 

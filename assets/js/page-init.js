@@ -119,6 +119,7 @@ window.PageInit = (function () {
          * Initialize the home page
          */
         homePage: function () {
+            console.log('Initializing home page...');
             // Force clear all widget states
             window.nowPlayingLoaded = false;
             window.featuredShowLoaded = false;
@@ -130,11 +131,14 @@ window.PageInit = (function () {
             }
             
             // Force clear widget content to ensure fresh load
-            const nowPlayingContainer = document.querySelector('.now-playing');
+            const nowPlayingContainer = document.getElementById('now-playing-content');
             const featuredShowContainer = document.querySelector('.featured-show');
             
+            console.log('Now playing container found:', !!nowPlayingContainer);
+            console.log('Featured show container found:', !!featuredShowContainer);
+            
             if (nowPlayingContainer) {
-                nowPlayingContainer.innerHTML = '<h2>Now Playing</h2>';
+                nowPlayingContainer.innerHTML = '';
             }
             
             if (featuredShowContainer) {
@@ -146,6 +150,7 @@ window.PageInit = (function () {
             
             // Add a delay to ensure DOM is fully ready after SPA navigation
             setTimeout(() => {
+                console.log('Loading widgets after delay...');
                 // Force reload both widgets
                 this.loadScriptIfNeeded('/assets/js/featured-show.js', () => {
                     setTimeout(() => {

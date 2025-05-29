@@ -1,7 +1,8 @@
 // Now Playing Widget
 class NowPlayingWidget {
     constructor() {
-        this.apiUrl = 'https://neunzugmilradio.airtime.pro/api/week-info';
+        this.weekApiUrl = 'https://neunzugmilradio.airtime.pro/api/week-info';
+        this.liveApiUrl = 'https://neunzugmilradio.airtime.pro/api/live-info';
         this.refreshInterval = 30000; // 30 seconds
         this.intervalId = null;
         this.container = null;
@@ -9,7 +10,8 @@ class NowPlayingWidget {
     }
 
     init() {
-        this.container = document.querySelector('.now-playing');
+        this.container = document.getElementById('now-playing-content');
+        console.log('Now Playing Widget init:', this.container ? 'Container found' : 'Container not found');
         if (!this.container) return;
 
         this.isActive = true;
@@ -38,14 +40,50 @@ class NowPlayingWidget {
     async updateNowPlaying() {
         if (!this.container) return;
 
+        console.log('Updating now playing...');
         try {
-            const response = await fetch(this.apiUrl);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            let liveData = null;
             
-            const data = await response.json();
-            const currentShow = this.getCurrentShow(data);
+            // First try to get live show info
+            const liveResponse = await fetch(this.liveApiUrl, { cache: 'no-store' });
+            if (liveResponse.ok) {
+                liveData = await liveResponse.json();
+                console.log('Live API data received:', liveData);
+                
+                // Check if there's a current show that's not autodj
+                if (liveData.currentShow && liveData.currentShow.length > 0) {
+                    const currentShow = liveData.currentShow[0];
+                    
+                    // If it's a real show (not "90mil Radio"), display it
+                    if (currentShow.name !== "90mil Radio") {
+                        this.renderLiveShow(currentShow, liveData.current);
+                        return;
+                    }
+                }
+            }
             
-            this.renderNowPlaying(currentShow);
+            // Try to get scheduled shows
+            const weekResponse = await fetch(this.weekApiUrl);
+            if (weekResponse.ok) {
+                const weekData = await weekResponse.json();
+                console.log('Week API data received:', weekData);
+                const currentShow = this.getCurrentShow(weekData);
+                console.log('Current show:', currentShow);
+                
+                if (currentShow) {
+                    this.renderScheduledShow(currentShow);
+                    return;
+                }
+            }
+            
+            // Fallback to autodj if no scheduled show and we have live data
+            if (liveData && liveData.current && liveData.current.metadata && liveData.current.metadata.track_title) {
+                this.renderAutodj(liveData.current);
+                return;
+            }
+            
+            // If nothing else, show off air
+            this.renderOffAir();
         } catch (error) {
             console.warn('Error fetching now playing data:', error);
             this.renderFallback();
@@ -87,54 +125,100 @@ class NowPlayingWidget {
         return textarea.value;
     }
 
-    renderNowPlaying(show) {
-        if (!show) {
-            this.renderOffAir();
-            return;
+    renderLiveShow(show, current) {
+        const showName = this.decodeHtmlEntities(show.name);
+        const isLive = current && current.type === 'livestream';
+        
+        let timeInfo = '';
+        if (current && current.starts && current.ends) {
+            const startTime = this.formatTime(current.starts);
+            const endTime = this.formatTime(current.ends);
+            timeInfo = `${startTime} - ${endTime}`;
         }
 
+        // Get description from show data
+        const description = show.description ? this.decodeHtmlEntities(show.description) : '';
+
+        this.container.innerHTML = `
+            <div class="show-info">
+                <div class="show-title">${showName}</div>
+                ${timeInfo ? `<div class="show-time">${timeInfo}</div>` : ''}
+                ${description ? `<div class="show-description">${description}</div>` : ''}
+            </div>
+            <div class="live-indicator">
+                ${isLive ? '<span class="live-dot"></span>' : ''}
+                <span class="live-text">${isLive ? 'LIVE' : 'ON AIR'}</span>
+            </div>
+        `;
+    }
+
+    renderAutodj(current) {
+        const trackTitle = this.decodeHtmlEntities(current.metadata.track_title || 'Unknown Track');
+        
+        // Remove .mp3 extension if present
+        const cleanTitle = trackTitle.replace(/\.mp3$/, '');
+        
+        // Parse title and host from track title if it contains "hosted by"
+        let title = cleanTitle;
+        let host = '';
+        
+        if (cleanTitle.includes("hosted by")) {
+            const parts = cleanTitle.split("hosted by").map(part => part.trim());
+            title = parts[0];
+            host = parts[1] || '';
+        }
+
+        // Get description if available
+        const description = current.metadata.description ? this.decodeHtmlEntities(current.metadata.description) : '';
+
+        this.container.innerHTML = `
+            <div class="show-info">
+                <div class="show-title">${title}</div>
+                ${host ? `<div class="show-host">hosted by ${host}</div>` : ''}
+                ${description ? `<div class="show-description">${description}</div>` : ''}
+            </div>
+            <div class="live-indicator archives">
+                <span class="live-text">FROM THE ARCHIVES</span>
+            </div>
+        `;
+    }
+
+    renderScheduledShow(show) {
         const startTime = this.formatTime(show.start_timestamp);
         const endTime = this.formatTime(show.end_timestamp);
         const showName = this.decodeHtmlEntities(show.name);
         const description = show.description ? this.decodeHtmlEntities(show.description) : '';
 
         this.container.innerHTML = `
-            <div class="now-playing-content">
-                <h2>Now Playing</h2>
-                <div class="show-info">
-                    <div class="show-title">${showName}</div>
-                    <div class="show-time">${startTime} - ${endTime}</div>
-                    ${description ? `<div class="show-description">${description}</div>` : ''}
-                </div>
-                <div class="live-indicator">
-                    <span class="live-dot"></span>
-                    <span class="live-text">ON AIR</span>
-                </div>
+            <div class="show-info">
+                <div class="show-title">${showName}</div>
+                <div class="show-time">${startTime} - ${endTime}</div>
+                ${description ? `<div class="show-description">${description}</div>` : ''}
+            </div>
+            <div class="live-indicator">
+                <span class="live-dot"></span>
+                <span class="live-text">ON AIR</span>
             </div>
         `;
     }
 
     renderOffAir() {
         this.container.innerHTML = `
-            <div class="now-playing-content">
-                <div class="show-info">
-                    <div class="show-title">Off Air</div>
-                    <div class="show-description">No scheduled programming at the moment</div>
-                </div>
-                <div class="live-indicator off-air">
-                    <span class="live-text">OFF AIR</span>
-                </div>
+            <div class="show-info">
+                <div class="show-title">Off Air</div>
+                <div class="show-description">No scheduled programming at the moment</div>
+            </div>
+            <div class="live-indicator off-air">
+                <span class="live-text">OFF AIR</span>
             </div>
         `;
     }
 
     renderFallback() {
         this.container.innerHTML = `
-            <div class="now-playing-content">
-                <div class="show-info">
-                    <div class="show-title">90mil Radio</div>
-                    <div class="show-description">This is a test</div>
-                </div>
+            <div class="show-info">
+                <div class="show-title">90mil Radio</div>
+                <div class="show-description">This is a test</div>
             </div>
         `;
     }
@@ -147,7 +231,7 @@ window.nowPlayingLoaded = false;
 // Function to check and load now playing widget
 function checkAndLoadNowPlaying() {
     // Check if we're on the right page and elements exist
-    const nowPlayingContainer = document.querySelector('.now-playing');
+    const nowPlayingContainer = document.getElementById('now-playing-content');
     
     if (!nowPlayingContainer) {
         // Clean up if container doesn't exist
@@ -177,7 +261,7 @@ function initNowPlaying() {
     }
     
     // Create new instance if container exists
-    const container = document.querySelector('.now-playing');
+    const container = document.getElementById('now-playing-content');
     if (container) {
         nowPlayingWidget = new NowPlayingWidget();
         nowPlayingWidget.init();

@@ -73,15 +73,15 @@
     top: calc(var(--nav-height) + var(--banner-height) + 40px);
     right: 40px;
     width: 360px;
-    background: rgba(1, 20, 17, 0.9);
+    background: rgba(1, 20, 17, 0.85);
+    backdrop-filter: blur(5px) brightness(0.96) contrast(1.03) sepia(0.01);
+    -webkit-backdrop-filter: blur(5px) brightness(0.96) contrast(1.03) sepia(0.01);
+    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.2),
+                0 5px 18px rgba(0, 0, 0, 0.3);
     padding: var(--spacing-main);
     border-radius: 0;
     z-index: 2;
-    backdrop-filter: blur(6px) brightness(0.95) saturate(1.05) sepia(0.02);
-    -webkit-backdrop-filter: blur(6px) brightness(0.95) saturate(1.05) sepia(0.02);
-    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2),
-                0 6px 20px rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--border-warm);
+    border: 1px solid var(--border-medium);
 }
 
 /* Responsive Layouts */
@@ -551,5 +551,76 @@
     
     .cta-secondary {
         @include button-secondary;
+    }
+}
+
+/* Responsive Media Queries for Featured Show Widget */
+@media (max-width: 800px) and (min-width: 601px) {
+    .featured-actions {
+        .cta-button, .cta-secondary {
+            font-size: 0.9rem;
+            padding: 10px 12px;
+        }
+    }
+}
+
+@media (max-width: 600px) {
+    .featured-show {
+        padding: 20px;
+    }
+    
+    .show-content {
+        flex-direction: column;
+        gap: 15px;
+        
+        .featured-show-image {
+            width: 100%;
+            max-width: 200px;
+            align-self: center;
+        }
+        
+        .show-text {
+            text-align: center;
+        }
+    }
+    
+    .featured-actions {
+        flex-direction: column;
+        gap: 10px;
+        
+        .cta-button, .cta-secondary {
+            width: 100%;
+            text-align: center;
+        }
+    }
+}
+
+@media (max-width: 480px) and (min-width: 320px) {
+    .featured-actions {
+        flex-direction: column;
+        gap: 8px;
+        
+        .cta-button, .cta-secondary {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+}
+
+/* For very narrow layouts between 480px and 600px */
+@media (max-width: 600px) and (min-width: 481px) {
+    .featured-actions {
+        flex-direction: column;
+        gap: 10px;
+        
+        .cta-button, .cta-secondary {
+            width: 100%;
+            text-align: center;
+        }
     }
 }

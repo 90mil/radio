@@ -71,20 +71,17 @@ function checkAndLoadFeaturedShow() {
     const showContent = document.querySelector('.show-content');
     
     if (!showImage || !showTitle || !showContent) {
+        console.log('Featured show elements not found, skipping load');
         return false;
     }
     
+    console.log('Featured show elements found, forcing reload');
+    
     // Always force reload to ensure widgets work after SPA navigation
-    // First try to load from cache
-    const cachedData = getCachedData();
-    if (cachedData) {
-        populateShowData(cachedData);
-        window.featuredShowLoaded = true;
-    } else {
-        // No cached data, fetch from API
-        showLoadingState();
-        fetchFeaturedShow();
-    }
+    // Force fresh data fetch instead of using cache
+    showLoadingState();
+    fetchFeaturedShow();
+    window.featuredShowLoaded = true;
     return true;
 }
 

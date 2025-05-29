@@ -119,26 +119,47 @@ window.PageInit = (function () {
          * Initialize the home page
          */
         homePage: function () {
-            // Force reset widget loading states for home page
+            // Force clear all widget states
             window.nowPlayingLoaded = false;
             window.featuredShowLoaded = false;
             
-            // Add a small delay to ensure DOM is fully ready after SPA navigation
+            // Clear any cached widget data
+            if (typeof localStorage !== 'undefined') {
+                localStorage.removeItem('featuredShowData');
+                localStorage.removeItem('featuredShowTimestamp');
+            }
+            
+            // Force clear widget content to ensure fresh load
+            const nowPlayingContainer = document.querySelector('.now-playing');
+            const featuredShowContainer = document.querySelector('.featured-show');
+            
+            if (nowPlayingContainer) {
+                nowPlayingContainer.innerHTML = '<h2>Now Playing</h2>';
+            }
+            
+            if (featuredShowContainer) {
+                const showContent = featuredShowContainer.querySelector('.show-content');
+                if (showContent) {
+                    showContent.style.opacity = '0';
+                }
+            }
+            
+            // Add a delay to ensure DOM is fully ready after SPA navigation
             setTimeout(() => {
-                // Load the widget scripts first, then initialize
+                // Force reload both widgets
                 this.loadScriptIfNeeded('/assets/js/featured-show.js', () => {
-                    // Add another small delay to ensure script is fully loaded
                     setTimeout(() => {
                         if (typeof checkAndLoadFeaturedShow === 'function') {
+                            console.log('Forcing featured show reload');
                             checkAndLoadFeaturedShow();
                         }
                     }, 50);
                 });
                 
                 this.loadScriptIfNeeded('/assets/js/now-playing.js', () => {
-                    // Add another small delay to ensure script is fully loaded
                     setTimeout(() => {
                         if (typeof checkAndLoadNowPlaying === 'function') {
+                            console.log('Forcing now playing reload');
                             checkAndLoadNowPlaying();
                         }
                     }, 50);

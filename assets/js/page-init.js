@@ -47,6 +47,11 @@ window.PageInit = (function () {
             if (state.scheduleInitialized && typeof window.scheduleCleanup === 'function') {
                 window.scheduleCleanup();
             }
+            
+            // Clean up now playing widget
+            if (typeof destroyNowPlaying === 'function') {
+                destroyNowPlaying();
+            }
 
             // Reset global variables that might be set by page scripts
             window.isLoadingMore = false;
@@ -101,7 +106,15 @@ window.PageInit = (function () {
          * Initialize the home page
          */
         homePage: function () {
-            // Home page initialization if needed
+            // Initialize featured show widget
+            if (typeof checkAndLoadFeaturedShow === 'function') {
+                checkAndLoadFeaturedShow();
+            }
+            
+            // Initialize now playing widget
+            if (typeof checkAndLoadNowPlaying === 'function') {
+                checkAndLoadNowPlaying();
+            }
         },
 
         /**

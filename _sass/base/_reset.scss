@@ -59,7 +59,7 @@ main#content-container {
     top: calc(var(--nav-height) + var(--banner-height));
     left: 0;
     right: 0;
-    bottom: var(--footer-height);
+    bottom: 0;
     box-sizing: border-box;
     overflow-y: auto;
 } 

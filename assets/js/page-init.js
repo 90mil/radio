@@ -53,6 +53,10 @@ window.PageInit = (function () {
                 destroyNowPlaying();
             }
 
+            // Reset global widget loading states
+            window.nowPlayingLoaded = false;
+            window.featuredShowLoaded = false;
+
             // Reset global variables that might be set by page scripts
             window.isLoadingMore = false;
             window.currentOffset = 0;
@@ -106,15 +110,24 @@ window.PageInit = (function () {
          * Initialize the home page
          */
         homePage: function () {
-            // Initialize featured show widget
-            if (typeof checkAndLoadFeaturedShow === 'function') {
-                checkAndLoadFeaturedShow();
-            }
+            // Force reset widget loading states for home page
+            window.nowPlayingLoaded = false;
+            window.featuredShowLoaded = false;
             
-            // Initialize now playing widget
-            if (typeof checkAndLoadNowPlaying === 'function') {
-                checkAndLoadNowPlaying();
-            }
+            // Load the widget scripts first, then initialize
+            this.loadScriptIfNeeded('/assets/js/featured-show.js', () => {
+                // Initialize featured show widget with forced reload
+                if (typeof checkAndLoadFeaturedShow === 'function') {
+                    checkAndLoadFeaturedShow();
+                }
+            });
+            
+            this.loadScriptIfNeeded('/assets/js/now-playing.js', () => {
+                // Initialize now playing widget with forced reload
+                if (typeof checkAndLoadNowPlaying === 'function') {
+                    checkAndLoadNowPlaying();
+                }
+            });
         },
 
         /**

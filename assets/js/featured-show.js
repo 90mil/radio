@@ -74,22 +74,18 @@ function checkAndLoadFeaturedShow() {
         return false;
     }
     
-    // Check if we need to load (either not loaded yet or container is invisible)
-    if (!window.featuredShowLoaded || showContent.style.opacity === '0') {
-        // First try to load from cache
-        const cachedData = getCachedData();
-        if (cachedData) {
-            populateShowData(cachedData);
-            window.featuredShowLoaded = true;
-        } else {
-            // No cached data, fetch from API
-            showLoadingState();
-            fetchFeaturedShow();
-        }
-        return true;
+    // Always force reload to ensure widgets work after SPA navigation
+    // First try to load from cache
+    const cachedData = getCachedData();
+    if (cachedData) {
+        populateShowData(cachedData);
+        window.featuredShowLoaded = true;
+    } else {
+        // No cached data, fetch from API
+        showLoadingState();
+        fetchFeaturedShow();
     }
-    
-    return false;
+    return true;
 }
 
 // Function to populate show data (from cache or API)

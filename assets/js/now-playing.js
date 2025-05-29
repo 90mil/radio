@@ -163,14 +163,10 @@ function checkAndLoadNowPlaying() {
         return false;
     }
     
-    // Check if we need to load (either not loaded yet or not active)
-    if (!window.nowPlayingLoaded || !nowPlayingWidget || !nowPlayingWidget.isActive) {
-        initNowPlaying();
-        window.nowPlayingLoaded = true;
-        return true;
-    }
-    
-    return false;
+    // Always force reload to ensure widgets work after SPA navigation
+    initNowPlaying();
+    window.nowPlayingLoaded = true;
+    return true;
 }
 
 // Initialize when DOM is ready

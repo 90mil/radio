@@ -33,18 +33,26 @@ nav {
         padding: 18px var(--nav-padding);
         color: var(--text-color);
         text-decoration: none;
-        background: var(--accent-2);
+        background: rgba(1, 20, 17, 0.7);
         font-family: var(--font-primary);
         font-size: 18px;
         font-weight: bold;
         text-transform: lowercase;
         border-right: 1px solid var(--border-soft);
+        border-radius: var(--button-border-radius);
+        margin-right: 2px;
         display: flex;
         align-items: center;
         justify-content: center;
         white-space: nowrap;
         flex: 1;
         min-width: fit-content;
+        backdrop-filter: blur(4px) brightness(0.95) saturate(1.02);
+        -webkit-backdrop-filter: blur(4px) brightness(0.95) saturate(1.02);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        transition: var(--button-transition);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        opacity: 0.9;
 
         &:first-child {
             margin-left: 0;
@@ -52,6 +60,8 @@ nav {
             padding-right: var(--nav-padding);
             justify-content: flex-start;
             flex: 0 0 auto;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
         }
 
         &:last-child {
@@ -60,15 +70,23 @@ nav {
             padding-right: var(--margin-desktop);
             justify-content: flex-end;
             flex: 0 0 auto;
+            margin-right: 0;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
         }
 
         &:hover {
-            background: var(--accent-2);
-            text-decoration: none;
-            transition: background 0.2s ease;
+            background: rgba(1, 20, 17, 0.85);
+            border-color: var(--border-warm);
+            color: var(--link-color);
+            opacity: 1;
+            backdrop-filter: blur(6px) brightness(1.05) saturate(1.05);
+            -webkit-backdrop-filter: blur(6px) brightness(1.05) saturate(1.05);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(1, 20, 17, 0.4);
 
-         .nav-text {
-                animation: glitch 0.8s cubic-bezier(.1, .4, .2, .9) both;
+            .nav-text {
+                animation: subtle-analog-glitch 0.6s ease-out both;
             }
         }
     }
@@ -80,11 +98,27 @@ nav {
     width: 36px;
     height: 36px;
     padding: 8px;
-    background: var(--accent-2);
-    border: none;
+    background: rgba(1, 20, 17, 0.7);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--button-border-radius);
     cursor: pointer;
     margin: 6px 16px;
     position: relative;
+    backdrop-filter: blur(4px) brightness(0.95);
+    -webkit-backdrop-filter: blur(4px) brightness(0.95);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: var(--button-transition);
+    opacity: 0.9;
+
+    &:hover {
+        background: rgba(1, 20, 17, 0.85);
+        border-color: var(--border-warm);
+        opacity: 1;
+        backdrop-filter: blur(6px) brightness(1.05);
+        -webkit-backdrop-filter: blur(6px) brightness(1.05);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(1, 20, 17, 0.4);
+    }
 
     .menu-icon {
         position: relative;
@@ -93,6 +127,7 @@ nav {
         height: 2px;
         background: var(--text-color);
         margin: 8px auto;
+        border-radius: 1px;
 
         &::before,
         &::after {
@@ -102,6 +137,7 @@ nav {
             height: 2px;
             background: var(--text-color);
             left: 0;
+            border-radius: 1px;
             transition: all 0.3s ease;
         }
 

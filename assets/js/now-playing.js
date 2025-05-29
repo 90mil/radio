@@ -217,8 +217,11 @@ class NowPlayingWidget {
     renderFallback() {
         this.container.innerHTML = `
             <div class="show-info">
-                <div class="show-title">90mil Radio</div>
-                <div class="show-description">This is a test</div>
+                <div class="show-title">Off Air</div>
+                <div class="show-description">No scheduled programming at the moment</div>
+            </div>
+            <div class="live-indicator off-air">
+                <span class="live-text">OFF AIR</span>
             </div>
         `;
     }

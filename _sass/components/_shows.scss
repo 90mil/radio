@@ -98,26 +98,14 @@
 }
 
 .play-container {
-    border: 1px solid var(--border-medium);
-    display: flex;
+    @include button-interactive;
     justify-content: flex-start;
-    align-items: center;
     width: 100%;
-    padding: 8px 12px;
-    box-sizing: border-box;
-    background-color: transparent;
     gap: 8px;
     margin-bottom: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
 
     &:last-child {
         margin-bottom: 4px;
-    }
-
-    &:hover {
-        background: var(--accent-1);
-        border-color: var(--accent-1);
     }
 }
 
@@ -128,12 +116,21 @@
     padding: 0;
     display: flex;
     align-items: center;
+    transition: transform 0.2s ease;
 
     svg {
         width: 14px;
         height: 14px;
         fill: var(--text-color);
         transition: fill 0.3s ease;
+    }
+    
+    &:hover {
+        transform: scale(1.1);
+        
+        svg {
+            fill: var(--link-color);
+        }
     }
 }
 

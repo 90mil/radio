@@ -78,4 +78,10 @@
     --section-header-weight: normal;
     --section-header-transform: lowercase;
     --section-header-margin: 0 0 30px 0;
+
+    /* Button Styles */
+    --button-border-radius: 3px;
+    --button-transition: all 0.3s ease;
+    --button-hover-transform: translateY(-1px);
+    --button-backdrop-blur: blur(6px);
 }

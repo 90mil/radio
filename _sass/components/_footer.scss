@@ -1,14 +1,22 @@
 .site-footer {
-    position: relative;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
     border-top: 1px solid var(--border-soft);
-    background: var(--body-bg);
+    background: rgba(1, 20, 17, 0.9);
+    backdrop-filter: blur(8px) brightness(0.9);
+    -webkit-backdrop-filter: blur(8px) brightness(0.9);
     padding: 10px var(--margin-desktop);
     z-index: var(--z-footer);
     text-align: center;
     font-size: 14px;
+    height: var(--footer-height);
     display: flex;
+    align-items: center;
     justify-content: center;
     gap: 30px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
 
     a {
         color: var(--text-color);

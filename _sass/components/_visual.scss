@@ -18,11 +18,6 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(
-        circle at center,
-        transparent 0%,
-        rgba(32, 128, 32, 0.2) 100%
-    );
     mix-blend-mode: screen;
     animation: flicker 4s infinite;
     pointer-events: none;

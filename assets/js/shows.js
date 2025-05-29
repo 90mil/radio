@@ -1,5 +1,5 @@
 // Constants
-const BATCH_SIZE = 50;
+const BATCH_SIZE = 20;
 const BATCH_DELAY = 50; // Milliseconds between batches
 const SCROLL_THRESHOLD = 500; // px from bottom to trigger next batch
 let currentOffset = 0;
@@ -96,7 +96,7 @@ function createLoadMoreTrigger() {
 }
 
 
-async function fetchWithTimeout(url, timeout = 5000) {
+async function fetchWithTimeout(url, timeout = 3000) {
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -123,10 +123,10 @@ async function fetchWithTimeout(url, timeout = 5000) {
 
 async function fetchShowDetails(showKey) {
     try {
-        return await fetchWithTimeout(`https://api.mixcloud.com${showKey}`);
+        return await fetchWithTimeout(`https://api.mixcloud.com${showKey}`, 2000); // Even shorter timeout for details
     } catch (error) {
-        console.error(`Failed to fetch show details for ${showKey}:`, error);
-        return null;
+        console.warn(`Failed to fetch show details for ${showKey}:`, error.message);
+        return null; // Return null instead of undefined for cleaner handling
     }
 }
 

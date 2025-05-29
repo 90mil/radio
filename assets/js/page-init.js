@@ -52,6 +52,11 @@ window.PageInit = (function () {
             if (typeof destroyNowPlaying === 'function') {
                 destroyNowPlaying();
             }
+            
+            // Clean up featured show widget
+            if (typeof destroyFeaturedShow === 'function') {
+                destroyFeaturedShow();
+            }
 
             // Reset global widget loading states
             window.nowPlayingLoaded = false;
@@ -118,36 +123,58 @@ window.PageInit = (function () {
             window.nowPlayingLoaded = false;
             window.featuredShowLoaded = false;
             
-            // Load the widget scripts first, then initialize
-            this.loadScriptIfNeeded('/assets/js/featured-show.js', () => {
-                // Initialize featured show widget with forced reload
-                if (typeof checkAndLoadFeaturedShow === 'function') {
-                    checkAndLoadFeaturedShow();
-                }
-            });
-            
-            this.loadScriptIfNeeded('/assets/js/now-playing.js', () => {
-                // Initialize now playing widget with forced reload
-                if (typeof checkAndLoadNowPlaying === 'function') {
-                    checkAndLoadNowPlaying();
-                }
-            });
+            // Add a small delay to ensure DOM is fully ready after SPA navigation
+            setTimeout(() => {
+                // Load the widget scripts first, then initialize
+                this.loadScriptIfNeeded('/assets/js/featured-show.js', () => {
+                    // Add another small delay to ensure script is fully loaded
+                    setTimeout(() => {
+                        if (typeof checkAndLoadFeaturedShow === 'function') {
+                            checkAndLoadFeaturedShow();
+                        }
+                    }, 50);
+                });
+                
+                this.loadScriptIfNeeded('/assets/js/now-playing.js', () => {
+                    // Add another small delay to ensure script is fully loaded
+                    setTimeout(() => {
+                        if (typeof checkAndLoadNowPlaying === 'function') {
+                            checkAndLoadNowPlaying();
+                        }
+                    }, 50);
+                });
+            }, 100);
         },
 
         /**
          * Load a script if it hasn't been loaded yet
          */
         loadScriptIfNeeded: function (src, callback) {
+            // For widget scripts, always execute the callback even if script exists
+            // to ensure proper reinitialization after SPA navigation
+            const isWidgetScript = src.includes('featured-show.js') || src.includes('now-playing.js');
+            
             const isLoaded = Array.from(document.scripts).some(script =>
                 script.src && script.src.includes(src.split('/').pop())
             );
 
             if (isLoaded) {
-                callback();
+                // For widget scripts, always call the callback to reinitialize
+                if (isWidgetScript) {
+                    // Small delay to ensure any previous cleanup is complete
+                    setTimeout(callback, 25);
+                } else {
+                    callback();
+                }
             } else {
                 const script = document.createElement('script');
                 script.src = src;
                 script.onload = callback;
+                script.onerror = () => {
+                    console.error(`Failed to load script: ${src}`);
+                    // Try to call callback anyway in case of network issues
+                    callback();
+                };
                 document.head.appendChild(script);
             }
         }

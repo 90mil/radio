@@ -241,4 +241,28 @@ async function fetchFeaturedShow() {
         populateShowData(fallbackData);
         window.featuredShowLoaded = true;
     }
+}
+
+// Cleanup function for page navigation
+function destroyFeaturedShow() {
+    // Reset the loading state
+    window.featuredShowLoaded = false;
+    
+    // Disconnect the mutation observer
+    if (observer) {
+        observer.disconnect();
+    }
+    
+    // Clear any existing content and reset opacity
+    const showContent = document.querySelector('.show-content');
+    if (showContent) {
+        showContent.style.opacity = '1';
+        showContent.style.transition = '';
+    }
+    
+    // Remove any dynamically added subtitle elements
+    const subtitle = document.querySelector('.subtitle');
+    if (subtitle) {
+        subtitle.remove();
+    }
 } 

@@ -340,12 +340,17 @@
 }
 
 .featured-poster {
-    flex: 0 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
     
     .poster-image {
+        display: block;
         width: auto;
         height: auto;
         max-height: 60vh;
+        max-width: 100%;
         border-radius: 8px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     }

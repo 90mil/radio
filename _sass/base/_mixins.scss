@@ -82,4 +82,7 @@
         transform: var(--button-hover-transform);
         box-shadow: 0 6px 20px rgba(1, 20, 17, 0.6);
     }
-} 
+}
+
+/* Container Styling Mixin */
+@import 'mixins/container'; 

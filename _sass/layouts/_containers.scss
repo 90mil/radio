@@ -73,15 +73,10 @@
     top: calc(var(--nav-height) + var(--banner-height) + 40px);
     right: 40px;
     width: 360px;
-    background: rgba(1, 20, 17, 0.85);
-    backdrop-filter: blur(5px) brightness(0.96) contrast(1.03) sepia(0.01);
-    -webkit-backdrop-filter: blur(5px) brightness(0.96) contrast(1.03) sepia(0.01);
-    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.2),
-                0 5px 18px rgba(0, 0, 0, 0.3);
+    @include container-styling;
     padding: var(--spacing-main);
     border-radius: 0;
     z-index: 2;
-    border: 1px solid var(--border-medium);
 }
 
 /* Responsive Layouts */
@@ -296,16 +291,11 @@
 }
 
 .featured-event {
-    background: rgba(1, 20, 17, 0.8);
+    @include container-styling;
     padding: 25px;
     border-radius: 0;
-    backdrop-filter: blur(4px) brightness(0.97) contrast(1.02) saturate(0.98);
-    -webkit-backdrop-filter: blur(4px) brightness(0.97) contrast(1.02) saturate(0.98);
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--border-warm);
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.15),
-                0 4px 15px rgba(0, 0, 0, 0.25);
     min-height: 600px;
     
     h2 {
@@ -344,14 +334,9 @@
 }
 
 .now-playing {
-    background: rgba(1, 20, 17, 0.85);
+    @include container-styling;
     padding: 25px;
     border-radius: 0;
-    backdrop-filter: blur(3px) brightness(0.98) hue-rotate(2deg);
-    -webkit-backdrop-filter: blur(3px) brightness(0.98) hue-rotate(2deg);
-    border: 1px solid var(--border-soft);
-    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.1),
-                0 3px 10px rgba(0, 0, 0, 0.2);
     min-height: 120px;
     
     h2 {
@@ -362,13 +347,13 @@
         letter-spacing: 1px;
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     }
-    }
-    
+}
+
 #now-playing-content {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
     .show-info {
         flex: 1;
         color: white;
@@ -447,14 +432,9 @@
 }
 
 .featured-show {
-    background: rgba(1, 20, 17, 0.85);
+    @include container-styling;
     padding: 30px;
     border-radius: 0;
-    backdrop-filter: blur(5px) brightness(0.96) contrast(1.03) sepia(0.01);
-    -webkit-backdrop-filter: blur(5px) brightness(0.96) contrast(1.03) sepia(0.01);
-    border: 1px solid var(--border-medium);
-    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.2),
-                0 5px 18px rgba(0, 0, 0, 0.3);
     min-height: 460px;
     
     h2 {

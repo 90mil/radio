@@ -1,7 +1,6 @@
 /* Show Box and Card Styles */
 .show-box {
-    background: rgba(1, 20, 17, 0.8);
-    border: 1px solid var(--border-medium);
+    @include container-styling;
     padding: 20px;
     position: relative;
     display: flex;

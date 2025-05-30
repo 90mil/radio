@@ -90,7 +90,15 @@ class NowPlayingWidget {
     }
 
     formatTime(timestamp) {
-        const date = new Date(timestamp);
+        // Handle different timestamp formats
+        let date;
+        if (typeof timestamp === 'string' && !timestamp.includes('Z') && !timestamp.includes('+')) {
+            // Assume UTC if no timezone info
+            date = new Date(timestamp + 'Z');
+        } else {
+            date = new Date(timestamp);
+        }
+        
         return date.toLocaleTimeString('en-US', { 
             hour: '2-digit', 
             minute: '2-digit',
@@ -100,7 +108,15 @@ class NowPlayingWidget {
     }
     
     formatTimeWithTimezone(timestamp) {
-        const date = new Date(timestamp);
+        // Handle different timestamp formats  
+        let date;
+        if (typeof timestamp === 'string' && !timestamp.includes('Z') && !timestamp.includes('+')) {
+            // Assume UTC if no timezone info
+            date = new Date(timestamp + 'Z');
+        } else {
+            date = new Date(timestamp);
+        }
+        
         const timeString = date.toLocaleTimeString('en-US', { 
             hour: '2-digit', 
             minute: '2-digit',
@@ -108,7 +124,7 @@ class NowPlayingWidget {
             timeZone: 'Europe/Berlin'
         });
         
-        // Add CEST/CET based on DST
+        // Use CEST/CET based on DST
         const isDST = this.isDaylightSavingTime(date);
         const timezone = isDST ? 'CEST' : 'CET';
         

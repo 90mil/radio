@@ -11,7 +11,6 @@ class NowPlayingWidget {
 
     init() {
         this.container = document.getElementById('now-playing-content');
-        console.log('Now Playing Widget init:', this.container ? 'Container found' : 'Container not found');
         if (!this.container) return;
 
         this.isActive = true;
@@ -40,7 +39,6 @@ class NowPlayingWidget {
     async updateNowPlaying() {
         if (!this.container) return;
 
-        console.log('Updating now playing...');
         try {
             let liveData = null;
             
@@ -48,7 +46,6 @@ class NowPlayingWidget {
             const liveResponse = await fetch(this.liveApiUrl, { cache: 'no-store' });
             if (liveResponse.ok) {
                 liveData = await liveResponse.json();
-                console.log('Live API data received:', liveData);
                 
                 // Check if there's a current show that's not autodj
                 if (liveData.currentShow && liveData.currentShow.length > 0) {
@@ -66,9 +63,7 @@ class NowPlayingWidget {
             const weekResponse = await fetch(this.weekApiUrl);
             if (weekResponse.ok) {
                 const weekData = await weekResponse.json();
-                console.log('Week API data received:', weekData);
                 const currentShow = this.getCurrentShow(weekData);
-                console.log('Current show:', currentShow);
                 
                 if (currentShow) {
                     this.renderScheduledShow(currentShow);
@@ -246,7 +241,6 @@ function checkAndLoadNowPlaying() {
     
     // Always force reload to ensure widgets work after SPA navigation
     initNowPlaying();
-    window.nowPlayingLoaded = true;
     return true;
 }
 
@@ -263,11 +257,19 @@ function initNowPlaying() {
         nowPlayingWidget.destroy();
     }
     
+    // Reset state
+    window.nowPlayingLoaded = false;
+    
     // Create new instance if container exists
     const container = document.getElementById('now-playing-content');
     if (container) {
+        // Clear container
+        container.innerHTML = '';
+        
+        // Create and initialize widget
         nowPlayingWidget = new NowPlayingWidget();
         nowPlayingWidget.init();
+        window.nowPlayingLoaded = true;
     }
 }
 

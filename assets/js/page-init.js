@@ -119,7 +119,6 @@ window.PageInit = (function () {
          * Initialize the home page
          */
         homePage: function () {
-            console.log('Initializing home page...');
             // Force clear all widget states
             window.nowPlayingLoaded = false;
             window.featuredShowLoaded = false;
@@ -130,46 +129,51 @@ window.PageInit = (function () {
                 localStorage.removeItem('featuredShowTimestamp');
             }
             
-            // Force clear widget content to ensure fresh load
+            // Force reinitialize widgets immediately if elements exist
             const nowPlayingContainer = document.getElementById('now-playing-content');
             const featuredShowContainer = document.querySelector('.featured-show');
             
-            console.log('Now playing container found:', !!nowPlayingContainer);
-            console.log('Featured show container found:', !!featuredShowContainer);
-            
+            // Initialize widgets directly if containers exist
             if (nowPlayingContainer) {
-                nowPlayingContainer.innerHTML = '';
-            }
-            
-            if (featuredShowContainer) {
-                const showContent = featuredShowContainer.querySelector('.show-content');
-                if (showContent) {
-                    showContent.style.opacity = '0';
+                if (typeof initNowPlaying === 'function') {
+                    initNowPlaying();
+                } else {
+                    // Load script and initialize
+                    this.loadScriptIfNeeded('/assets/js/now-playing.js', () => {
+                        if (typeof initNowPlaying === 'function') {
+                            initNowPlaying();
+                        }
+                    });
                 }
             }
             
-            // Add a delay to ensure DOM is fully ready after SPA navigation
-            setTimeout(() => {
-                console.log('Loading widgets after delay...');
-                // Force reload both widgets
-                this.loadScriptIfNeeded('/assets/js/featured-show.js', () => {
-                    setTimeout(() => {
+            if (featuredShowContainer) {
+                if (typeof checkAndLoadFeaturedShow === 'function') {
+                    checkAndLoadFeaturedShow();
+                } else {
+                    // Load script and initialize
+                    this.loadScriptIfNeeded('/assets/js/featured-show.js', () => {
                         if (typeof checkAndLoadFeaturedShow === 'function') {
-                            console.log('Forcing featured show reload');
                             checkAndLoadFeaturedShow();
+                        }
+                    });
+                }
             }
-                    }, 50);
-                });
+            
+            // Also set up a backup timer to catch any missed initializations
+            setTimeout(() => {
+                if (!window.nowPlayingLoaded && document.getElementById('now-playing-content')) {
+                    if (typeof initNowPlaying === 'function') {
+                        initNowPlaying();
+                    }
+                }
                 
-                this.loadScriptIfNeeded('/assets/js/now-playing.js', () => {
-                    setTimeout(() => {
-            if (typeof checkAndLoadNowPlaying === 'function') {
-                            console.log('Forcing now playing reload');
-                checkAndLoadNowPlaying();
-            }
-                    }, 50);
-                });
-            }, 100);
+                if (!window.featuredShowLoaded && document.querySelector('.featured-show')) {
+                    if (typeof checkAndLoadFeaturedShow === 'function') {
+                        checkAndLoadFeaturedShow();
+                    }
+                }
+            }, 500);
         },
 
         /**

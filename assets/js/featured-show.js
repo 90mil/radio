@@ -71,18 +71,37 @@ function checkAndLoadFeaturedShow() {
     const showContent = document.querySelector('.show-content');
     
     if (!showImage || !showTitle || !showContent) {
-        console.log('Featured show elements not found, skipping load');
         return false;
     }
     
-    console.log('Featured show elements found, forcing reload');
+    // Reset the loaded state and clear any existing content
+    window.featuredShowLoaded = false;
     
-    // Always force reload to ensure widgets work after SPA navigation
+    // Clear existing content to force fresh appearance
+    showContent.style.opacity = '0';
+    if (showImage) {
+        showImage.src = '';
+        showImage.classList.remove('loaded');
+    }
+    if (showTitle) showTitle.textContent = '';
+    
+    // Remove any existing subtitles
+    const existingSubtitle = document.querySelector('.subtitle');
+    if (existingSubtitle) {
+        existingSubtitle.remove();
+    }
+    
     // Force fresh data fetch instead of using cache
-            showLoadingState();
-            fetchFeaturedShow();
-    window.featuredShowLoaded = true;
-        return true;
+    if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem('featuredShowData');
+        localStorage.removeItem('featuredShowTimestamp');
+    }
+    
+    // Start loading
+    showLoadingState();
+    fetchFeaturedShow();
+    
+    return true;
 }
 
 // Function to populate show data (from cache or API)

@@ -52,7 +52,7 @@ window.PageInit = (function () {
             if (typeof destroyNowPlaying === 'function') {
                 destroyNowPlaying();
             }
-            
+
             // Clean up featured show widget
             if (typeof destroyFeaturedShow === 'function') {
                 destroyFeaturedShow();
@@ -157,16 +157,16 @@ window.PageInit = (function () {
                         if (typeof checkAndLoadFeaturedShow === 'function') {
                             console.log('Forcing featured show reload');
                             checkAndLoadFeaturedShow();
-                        }
+            }
                     }, 50);
                 });
                 
                 this.loadScriptIfNeeded('/assets/js/now-playing.js', () => {
                     setTimeout(() => {
-                        if (typeof checkAndLoadNowPlaying === 'function') {
+            if (typeof checkAndLoadNowPlaying === 'function') {
                             console.log('Forcing now playing reload');
-                            checkAndLoadNowPlaying();
-                        }
+                checkAndLoadNowPlaying();
+            }
                     }, 50);
                 });
             }, 100);
@@ -190,7 +190,7 @@ window.PageInit = (function () {
                     // Small delay to ensure any previous cleanup is complete
                     setTimeout(callback, 25);
                 } else {
-                    callback();
+                callback();
                 }
             } else {
                 const script = document.createElement('script');

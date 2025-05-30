@@ -79,10 +79,10 @@ function checkAndLoadFeaturedShow() {
     
     // Always force reload to ensure widgets work after SPA navigation
     // Force fresh data fetch instead of using cache
-    showLoadingState();
-    fetchFeaturedShow();
+            showLoadingState();
+            fetchFeaturedShow();
     window.featuredShowLoaded = true;
-    return true;
+        return true;
 }
 
 // Function to populate show data (from cache or API)

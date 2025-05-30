@@ -90,19 +90,21 @@ nav {
         }
 
         &:hover {
-            background: rgba(1, 20, 17, 0.9);
+            background: rgba(30, 50, 45, 0.8);
             border-color: var(--border-warm);
             color: var(--link-color);
-            opacity: 1;
-            backdrop-filter: blur(4px) brightness(0.85) saturate(1.05) contrast(1.1);
-            -webkit-backdrop-filter: blur(4px) brightness(0.85) saturate(1.05) contrast(1.1);
-            box-shadow: 0 4px 16px rgba(1, 20, 17, 0.4);
+            opacity: 0.95;
+            backdrop-filter: blur(10px) brightness(1.1) saturate(1.15) contrast(1.15);
+            -webkit-backdrop-filter: blur(10px) brightness(1.1) saturate(1.15) contrast(1.15);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2),
+                        0 4px 16px rgba(1, 20, 17, 0.3);
+            filter: contrast(1.05) saturate(1.1);
             
             /* Enhanced chromatic aberration on hover */
             text-shadow: 
                 0 1px 2px rgba(0, 0, 0, 0.4),
                 1px 0 0 rgba(255, 40, 89, 0.4),
-                -1px 0 0 rgba(0, 255, 170, 0.4),
+                -1px 0 0 rgba(0, 255, 170, 0.4);
         }
     }
 }
@@ -110,33 +112,65 @@ nav {
 /* Mobile Menu Toggle */
 .menu-toggle {
     display: none;
-    width: 36px;
-    height: 36px;
-    padding: 8px;
-    background: rgba(1, 20, 17, 0.85);
-    border: 1px solid var(--border-medium);
+    width: auto;
+    height: auto;
+    padding: 10px 20px 14px 20px;
+    background: transparent;
+    border: none;
     border-radius: var(--button-border-radius);
     cursor: pointer;
-    margin: 6px 16px;
+    margin: 0;
     position: relative;
-    backdrop-filter: blur(3px) brightness(1.0);
-    -webkit-backdrop-filter: blur(3px) brightness(1.0);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    transition: opacity 0.2s ease, background 0.2s ease, backdrop-filter 0.2s ease;
-    opacity: 0.9;
+    box-shadow: none;
+    transition: opacity 0.2s ease, background 0.2s ease;
+    opacity: 1;
+    outline: none; /* Remove any default button outline */
+    
+    /* Menu text styling */
+    color: var(--text-color);
+    font-family: var(--font-secondary);
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: lowercase;
+    line-height: 1;
+    vertical-align: top;
+    
+    /* Crunchy text rendering to match nav links */
+    text-rendering: optimizeSpeed;
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: unset;
+    font-smooth: never;
+    
+    /* Base text shadow with subtle chromatic aberration */
+    text-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.3),
+        0.5px 0 0 rgba(255, 40, 89, 0.2),
+        -0.5px 0 0 rgba(0, 255, 170, 0.2);
 
     &:hover {
-        background: rgba(1, 20, 17, 0.9);
-        border-color: var(--border-warm);
-        opacity: 1;
-        backdrop-filter: blur(4px) brightness(0.85) saturate(1.05) contrast(1.1);
-        -webkit-backdrop-filter: blur(4px) brightness(0.85) saturate(1.05) contrast(1.1);
-        box-shadow: 0 4px 16px rgba(1, 20, 17, 0.4);
+        background: rgba(1, 20, 17, 0.2);
+        color: var(--link-color);
+        
+        /* Enhanced chromatic aberration on hover */
+        text-shadow: 
+            0 1px 2px rgba(0, 0, 0, 0.4),
+            1px 0 0 rgba(255, 40, 89, 0.4),
+            -1px 0 0 rgba(0, 255, 170, 0.4);
+    }
+
+    &:focus {
+        outline: none; /* Remove focus outline that might cause black box */
+    }
+
+    &:active {
+        /* Prevent any active state color changes */
+        background: transparent;
+        color: var(--text-color);
     }
 
     .menu-icon {
+        display: none; /* Hide hamburger icon, using text instead */
         position: relative;
-        display: block;
         width: 20px;
         height: 2px;
         background: var(--text-color);
@@ -161,6 +195,19 @@ nav {
 }
 
 .menu-open {
+    .menu-toggle {
+        /* Keep transparent background when menu is open */
+        background: transparent;
+        opacity: 1;
+        color: var(--text-color);
+        
+        /* Keep same text shadow */
+        text-shadow: 
+            0 1px 2px rgba(0, 0, 0, 0.3),
+            0.5px 0 0 rgba(255, 40, 89, 0.2),
+            -0.5px 0 0 rgba(0, 255, 170, 0.2);
+    }
+    
     .menu-icon {
         background: transparent;
 
@@ -236,13 +283,21 @@ nav {
         left: 0;
         right: 0;
         flex-direction: column;
-        background: var(--body-bg);
+        background: rgba(15, 30, 25, 0.75);
+        backdrop-filter: blur(20px) brightness(0.9) saturate(1.1) contrast(1.1);
+        -webkit-backdrop-filter: blur(20px) brightness(0.9) saturate(1.1) contrast(1.1);
         z-index: calc(var(--z-header) - 1);
         padding: 0;
-        border-bottom: 1px solid var(--border-medium);
+        border-bottom: none;
         opacity: 0;
         visibility: hidden;
         transition: opacity 0.3s ease, visibility 0.3s ease;
+        
+        /* Quantization effect */
+        image-rendering: pixelated;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: crisp-edges;
+        filter: contrast(1.05) saturate(1.1);
 
         &.hidden {
             display: none;
@@ -258,16 +313,69 @@ nav {
             width: 100%;
             justify-content: center;
             text-align: center;
-            padding: 15px;
-            margin: 0;
+            padding: 18px var(--nav-padding);
+            margin: 0 2px 2px 2px;
+            color: var(--text-color);
+            text-decoration: none;
+            background: rgba(20, 40, 35, 0.7);
+            font-family: var(--font-secondary);
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: lowercase;
             border-right: none;
             border-bottom: 1px solid var(--border-soft);
+            border-radius: var(--button-border-radius);
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            backdrop-filter: blur(8px) brightness(1.0) saturate(1.05) contrast(1.1);
+            -webkit-backdrop-filter: blur(8px) brightness(1.0) saturate(1.05) contrast(1.1);
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.15),
+                        0 2px 8px rgba(0, 0, 0, 0.15);
+            transition: opacity 0.2s ease, background 0.2s ease, backdrop-filter 0.2s ease;
+            opacity: 0.85;
+            
+            /* Quantization and distortion effects */
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            filter: contrast(1.02) saturate(1.05);
+            
+            /* Crunchy text rendering */
+            text-rendering: optimizeSpeed;
+            -webkit-font-smoothing: none;
+            -moz-osx-font-smoothing: unset;
+            font-smooth: never;
+            
+            /* Base text shadow with subtle chromatic aberration */
+            text-shadow: 
+                0 1px 2px rgba(0, 0, 0, 0.3),
+                0.5px 0 0 rgba(255, 40, 89, 0.2),
+                -0.5px 0 0 rgba(0, 255, 170, 0.2);
 
             &:first-child,
             &:last-child {
-                margin: 0;
-                padding: 15px;
+                margin: 0 2px 2px 2px;
+                padding: 18px var(--nav-padding);
                 justify-content: center;
+            }
+
+            &:hover {
+                background: rgba(30, 50, 45, 0.8);
+                border-color: var(--border-warm);
+                color: var(--link-color);
+                opacity: 0.95;
+                backdrop-filter: blur(10px) brightness(1.1) saturate(1.15) contrast(1.15);
+                -webkit-backdrop-filter: blur(10px) brightness(1.1) saturate(1.15) contrast(1.15);
+                box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2),
+                            0 4px 16px rgba(1, 20, 17, 0.3);
+                filter: contrast(1.05) saturate(1.1);
+                
+                /* Enhanced chromatic aberration on hover */
+                text-shadow: 
+                    0 1px 2px rgba(0, 0, 0, 0.4),
+                    1px 0 0 rgba(255, 40, 89, 0.4),
+                    -1px 0 0 rgba(0, 255, 170, 0.4);
             }
         }
     }

@@ -89,43 +89,58 @@ class NowPlayingWidget {
         return days[date.getDay()];
     }
 
-    formatTime(timestamp) {
-        // Handle different timestamp formats
-        let date;
-        if (typeof timestamp === 'string' && !timestamp.includes('Z') && !timestamp.includes('+')) {
-            // Assume UTC if no timezone info
-            date = new Date(timestamp + 'Z');
+    roundToNearestHalfHourAndAdjustCET(date) {
+        // Create a copy of the date to avoid modifying the original
+        const adjustedDate = new Date(date);
+
+        // Get timezone offset in hours for the current date
+        // During summer time (DST) it will be 2, during winter time it will be 1
+        const cetOffset = adjustedDate.getTimezoneOffset() === -120 ? 2 : 1;
+
+        // Add the correct offset
+        adjustedDate.setHours(adjustedDate.getHours() + cetOffset);
+
+        const minutes = adjustedDate.getMinutes();
+        let roundedMinutes;
+
+        if (minutes < 15) {
+            roundedMinutes = 0;
+        } else if (minutes < 45) {
+            roundedMinutes = 30;
         } else {
-            date = new Date(timestamp);
+            roundedMinutes = 0;
+            adjustedDate.setHours(adjustedDate.getHours() + 1);
         }
+
+        adjustedDate.setMinutes(roundedMinutes, 0, 0);
+        return adjustedDate;
+    }
+
+    formatTime(timestamp) {
+        // Convert timestamp to Date object and round to nominal show time
+        const date = new Date(timestamp);
+        const nominalDate = this.roundToNearestHalfHourAndAdjustCET(date);
         
-        return date.toLocaleTimeString('en-US', { 
+        return nominalDate.toLocaleTimeString('en-GB', { 
             hour: '2-digit', 
             minute: '2-digit',
-            hour12: false,
-            timeZone: 'Europe/Berlin'
+            hour12: false
         });
     }
     
     formatTimeWithTimezone(timestamp) {
-        // Handle different timestamp formats  
-        let date;
-        if (typeof timestamp === 'string' && !timestamp.includes('Z') && !timestamp.includes('+')) {
-            // Assume UTC if no timezone info
-            date = new Date(timestamp + 'Z');
-        } else {
-            date = new Date(timestamp);
-        }
+        // Convert timestamp to Date object and round to nominal show time
+        const date = new Date(timestamp);
+        const nominalDate = this.roundToNearestHalfHourAndAdjustCET(date);
         
-        const timeString = date.toLocaleTimeString('en-US', { 
+        const timeString = nominalDate.toLocaleTimeString('en-GB', { 
             hour: '2-digit', 
             minute: '2-digit',
-            hour12: false,
-            timeZone: 'Europe/Berlin'
+            hour12: false
         });
         
         // Use CEST/CET based on DST
-        const isDST = this.isDaylightSavingTime(date);
+        const isDST = this.isDaylightSavingTime(nominalDate);
         const timezone = isDST ? 'CEST' : 'CET';
         
         return `${timeString} ${timezone}`;

@@ -108,7 +108,6 @@ function checkAndLoadFeaturedShow() {
 function populateShowData(showData) {
     const showImage = document.getElementById('featured-show-image');
     const showTitle = document.getElementById('featured-show-title');
-    const descriptionEl = document.getElementById('featured-show-description');
     const genresEl = document.getElementById('featured-show-genres');
     
     // Update the show image
@@ -152,20 +151,7 @@ function populateShowData(showData) {
         showTitle.textContent = title;
     }
     
-    // Update the description with animation
-    if (descriptionEl) {
-        descriptionEl.style.transition = 'opacity 0.3s ease';
-        // Override with custom description for Tales of Our Inner Kingdoms
-        const customDescription = `A concept series imagined by Random Kingdom
-
-In the hush of night, when the veil between past and present thins, stories emerge—not as linear truths, but as echoes, fragments, whispering their way back into form.
-
-Tales of Our Inner Kingdoms is a seven-episode sonic odyssey. Each episode unfolds the journey of a soul— distant
-from its own life. Across an hour of intimate narration, memory and imagination blur, listeners are pulled into a world
-where voices, field recordings, music, and poetry entwine. This is storytelling as invocation—an act of deep listening, a way to feel the weight of lives that came before.`;
-        
-        descriptionEl.textContent = customDescription;
-    }
+    // Description is now manually controlled in HTML - no JavaScript override
     
     // Update the genres with animation
     if (genresEl) {
@@ -252,7 +238,7 @@ async function fetchFeaturedShow() {
         // Fallback content
         const fallbackData = {
             name: 'Circling the Whuhula (Tales Of Our Inner Kingdoms Ep. 1)',
-            description: `A concept series imagined by Random Kingdom
+            description: `A concept series imagined by Random Kingdom<br>
 
 In the hush of night, when the veil between past and present thins, stories emerge—not as linear truths, but as echoes, fragments, whispering their way back into form.
 

@@ -271,9 +271,9 @@
     right: 0;
     display: grid;
     grid-template-columns: 1.5fr 1fr;
-    gap: 40px;
-    padding: 40px;
-    max-width: 1600px;
+    gap: 32px;
+    padding: 32px;
+    max-width: 1280px;
     margin: 0 auto;
     align-items: start;
     z-index: 1;
@@ -289,20 +289,20 @@
 .featured-right {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
 }
 
 .featured-event {
     @include container-styling;
-    padding: 25px;
+    padding: 20px;
     border-radius: 0;
     display: flex;
     flex-direction: column;
-    min-height: 600px;
+    min-height: 480px;
     
     h2 {
         @extend .heading-level-2;
-        margin: 0 0 20px 0;
+        margin: 0 0 16px 0;
         align-self: flex-start;
         flex-shrink: 0;
     }
@@ -312,7 +312,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: 400px;
+        min-height: 320px;
     }
     
     .featured-info {
@@ -323,7 +323,7 @@
     .featured-actions {
         align-self: center;
         width: 100%;
-        margin-top: 20px;
+        margin-top: 16px;
         
         .cta-button {
             width: 100%;
@@ -333,13 +333,13 @@
 
 .now-playing {
     @include container-styling;
-    padding: 25px;
+    padding: 20px;
     border-radius: 0;
-    min-height: 120px;
+    min-height: 96px;
     
     h2 {
         @extend .heading-level-2;
-        margin: 0 0 12px 0;
+        margin: 0 0 10px 0;
         align-self: flex-start;
         flex-shrink: 0;
     }
@@ -472,13 +472,13 @@
 
 .featured-show {
     @include container-styling;
-    padding: 30px;
+    padding: 24px;
     border-radius: 0;
-    min-height: 460px;
+    min-height: 368px;
     
     h2 {
         @extend .heading-level-2;
-        margin: 0 0 20px 0;
+        margin: 0 0 16px 0;
         align-self: flex-start;
         flex-shrink: 0;
     }
@@ -534,6 +534,15 @@
     .show-description {
         margin: 0 0 12px 0;
         line-height: 1.5;
+        
+        p {
+            margin: 0 0 12px 0;
+            line-height: 1.5;
+        }
+        
+        p:last-child {
+            margin-bottom: 0;
+        }
     }
     
     .genres {
@@ -576,7 +585,7 @@
 }
 
 .featured-poster-description {
-    padding: 20px 5px 0px 5px;
+    padding: 16px 4px 0px 4px;
 }
 
 .featured-info {

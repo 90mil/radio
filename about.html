@@ -27,33 +27,36 @@ description: An independent platform amplifying underrepresented voices in Berli
     <div class="visual">
         <div class="contact-info">
             <h3>get in touch/</h3>
-            <a href="#" class="email-protected" onclick="this.href='mailto:90milradio@gmail.com'">
+            <a href="#" class="contact-link email-protected" onclick="this.href='mailto:90milradio@gmail.com'; this.onclick=null;">
                 <span class="email-reverse">moc.liamg@oidarlim09</span>
             </a>
             <h3>Live chat/</h3>
-            <a href="https://t.me/Neunzig90milRadio">t.me/Neunzig90milRadio</a>
+            <a href="https://t.me/Neunzig90milRadio" target="_blank" class="contact-link">t.me/Neunzig90milRadio</a>
             <h3>mixcloud library/</h3>
-            <a href="https://www.mixcloud.com/90milradio/">mixcloud.com/90milradio/</a>
+            <a href="https://www.mixcloud.com/90milradio/" target="_blank" class="contact-link">mixcloud.com/90milradio/</a>
             <h3>instagram/</h3>
-            <a href="https://instagram.com/90milradio">@90milradio</a>
+            <a href="https://instagram.com/90milradio" target="_blank" class="contact-link">@90milradio</a>
         </div>
     </div>
 </div>
 
 <style>
-.email-reverse {
-    unicode-bidi: bidi-override;
-    direction: rtl;
-}
-
-.email-protected {
+.contact-link {
     color: white;
     text-decoration: underline;
     cursor: pointer;
+    display: block;
+    margin: 6px 0;
+    transition: color 0.3s ease;
 }
 
-.email-protected:hover {
-    color: var(--accent-1, #ffcc00);
+.contact-link:hover {
+    color: var(--accent-1, #2C4E55);
+}
+
+.email-reverse {
+    unicode-bidi: bidi-override;
+    direction: rtl;
 }
 </style>
 

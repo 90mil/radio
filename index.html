@@ -7,28 +7,36 @@ description: An independent platform amplifying underrepresented voices in Berli
     <div class="featured-container">
         <div class="featured-left">
             <div class="featured-event">
-                <h2>Coming up...</h2>
+                <h2>Coming up/</h2>
                 <div class="featured-poster">
-                    <img src="assets/images/pollen-detailed.jpg" alt="Pollen detailed poster" class="poster-image">
+                    <picture class="poster-image">
+                        <source media="(min-width: 1024px)" srcset="assets/images/pollen/pollen-1920.webp">
+                        <source media="(min-width: 768px)" srcset="assets/images/pollen/pollen-1024.webp">
+                        <source media="(min-width: 480px)" srcset="assets/images/pollen/pollen-640.webp">
+                        <img src="assets/images/pollen/pollen-320.webp" alt="Pollen detailed poster" class="poster-image">
+                    </picture>
                 </div>
-                <!-- <div class="featured-info">
+                <div class="featured-poster-description">
+                    <p>A day-to-night festival programme with three rooms of live music, daytime deep listening sessions, open air vendors and workshops, audiovisual installations and performances, and an art cinema screening original and obscure films.</p>
+                </div>
+                <div class="featured-info">
                     <div class="featured-actions">
-                        <a href="/shows" class="cta-button">Learn More</a>
+                        <a target="_blank" href="https://www.instagram.com/p/DKR4NfEMD-f/" class="cta-button">Learn More</a>
                     </div>
-                </div> -->
+                </div>
             </div>
         </div>
         
         <div class="featured-right">
             <div class="now-playing">
-                <h2>Now Playing</h2>
+                <h2>Playing/</h2>
                 <div id="now-playing-content">
                 <!-- Content populated by now-playing.js -->
                 </div>
             </div>
 
             <div class="featured-show">
-                <h2>Featured show</h2>                <div class="show-content" style="opacity: 0;">
+                <h2>Featured/</h2>                <div class="show-content" style="opacity: 0;">
                     <img id="featured-show-image" src="" alt="Show artwork" class="featured-show-image" style="display: block; min-height: 180px; min-width: 180px; background: rgba(255,255,255,0.1);">
                     <div class="show-text">
                         <h3 id="featured-show-title"></h3>
@@ -36,7 +44,7 @@ description: An independent platform amplifying underrepresented voices in Berli
                         <p id="featured-show-genres" class="genres"></p>
                         <div class="featured-actions">
                             <a href="/shows#circling-the-whuhula" class="cta-button">Listen Now</a>
-                            <a href="/shows" class="cta-secondary">More Shows</a>
+                            <a href="https://www.instagram.com/random.kingdom.rk/" target="_blank" class="cta-secondary">Learn More</a>
                         </div>
                     </div>
                 </div>

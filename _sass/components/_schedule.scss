@@ -63,6 +63,7 @@
 
 /* Day Header */
 .day-header {
+    @extend .heading-level-4;
     position: relative;
     z-index: 2;
     background: var(--accent-2);
@@ -71,8 +72,6 @@
     margin-bottom: 10px;
     border: 1px solid var(--border-medium);
     border-radius: 4px 4px 0 0;
-    font-size: 18px;
-    font-weight: bold;
     display: flex;
     justify-content: space-between;
     align-items: center;

@@ -4,6 +4,8 @@
     /* Body/Background */
     --text-color: #E6EAE9;
     /* Text/Details */
+    --text-color-muted: #D1D6D5;
+    /* Slightly darker text for headers */
     --accent-1: #2C4E55;
     /* Accent I */
     --accent-2: #011411;
@@ -74,10 +76,43 @@
     --section-header-font: var(--font-secondary);
     --section-header-size: 24px;
     --section-header-style: italic;
-    --section-header-color: var(--text-color);
+    --section-header-color: var(--text-color-muted);
     --section-header-weight: normal;
     --section-header-transform: lowercase;
     --section-header-margin: 0 0 30px 0;
+
+    /* Heading Hierarchy System */
+    /* Level 1: Navigation links (unchanged) */
+    
+    /* Level 2: Major section headers */
+    --heading-level-2-font: var(--font-secondary);
+    --heading-level-2-size: 24px;
+    --heading-level-2-style: italic;
+    --heading-level-2-color: var(--text-color-muted);
+    --heading-level-2-weight: normal;
+    --heading-level-2-transform: lowercase;
+    --heading-level-2-margin: 0 0 30px 0;
+    --heading-level-2-letter-spacing: normal;
+
+    /* Level 3: Widget headers (coming up, featured, now playing) */
+    --heading-level-3-font: var(--font-body);
+    --heading-level-3-size: 1.2rem;
+    --heading-level-3-style: normal;
+    --heading-level-3-color: var(--accent-1);
+    --heading-level-3-weight: normal;
+    --heading-level-3-transform: uppercase;
+    --heading-level-3-margin: 0 0 20px 0;
+    --heading-level-3-letter-spacing: 1px;
+
+    /* Level 4: Lower level headers (day headers, show titles) */
+    --heading-level-4-font: var(--font-body);
+    --heading-level-4-size: 1.1rem;
+    --heading-level-4-style: normal;
+    --heading-level-4-color: var(--text-color);
+    --heading-level-4-weight: bold;
+    --heading-level-4-transform: none;
+    --heading-level-4-margin: 0 0 8px 0;
+    --heading-level-4-letter-spacing: normal;
 
     /* Button Styles */
     --button-border-radius: 3px;

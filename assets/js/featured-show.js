@@ -155,7 +155,16 @@ function populateShowData(showData) {
     // Update the description with animation
     if (descriptionEl) {
         descriptionEl.style.transition = 'opacity 0.3s ease';
-        descriptionEl.textContent = showData.description || 'A concept series imagined by Random Kingdom.';
+        // Override with custom description for Tales of Our Inner Kingdoms
+        const customDescription = `A concept series imagined by Random Kingdom
+
+In the hush of night, when the veil between past and present thins, stories emerge—not as linear truths, but as echoes, fragments, whispering their way back into form.
+
+Tales of Our Inner Kingdoms is a seven-episode sonic odyssey. Each episode unfolds the journey of a soul— distant
+from its own life. Across an hour of intimate narration, memory and imagination blur, listeners are pulled into a world
+where voices, field recordings, music, and poetry entwine. This is storytelling as invocation—an act of deep listening, a way to feel the weight of lives that came before.`;
+        
+        descriptionEl.textContent = customDescription;
     }
     
     // Update the genres with animation
@@ -243,7 +252,11 @@ async function fetchFeaturedShow() {
         // Fallback content
         const fallbackData = {
             name: 'Circling the Whuhula (Tales Of Our Inner Kingdoms Ep. 1)',
-            description: 'A concept series imagined by Random Kingdom.',
+            description: `A concept series imagined by Random Kingdom
+
+In the hush of night, when the veil between past and present thins, stories emerge—not as linear truths, but as echoes, fragments, whispering their way back into form.
+
+Tales of Our Inner Kingdoms is a seven-episode sonic odyssey. Each episode unfolds the journey of a soul— distant from its own life. Across an hour of intimate narration, memory and imagination blur, listeners are pulled into a world where voices, field recordings, music, and poetry entwine. This is storytelling as invocation—an act of deep listening, a way to feel the weight of lives that came before.`,
             tags: [
                 { name: 'Ambient' },
                 { name: 'Poetry' },

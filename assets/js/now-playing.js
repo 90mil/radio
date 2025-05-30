@@ -40,44 +40,28 @@ class NowPlayingWidget {
         if (!this.container) return;
 
         try {
-            let liveData = null;
-            
-            // First try to get live show info
+            // Get live data
             const liveResponse = await fetch(this.liveApiUrl, { cache: 'no-store' });
             if (liveResponse.ok) {
-                liveData = await liveResponse.json();
+                const liveData = await liveResponse.json();
                 
-                // Check if there's a current show that's not autodj
-                if (liveData.currentShow && liveData.currentShow.length > 0) {
-                    const currentShow = liveData.currentShow[0];
-                    
-                    // If it's a real show (not "90mil Radio"), display it
-                    if (currentShow.name !== "90mil Radio") {
-                        this.renderLiveShow(currentShow, liveData.current);
-                        return;
-                    }
-                }
-            }
-            
-            // Try to get scheduled shows
-            const weekResponse = await fetch(this.weekApiUrl);
-            if (weekResponse.ok) {
-                const weekData = await weekResponse.json();
-                const currentShow = this.getCurrentShow(weekData);
+                // Check if there's actual live content (not autodj)
+                const isLiveShow = liveData.currentShow && 
+                                   liveData.currentShow.length > 0 && 
+                                   liveData.currentShow[0].name !== "90mil Radio" &&
+                                   !liveData.currentShow[0].auto_dj;
                 
-                if (currentShow) {
-                    this.renderScheduledShow(currentShow);
-                    return;
+                if (isLiveShow) {
+                    this.renderLiveShow(liveData.currentShow[0], liveData.current, liveData.next);
+                } else if (liveData.current && liveData.current.metadata && liveData.current.metadata.track_title) {
+                    // Show archived content
+                    this.renderArchivedContent(liveData.current, liveData.next);
+                } else {
+                    this.renderOffAir();
                 }
-            }
-            
-            // Fallback to autodj if no scheduled show and we have live data
-            if (liveData && liveData.current && liveData.current.metadata && liveData.current.metadata.track_title) {
-                this.renderAutodj(liveData.current);
                 return;
             }
             
-            // If nothing else, show off air
             this.renderOffAir();
         } catch (error) {
             console.warn('Error fetching now playing data:', error);
@@ -110,8 +94,60 @@ class NowPlayingWidget {
         return date.toLocaleTimeString('en-US', { 
             hour: '2-digit', 
             minute: '2-digit',
-            hour12: false 
+            hour12: false,
+            timeZone: 'Europe/Berlin'
         });
+    }
+    
+    formatTimeWithTimezone(timestamp) {
+        const date = new Date(timestamp);
+        const timeString = date.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false,
+            timeZone: 'Europe/Berlin'
+        });
+        
+        // Add CEST/CET based on DST
+        const isDST = this.isDaylightSavingTime(date);
+        const timezone = isDST ? 'CEST' : 'CET';
+        
+        return `${timeString} ${timezone}`;
+    }
+    
+    formatTitleWithTime(title, startTime, endTime) {
+        if (startTime && endTime) {
+            const start = this.formatTime(startTime);
+            const end = this.formatTimeWithTimezone(endTime);
+            return `${title} <span class="time-display">${start} - ${end}</span>`;
+        }
+        return title;
+    }
+    
+    isDaylightSavingTime(date) {
+        // Create dates for start and end of DST in Berlin
+        const year = date.getFullYear();
+        const dstStart = new Date(year, 2, 31); // Last Sunday in March
+        dstStart.setDate(31 - ((dstStart.getDay() + 6) % 7));
+        dstStart.setHours(2, 0, 0, 0);
+        
+        const dstEnd = new Date(year, 9, 31); // Last Sunday in October
+        dstEnd.setDate(31 - ((dstEnd.getDay() + 6) % 7));
+        dstEnd.setHours(3, 0, 0, 0);
+        
+        return date >= dstStart && date < dstEnd;
+    }
+
+    formatOriginallyAired(metadata) {
+        if (metadata.year && metadata.mtime) {
+            const originalDate = new Date(metadata.mtime);
+            return `Aired ${originalDate.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            })}`;
+        }
+        return '';
     }
 
     decodeHtmlEntities(text) {
@@ -120,61 +156,67 @@ class NowPlayingWidget {
         return textarea.value;
     }
 
-    renderLiveShow(show, current) {
+    renderLiveShow(show, current, next) {
         const showName = this.decodeHtmlEntities(show.name);
         const isLive = current && current.type === 'livestream';
         
-        let timeInfo = '';
+        // Format title with time
+        let showTitleWithTime = showName;
         if (current && current.starts && current.ends) {
-            const startTime = this.formatTime(current.starts);
-            const endTime = this.formatTime(current.ends);
-            timeInfo = `${startTime} - ${endTime}`;
+            showTitleWithTime = this.formatTitleWithTime(showName, current.starts, current.ends);
         }
 
         // Get description from show data
         const description = show.description ? this.decodeHtmlEntities(show.description) : '';
 
-        this.container.innerHTML = `
-            <div class="show-info">
-                <div class="show-title">${showName}</div>
-                ${timeInfo ? `<div class="show-time">${timeInfo}</div>` : ''}
-                ${description ? `<div class="show-description">${description}</div>` : ''}
-            </div>
-            <div class="live-indicator">
-                ${isLive ? '<span class="live-dot"></span>' : ''}
-                <span class="live-text">${isLive ? 'LIVE' : 'ON AIR'}</span>
-            </div>
-        `;
-    }
+        // Status for current show
+        const currentStatus = isLive ? 'LIVE' : 'ON AIR';
 
-    renderAutodj(current) {
-        const trackTitle = this.decodeHtmlEntities(current.metadata.track_title || 'Unknown Track');
-        
-        // Remove .mp3 extension if present
-        const cleanTitle = trackTitle.replace(/\.mp3$/, '');
-        
-        // Parse title and host from track title if it contains "hosted by"
-        let title = cleanTitle;
-        let host = '';
-        
-        if (cleanTitle.includes("hosted by")) {
-            const parts = cleanTitle.split("hosted by").map(part => part.trim());
-            title = parts[0];
-            host = parts[1] || '';
+        // Next up info
+        let nextUpHtml = '';
+        if (next && next.metadata && next.metadata.track_title) {
+            const nextTitle = this.decodeHtmlEntities(next.metadata.track_title).replace(/\.mp3$/, '');
+            let nextHost = '';
+            let nextShowTitle = nextTitle;
+            
+            if (nextTitle.includes("hosted by")) {
+                const parts = nextTitle.split("hosted by").map(part => part.trim());
+                nextShowTitle = parts[0];
+                nextHost = parts[1] || '';
+            }
+            
+            let nextTitleWithTime = nextShowTitle;
+            let nextAiredDate = '';
+            const nextDescription = next.metadata.description ? this.decodeHtmlEntities(next.metadata.description) : '';
+            if (next.starts && next.ends) {
+                nextTitleWithTime = this.formatTitleWithTime(nextShowTitle, next.starts, next.ends);
+                nextAiredDate = this.formatOriginallyAired(next.metadata);
+            }
+            
+            nextUpHtml = `
+                <div class="next-section">
+                    <div class="section-label">NEXT:</div>
+                    <div class="section-title">${nextTitleWithTime}</div>
+                    ${nextHost ? `<div class="section-host">hosted by ${nextHost}</div>` : ''}
+                    ${nextDescription ? `<div class="section-description">${nextDescription}</div>` : ''}
+                    <div class="section-status">
+                        ${nextAiredDate ? `<span class="aired-date">${nextAiredDate}</span>` : ''}
+                        <span class="status-label">FROM THE ARCHIVES</span>
+                    </div>
+                </div>
+            `;
         }
 
-        // Get description if available
-        const description = current.metadata.description ? this.decodeHtmlEntities(current.metadata.description) : '';
-
         this.container.innerHTML = `
-            <div class="show-info">
-                <div class="show-title">${title}</div>
-                ${host ? `<div class="show-host">hosted by ${host}</div>` : ''}
-                ${description ? `<div class="show-description">${description}</div>` : ''}
+            <div class="now-section">
+                <div class="section-label">NOW:</div>
+                <div class="section-title">${showTitleWithTime}</div>
+                ${description ? `<div class="section-description">${description}</div>` : ''}
+                <div class="section-status">
+                    <span class="status-label">${currentStatus}</span>
+                </div>
             </div>
-            <div class="live-indicator archives">
-                <span class="live-text">FROM THE ARCHIVES</span>
-            </div>
+            ${nextUpHtml}
         `;
     }
 
@@ -218,6 +260,83 @@ class NowPlayingWidget {
             <div class="live-indicator off-air">
                 <span class="live-text">OFF AIR</span>
             </div>
+        `;
+    }
+
+    renderArchivedContent(current, next) {
+        const trackTitle = this.decodeHtmlEntities(current.metadata.track_title || 'Unknown Track');
+        
+        // Remove .mp3 extension if present
+        const cleanTitle = trackTitle.replace(/\.mp3$/, '');
+        
+        // Parse title and host from track title if it contains "hosted by"
+        let title = cleanTitle;
+        let host = '';
+        
+        if (cleanTitle.includes("hosted by")) {
+            const parts = cleanTitle.split("hosted by").map(part => part.trim());
+            title = parts[0];
+            host = parts[1] || '';
+        }
+
+        // Get description if available
+        const description = current.metadata.description ? this.decodeHtmlEntities(current.metadata.description) : '';
+
+        // Format title with time and originally aired
+        let showTitleWithTime = title;
+        let airedDate = '';
+        if (current.starts && current.ends) {
+            showTitleWithTime = this.formatTitleWithTime(title, current.starts, current.ends);
+            airedDate = this.formatOriginallyAired(current.metadata);
+        }
+
+        // Next up info
+        let nextUpHtml = '';
+        if (next && next.metadata && next.metadata.track_title) {
+            const nextTitle = this.decodeHtmlEntities(next.metadata.track_title).replace(/\.mp3$/, '');
+            let nextHost = '';
+            let nextShowTitle = nextTitle;
+            
+            if (nextTitle.includes("hosted by")) {
+                const parts = nextTitle.split("hosted by").map(part => part.trim());
+                nextShowTitle = parts[0];
+                nextHost = parts[1] || '';
+            }
+            
+            let nextTitleWithTime = nextShowTitle;
+            let nextAiredDate = '';
+            const nextDescription = next.metadata.description ? this.decodeHtmlEntities(next.metadata.description) : '';
+            if (next.starts && next.ends) {
+                nextTitleWithTime = this.formatTitleWithTime(nextShowTitle, next.starts, next.ends);
+                nextAiredDate = this.formatOriginallyAired(next.metadata);
+            }
+            
+            nextUpHtml = `
+                <div class="next-section">
+                    <div class="section-label">NEXT:</div>
+                    <div class="section-title">${nextTitleWithTime}</div>
+                    ${nextHost ? `<div class="section-host">hosted by ${nextHost}</div>` : ''}
+                    ${nextDescription ? `<div class="section-description">${nextDescription}</div>` : ''}
+                    <div class="section-status">
+                        ${nextAiredDate ? `<span class="aired-date">${nextAiredDate}</span>` : ''}
+                        <span class="status-label">FROM THE ARCHIVES</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        this.container.innerHTML = `
+            <div class="now-section">
+                <div class="section-label">NOW:</div>
+                <div class="section-title">${showTitleWithTime}</div>
+                ${host ? `<div class="section-host">hosted by ${host}</div>` : ''}
+                ${description ? `<div class="section-description">${description}</div>` : ''}
+                <div class="section-status">
+                    ${airedDate ? `<span class="aired-date">${airedDate}</span>` : ''}
+                    <span class="status-label">FROM THE ARCHIVES</span>
+                </div>
+            </div>
+            ${nextUpHtml}
         `;
     }
 }

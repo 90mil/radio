@@ -40,12 +40,12 @@ description: Get in touch with 90mil Radio
                 <h2>Other ways to reach us</h2>
                 <div class="contact-item">
                     <strong>Email:</strong>
-                    <span id="email-reveal" onclick="revealEmail()">Click to reveal</span>
+                    <span id="email-reveal" onclick="revealEmail()" class="contact-link">Click to reveal</span>
                 </div>
                 
                 <div class="contact-item">
                     <strong>Social:</strong>
-                    <a href="#" target="_blank">Instagram</a>
+                    <a href="https://instagram.com/90milradio" target="_blank" class="contact-link">@90milradio</a>
                 </div>
             </div>
         </div>
@@ -57,7 +57,7 @@ function revealEmail() {
     const emailSpan = document.getElementById('email-reveal');
     const user = 'contact';
     const domain = '90mil.org';
-    emailSpan.innerHTML = `<a href="mailto:${user}@${domain}">${user}@${domain}</a>`;
+    emailSpan.innerHTML = `<a href="mailto:${user}@${domain}" target="_blank" class="contact-link">${user}@${domain}</a>`;
     emailSpan.onclick = null;
 }
 </script>
@@ -148,14 +148,17 @@ function revealEmail() {
     color: var(--accent-1);
 }
 
-#email-reveal {
-    cursor: pointer;
-    color: var(--accent-1);
+.contact-link {
+    color: white;
     text-decoration: underline;
+    cursor: pointer;
+    display: inline-block;
+    margin-left: 8px;
+    transition: color 0.3s ease;
 }
 
-#email-reveal:hover {
-    color: #e6b800;
+.contact-link:hover {
+    color: var(--accent-1);
 }
 
 @media (max-width: 768px) {

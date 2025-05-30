@@ -94,6 +94,40 @@ function formatDateLong(date) {
     return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
 }
 
+function isDaylightSavingTime(date) {
+    // Create dates for start and end of DST in Berlin
+    const year = date.getFullYear();
+    const dstStart = new Date(year, 2, 31); // Last Sunday in March
+    dstStart.setDate(31 - ((dstStart.getDay() + 6) % 7));
+    dstStart.setHours(2, 0, 0, 0);
+    
+    const dstEnd = new Date(year, 9, 31); // Last Sunday in October
+    dstEnd.setDate(31 - ((dstEnd.getDay() + 6) % 7));
+    dstEnd.setHours(3, 0, 0, 0);
+    
+    return date >= dstStart && date < dstEnd;
+}
+
+function formatTimeWithTimezone(date) {
+    return date.toLocaleTimeString([], { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        hour12: false, 
+        timeZone: 'Europe/Berlin' 
+    });
+}
+
+function formatTimeRangeWithTimezone(startDate, endDate) {
+    const startTime = formatTimeWithTimezone(startDate);
+    const endTime = formatTimeWithTimezone(endDate);
+    
+    // Add CEST/CET based on DST
+    const isDST = isDaylightSavingTime(startDate);
+    const timezone = isDST ? 'CEST' : 'CET';
+    
+    return `${startTime} - ${endTime} ${timezone}`;
+}
+
 function hideHoverBoxDuringScroll() {
     if (activeHoverBox) {
         activeHoverBox.style.display = 'none';
@@ -265,7 +299,7 @@ function createBasicShowStructure(show, earliestHour) {
     // Create time info
     const timeInfo = document.createElement('div');
     timeInfo.className = 'time-info';
-    timeInfo.innerHTML = `${showStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}<br>${showEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}`;
+    timeInfo.innerHTML = `${formatTimeWithTimezone(showStart)}<br>${formatTimeWithTimezone(showEnd)}`;
 
     // Create show info
     const showInfo = document.createElement('div');
@@ -304,7 +338,7 @@ function createHoverBox(show, { titleStr, hostStr }) {
 
     const showStart = new Date(show.start_timestamp);
     const showEnd = new Date(show.end_timestamp);
-    const timeStr = `${showStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} - ${showEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} · ${formatDateLong(showStart)}`;
+    const timeStr = `${formatTimeRangeWithTimezone(showStart, showEnd)} · ${formatDateLong(showStart)}`;
 
     const fullShowInfo = document.createElement('div');
     fullShowInfo.className = 'full-show-info';

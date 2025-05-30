@@ -103,6 +103,46 @@ p, .description, .show-description {
     text-shadow: none;
 }
 
+/* Unified Heading Hierarchy System */
+
+/* Level 2: Major section headers - about, contact, month headers, week headers */
+.heading-level-2,
+.section-header {
+    font-family: var(--heading-level-2-font);
+    font-size: var(--heading-level-2-size);
+    font-style: var(--heading-level-2-style);
+    color: var(--heading-level-2-color);
+    font-weight: var(--heading-level-2-weight);
+    text-transform: var(--heading-level-2-transform);
+    margin: var(--heading-level-2-margin);
+    letter-spacing: var(--heading-level-2-letter-spacing);
+}
+
+/* Level 3: Widget headers - homepage widgets (coming up, featured, now playing) */
+.heading-level-3 {
+    font-family: var(--heading-level-3-font);
+    font-size: var(--heading-level-3-size);
+    font-style: var(--heading-level-3-style);
+    color: var(--heading-level-3-color);
+    font-weight: var(--heading-level-3-weight);
+    text-transform: var(--heading-level-3-transform);
+    margin: var(--heading-level-3-margin);
+    letter-spacing: var(--heading-level-3-letter-spacing);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Level 4: Lower level headers - day headers, show titles */
+.heading-level-4 {
+    font-family: var(--heading-level-4-font);
+    font-size: var(--heading-level-4-size);
+    font-style: var(--heading-level-4-style);
+    color: var(--heading-level-4-color);
+    font-weight: var(--heading-level-4-weight);
+    text-transform: var(--heading-level-4-transform);
+    margin: var(--heading-level-4-margin);
+    letter-spacing: var(--heading-level-4-letter-spacing);
+}
+
 /* Links */
 a {
     color: var(--link-color);

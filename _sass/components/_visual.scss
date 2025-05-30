@@ -25,11 +25,9 @@
 
 /* Contact Info Typography */
 .contact-info h3 {
-    font-family: var(--font-primary);
-    color: var(--text-color);
-    font-size: 18px;
+    @extend .heading-level-2;
+    font-size: var(--font-size-h3);
     margin: 24px 0 12px;
-    text-transform: lowercase;
 }
 
 .contact-info h3:first-child {

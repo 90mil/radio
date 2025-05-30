@@ -475,13 +475,15 @@
     
     .featured-show-image {
         width: 100%;
-        max-width: 100%;
+        max-width: calc(100% - 40px);
         height: auto;
         border-radius: 4px;
         object-fit: contain;
         background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border: none;
         display: block;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        margin: 0 auto;
     }
     
     .show-text {
@@ -604,7 +606,7 @@
         
         .featured-show-image {
             width: 100%;
-            max-width: 200px;
+            max-width: calc(100% - 40px);
             align-self: center;
         }
         

@@ -1,0 +1,366 @@
+/* ===== FEATURED CONTENT STYLES ===== */
+/* Homepage hero section and featured content components */
+
+/* ===== HOMEPAGE HERO LAYOUT ===== */
+
+.hero-section {
+    height: auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+    background: transparent;
+    box-sizing: border-box;
+    padding: 32px;
+}
+
+.featured-container {
+    display: grid;
+    grid-template-columns: minmax(350px, fit-content(40%)) 1fr;
+    gap: 40px;
+    max-width: 90vw;
+    margin: 0 auto;
+    align-items: stretch;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.featured-left {
+    display: flex;
+    flex-direction: column;
+}
+
+.featured-right {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ===== FEATURED EVENT COMPONENT ===== */
+
+.featured-event {
+    @include container-styling;
+    padding: 20px;
+    border-radius: 0;
+    
+    h2 {
+        @extend .heading-level-2;
+        margin: 0 0 20px 0;
+        align-self: flex-start;
+        flex-shrink: 0;
+    }
+
+    .featured-poster {
+        margin: 20px auto;
+        text-align: center;
+        
+        picture.poster-image,
+        img.poster-image {
+            display: block;
+            width: auto;
+            max-width: 100%;
+            height: auto;
+            max-height: 60vh;
+            border-radius: 4px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            object-fit: contain;
+        }
+        
+        picture.poster-image img {
+            display: block;
+            width: auto;
+            max-width: 100%;
+            height: auto;
+            max-height: 60vh;
+            border-radius: 4px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            object-fit: contain;
+        }
+    }
+    
+    .featured-poster-description {
+        margin-bottom: 20px;
+        
+        p {
+            margin: 0;
+            line-height: 1.5;
+        }
+    }
+    
+    .featured-actions {
+        display: flex;
+        gap: 12px;
+        
+        .cta-button {
+            @include button-primary;
+            margin-bottom: 0;
+            flex: 1;
+        }
+    }
+}
+
+/* ===== FEATURED SHOW COMPONENT ===== */
+
+.featured-show {
+    @include container-styling;
+    padding: 20px;
+    border-radius: 0;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    
+    h2 {
+        @extend .heading-level-2;
+        margin: 0 0 24px 0;
+        align-self: flex-start;
+        flex-shrink: 0;
+    }
+}
+
+.show-content {
+    display: flex;
+    flex-direction: row;
+    gap: 32px;
+    color: white;
+    flex: 1;
+    align-items: flex-start;
+    
+    .featured-show-image {
+        width: 100%;
+        max-width: 400px;
+        min-width: 200px;
+        height: auto;
+        margin: 0 auto;
+        border-radius: 6px;
+        object-fit: cover;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        display: block;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        flex: 1 1 300px; /* Grow and shrink with preferred width of 300px */
+        align-self: flex-start;
+    }
+    
+    .show-text {
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding-top: 0;
+        flex: 2 1 400px; /* Take more space, preferred width 400px */
+        min-height: 100%;
+        min-width: 0;
+    }
+    
+    h2 {
+        margin: 0 0 8px 0;
+        font-size: 1rem;
+        color: var(--accent-1, #ffcc00);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    h3 {
+        @extend .heading-level-4;
+        margin: 0 0 12px 0;
+        font-size: 2rem;
+        line-height: 1.1;
+        font-weight: bold;
+    }
+    
+    h4 {
+        margin: 0 0 16px 0;
+        font-size: 1.1rem;
+        font-style: italic;
+        opacity: 0.85;
+        line-height: 1.3;
+    }
+    
+    .show-description {
+        margin: 0 0 24px 0;
+        line-height: 1.6;
+        flex: 1;
+        
+        p {
+            margin: 0 0 16px 0;
+            line-height: 1.6;
+        }
+        
+        p:last-child {
+            margin-bottom: 0;
+        }
+    }
+    
+    .genres {
+        margin: 0 0 24px 0;
+        font-size: 0.9rem;
+        opacity: 0.8;
+        font-style: italic;
+    }
+}
+
+/* ===== FEATURED POSTER COMPONENT ===== */
+
+.featured-poster {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 0 20px 0;
+    width: fit-content;
+    align-self: center;
+    
+    picture.poster-image,
+    img.poster-image {
+        width: auto;
+        max-width: 100%;
+        height: auto;
+        margin: 0 auto; /* Center when narrower than container */
+        object-fit: contain;
+        border-radius: 4px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    picture.poster-image img {
+        width: auto;
+        max-width: 100%;
+        height: auto;
+        margin: 0 auto; /* Center when narrower than container */
+        object-fit: contain;
+        border-radius: 4px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+}
+
+.featured-info {
+    color: white;
+    padding: 0 20px;
+    
+    p {
+        margin: 0 0 20px 0;
+        line-height: 1.6;
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+    
+    .featured-actions {
+        align-self: flex-start;
+    }
+}
+
+.featured-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    margin-top: auto;
+    width: 100%;
+    
+    .cta-button, .cta-secondary {
+        flex: 1;
+        min-height: 48px;
+        font-weight: 600;
+    }
+    
+    .cta-button {
+        @include button-primary;
+        margin-bottom: 0;
+    }
+    
+    .cta-secondary {
+        @include button-secondary;
+    }
+}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+@media (min-width: 1400px) {
+    .featured-container {
+        grid-template-columns: minmax(600px, 35%) 1fr;
+        max-width: 1600px;
+    }
+}
+
+
+@media (max-width: 1024px) {
+    .hero-section {
+        padding: 24px;
+    }
+
+    .featured-container {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+        max-width: 95vw;
+    }
+}
+
+@media (max-width: 800px) {
+    /* Now we switch show content to vertical at 800px, well after container goes vertical */
+    .show-content {
+        flex-direction: column;
+        gap: 24px;
+        
+        .featured-show-image {
+            flex: 0 0 auto;
+            min-width: 200px;
+            width: 100%;
+            align-self: center;
+        }
+        
+        .show-text {
+            flex: 1;
+        }
+    }
+    
+    .featured-actions {
+        .cta-button, .cta-secondary {
+            font-size: 0.9rem;
+            padding: 10px 12px;
+        }
+    }
+}
+
+@media (max-width: 600px) {
+    .featured-show {
+        padding: 20px;
+    }
+    
+    .show-content {
+        gap: 20px;
+        
+        .featured-show-image {
+            min-width: 180px;
+        }
+    }
+    
+    .featured-actions {
+        flex-direction: column;
+        gap: 10px;
+        
+        .cta-button, .cta-secondary {
+            width: 100%;
+            text-align: center;
+        }
+    }
+    
+    .featured-event {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .featured-actions {
+        flex-direction: column;
+        gap: 8px;
+        
+        .cta-button, .cta-secondary {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+} 

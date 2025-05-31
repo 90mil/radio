@@ -3,57 +3,52 @@
     display: none;
 }
 
+
 nav {
     display: flex;
     height: var(--nav-height);
-    border-top: 1px solid var(--text-color);
-    border-bottom: 1px solid var(--text-color);
     position: relative;
+    width: 100%;
 }
 
+/* Navigation Links */
 .nav-links {
     display: flex;
     margin-right: auto;
-    gap: var(--spacing-nav);
+    gap: 0;
+    width: 100%;
+    @include container-styling;
 
     a {
         --nav-padding: var(--padding-nav);
-        padding: 18px var(--nav-padding);
-        color: var(--text-color);
-        text-decoration: none;
-        background: var(--accent-2);
-        font-family: var(--font-primary);
-        font-size: 18px;
-        font-weight: bold;
-        text-transform: lowercase;
-        border-right: 1px solid var(--text-color);
-        display: flex;
-        align-items: center;
+        @include nav-link-base;
+        @include nav-hover;
+        
+        border-right: 1px solid var(--border-soft);
+        margin-right: 2px;
         justify-content: center;
-        white-space: nowrap;
+        flex: 1;
+        min-width: fit-content;
 
         &:first-child {
-            margin-left: var(--margin-desktop);
-            padding-left: 0;
+            margin-left: 0;
+            padding-left: var(--margin-desktop);
             padding-right: var(--nav-padding);
             justify-content: flex-start;
+            flex: 0 0 auto;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
         }
 
         &:last-child {
             border-right: none;
             padding-left: var(--nav-padding);
-            padding-right: calc(var(--nav-padding) * 2);
+            padding-right: var(--margin-desktop);
             justify-content: flex-end;
-        }
-
-        &:hover {
-            background: var(--accent-2);
-            text-decoration: none;
-            transition: background 0.2s ease;
-
-            .nav-text {
-                animation: glitch 0.8s cubic-bezier(.1, .4, .2, .9) both;
-            }
+            flex: 0 0 auto;
+            margin-right: 0;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
         }
     }
 }
@@ -61,22 +56,52 @@ nav {
 /* Mobile Menu Toggle */
 .menu-toggle {
     display: none;
-    width: 36px;
-    height: 36px;
-    padding: 8px;
-    background: var(--accent-2);
+    width: auto;
+    height: auto;
+    padding: 10px 20px 14px 20px;
+    background: transparent;
     border: none;
+    border-radius: var(--button-border-radius);
     cursor: pointer;
-    margin: 6px 16px;
+    margin: 0;
     position: relative;
+    box-shadow: none;
+    transition: opacity 0.2s ease, background 0.2s ease;
+    opacity: 1;
+    outline: none;
+    
+    /* Menu text styling */
+    color: var(--text-color);
+    font-family: var(--font-secondary);
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: lowercase;
+    line-height: 1;
+    vertical-align: top;
+
+    &:hover {
+        background: rgba(1, 20, 17, 0.2);
+        color: var(--link-color);
+        @include chromatic-aberration-hover;
+    }
+
+    &:focus {
+        outline: none;
+    }
+
+    &:active {
+        background: transparent;
+        color: var(--text-color);
+    }
 
     .menu-icon {
+        display: none; /* Hide hamburger icon, using text instead */
         position: relative;
-        display: block;
         width: 20px;
         height: 2px;
         background: var(--text-color);
         margin: 8px auto;
+        border-radius: 1px;
 
         &::before,
         &::after {
@@ -86,6 +111,7 @@ nav {
             height: 2px;
             background: var(--text-color);
             left: 0;
+            border-radius: 1px;
             transition: all 0.3s ease;
         }
 
@@ -95,6 +121,12 @@ nav {
 }
 
 .menu-open {
+    .menu-toggle {
+        background: transparent;
+        opacity: 1;
+        color: var(--text-color);
+    }
+    
     .menu-icon {
         background: transparent;
 
@@ -115,7 +147,7 @@ nav {
     position: relative;
     top: var(--nav-height);
     height: var(--nav-height);
-    border-bottom: 1px solid var(--text-color);
+    border-bottom: 1px solid var(--border-medium);
     background: var(--body-bg);
     width: 100%;
 
@@ -131,13 +163,14 @@ nav {
 @media (max-width: 1024px) {
     .nav-links a {
         font-size: 16px;
+        padding: 18px 12px;
         
         &:first-child {
-            margin-left: var(--margin-laptop);
+            padding-left: var(--margin-laptop);
         }
 
         &:last-child {
-            margin-right: 60px;
+            padding-right: var(--margin-laptop);
         }
     }
 
@@ -148,18 +181,23 @@ nav {
 
 @media (max-width: 768px) {
     nav {
-        justify-content: flex-end;
+        justify-content: center;
         pointer-events: none;
-        padding: 0 var(--margin-tablet);
+        padding: 0;
+        @include container-styling;
+        height: var(--nav-height);
+        position: relative;
+        z-index: calc(var(--z-modal) + 1);
     }
 
     .menu-toggle {
         pointer-events: auto;
         display: block;
-        z-index: var(--z-modal);
-        margin: 8px 0;
+        z-index: calc(var(--z-modal) + 2);
         flex: 0 0 auto;
-        order: 2;
+        order: 1;
+        backdrop-filter: blur(4px);
+        border-radius: 4px;
     }
 
     .nav-links {
@@ -169,10 +207,9 @@ nav {
         left: 0;
         right: 0;
         flex-direction: column;
-        background: var(--body-bg);
-        z-index: calc(var(--z-header) - 1);
+        z-index: calc(var(--z-modal) + 1);
         padding: 0;
-        border-bottom: 1px solid var(--text-color);
+        border-bottom: none;
         opacity: 0;
         visibility: hidden;
         transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -191,15 +228,15 @@ nav {
             width: 100%;
             justify-content: center;
             text-align: center;
-            padding: 15px;
-            margin: 0;
+            margin: 0 2px 1px 2px;
             border-right: none;
-            border-bottom: 1px solid var(--text-color);
+            border-bottom: 1px solid var(--border-soft);
+            padding: 12px var(--nav-padding);
 
             &:first-child,
             &:last-child {
-                margin: 0;
-                padding: 15px;
+                margin: 0 2px 1px 2px;
+                padding: 12px var(--nav-padding);
                 justify-content: center;
             }
         }
@@ -212,9 +249,11 @@ nav {
     }
 
     .mixcloud-link {
-        order: 1;
-        margin-right: auto;
+        order: 2;
+        margin-left: auto;
+        margin-right: 20px;
         top: 0;
+        height: var(--nav-height);
         
         a {
             padding: 15px;

@@ -1,3 +1,58 @@
+/* ===== SCHEDULE FEATURE STYLES ===== */
+/* All schedule-related styles consolidated in one place */
+
+/* ===== SCHEDULE PAGE LAYOUT ===== */
+
+/* Main Schedule Container */
+.schedule-container {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.week-schedule-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    width: 100%;
+    overflow: visible;
+    position: relative;
+}
+
+.week-section {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: visible;
+    margin-bottom: 30px;
+    padding: 0 var(--margin-desktop);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    user-select: none;
+    height: fit-content;
+    position: relative;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.week-header {
+    @extend .section-header;
+    margin: 30px var(--margin-desktop) 20px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--accent-1);
+    height: 50px;
+    display: flex;
+    align-items: center;
+}
+
+/* ===== DAY BLOCK COMPONENTS ===== */
+
 /* Day Block Styles */
 .day-block {
     border: 1px solid var(--border-medium);
@@ -11,7 +66,6 @@
     display: flex;
     flex-direction: column;
     position: relative;
-    min-height: 200px;
     overflow: visible;
     border-radius: 4px;
 
@@ -29,43 +83,13 @@
             background: rgba(1, 20, 17, 0.75);
         }
     }
-
-    @media (max-width: 1024px) {
-        min-width: 380px;
-        max-width: 500px;
-
-        &.empty {
-            min-width: 140px;
-            max-width: 160px;
-        }
-    }
-
-    @media (max-width: 768px) {
-        min-width: 320px;
-        max-width: 400px;
-
-        &.empty {
-            min-width: 120px;
-            max-width: 140px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        min-width: 280px;
-        max-width: 340px;
-
-        &.empty {
-            min-width: 100px;
-            max-width: 120px;
-        }
-    }
 }
 
 /* Day Header */
 .day-header {
     @extend .heading-level-4;
     position: relative;
-    z-index: 2;
+    z-index: 10;
     background: var(--accent-2);
     color: var(--link-color);
     padding: 12px 16px;
@@ -83,6 +107,16 @@
     color: rgba(237, 253, 250, 0.6);
     background: rgba(1, 20, 17, 0.7);
 }
+
+/* Shows Container */
+.shows-container {
+    position: relative;
+    flex: 1;
+    min-height: 400px;
+    height: auto;
+}
+
+/* ===== SHOW ENTRY COMPONENTS ===== */
 
 /* Show Entry Styles */
 .show {
@@ -152,6 +186,8 @@
     margin-top: 2px;
 }
 
+/* ===== SHOW HOVER BOX ===== */
+
 /* Hover Box */
 .hover-box {
     --hover-text-color: rgba(255, 255, 255, 0.9);
@@ -187,13 +223,6 @@
         border-color: rgba(255, 255, 255, 0.2);
         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
     }
-
-    @media (max-width: 768px) {
-        margin: 0;
-        max-width: calc(90vw - 20px);
-        width: 100%;
-        min-width: 300px;
-    }
 }
 
 .full-show-info {
@@ -224,4 +253,88 @@
     font-size: 16px;
     line-height: 1.5;
     color: rgba(255, 255, 255, 0.9);
+}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+@media (max-width: 1024px) {
+    .week-header {
+        margin-left: var(--margin-laptop);
+        margin-right: var(--margin-laptop);
+    }
+
+    .week-section {
+        padding: 0 var(--margin-laptop);
+    }
+
+    .day-block {
+        min-width: 380px;
+        max-width: 500px;
+
+        &.empty {
+            min-width: 140px;
+            max-width: 160px;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .week-header {
+        margin-left: var(--margin-tablet);
+        margin-right: var(--margin-tablet);
+    }
+
+    .week-section {
+        padding: 0 var(--margin-tablet);
+    }
+
+    .day-block {
+        min-width: 320px;
+        max-width: 400px;
+
+        &.empty {
+            min-width: 120px;
+            max-width: 140px;
+        }
+    }
+
+    .day-header {
+        position: sticky;
+        top: 0;
+    }
+
+    .hover-box {
+        margin: 0;
+        max-width: calc(90vw - 20px);
+        width: 100%;
+        min-width: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .week-schedule-container {
+        padding: 0;
+    }
+
+    .week-header {
+        margin-left: var(--margin-mobile);
+        margin-right: var(--margin-mobile);
+        padding: 15px 0;
+        border-bottom: 1px solid var(--accent-1);
+    }
+
+    .week-section {
+        padding: 0;
+        margin: 0;
+    }
+
+    .day-block {
+        min-width: 280px;
+        max-width: 340px;
+
+        &.empty {
+            min-width: 100px;
+            max-width: 120px;
+        }
+    }
 }

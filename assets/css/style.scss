@@ -1,18 +1,35 @@
 --- 
 --- 
-@import "base/variables";
-@import "base/reset";
-@import "base/typography";
-@import "base/animations";
-@import "layouts/containers";
-@import "components/header";
-@import "components/navigation";
-@import "components/visual";
-@import "components/shows";
-@import "components/footer";
-@import "components/schedule";
-@import "pages/shows";
-@import "pages/schedule";
+
+/* ===== IMPORT ORDER MATCHES NEW SCSS STRUCTURE ===== */
+
+// 01-foundations - Core system files
+@import "01-foundations/variables";
+@import "01-foundations/reset";
+@import "01-foundations/typography";
+@import "01-foundations/animations";
+
+// 02-tools - Mixins and functions
+@import "02-tools/mixins";
+
+// 03-layout - Layout and structural components
+@import "03-layout/header";
+@import "03-layout/navigation";
+@import "03-layout/banner";
+@import "03-layout/footer";
+@import "03-layout/containers";
+
+// 04-components - Reusable UI components
+@import "04-components/visual";
+
+// 05-features - Feature-specific modules
+@import "05-features/schedule";
+@import "05-features/shows";
+@import "05-features/now-playing";
+@import "05-features/featured";
+
+// 06-pages - Page-specific overrides
+@import "06-pages/home";
 
 /* Main Content Styles */
 .main-content {

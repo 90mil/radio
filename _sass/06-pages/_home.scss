@@ -1,0 +1,10 @@
+/* ===== HOME PAGE STYLES ===== */
+/* Page-specific styles for the home page */
+
+/* Remove margin/padding overrides that break the layout */
+body.home {
+    main#content-container {
+        padding: 0;
+        margin: 0;
+    }
+} 

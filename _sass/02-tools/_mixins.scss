@@ -1,0 +1,160 @@
+/* Button Mixins for Retro Aesthetic */
+
+@mixin button-base {
+    border: 1px solid var(--border-medium);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 20px;
+    box-sizing: border-box;
+    background-color: transparent;
+    color: var(--text-color);
+    text-decoration: none;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: var(--button-border-radius);
+    backdrop-filter: blur(4px) brightness(0.95);
+    -webkit-backdrop-filter: blur(4px) brightness(0.95);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: var(--button-transition);
+    cursor: pointer;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+@mixin button-primary {
+    @include button-base;
+    background: var(--accent-1);
+    border-color: var(--accent-1);
+    color: var(--body-bg);
+    box-shadow: 0 4px 12px rgba(44, 78, 85, 0.4);
+    opacity: 0.9;
+    
+    &:hover {
+        background: rgba(44, 78, 85, 0.85);
+        border-color: rgba(230, 234, 233, 0.6);
+        color: var(--link-color);
+        opacity: 1;
+        backdrop-filter: var(--button-backdrop-blur) brightness(1.1);
+        -webkit-backdrop-filter: var(--button-backdrop-blur) brightness(1.1);
+        transform: var(--button-hover-transform);
+        box-shadow: 0 6px 20px rgba(44, 78, 85, 0.5);
+    }
+}
+
+@mixin button-secondary {
+    @include button-base;
+    background: rgba(1, 20, 17, 0.6);
+    border-color: var(--border-warm);
+    opacity: 0.85;
+    
+    &:hover {
+        background: rgba(1, 20, 17, 0.8);
+        border-color: rgba(237, 253, 250, 0.4);
+        color: var(--link-color);
+        opacity: 1;
+        backdrop-filter: var(--button-backdrop-blur) brightness(1.05);
+        -webkit-backdrop-filter: var(--button-backdrop-blur) brightness(1.05);
+        transform: var(--button-hover-transform);
+        box-shadow: 0 6px 20px rgba(1, 20, 17, 0.6);
+    }
+}
+
+@mixin button-interactive {
+    @include button-base;
+    background: rgba(1, 20, 17, 0.5);
+    border-color: var(--border-medium);
+    padding: 8px 12px;
+    font-size: 14px;
+    text-transform: none;
+    letter-spacing: normal;
+    opacity: 0.8;
+    
+    &:hover {
+        background: rgba(1, 20, 17, 0.8);
+        border-color: rgba(237, 253, 250, 0.4);
+        color: var(--link-color);
+        opacity: 1;
+        backdrop-filter: var(--button-backdrop-blur) brightness(1.1);
+        -webkit-backdrop-filter: var(--button-backdrop-blur) brightness(1.1);
+        transform: var(--button-hover-transform);
+        box-shadow: 0 6px 20px rgba(1, 20, 17, 0.6);
+    }
+}
+
+/* Container Styling Mixin */
+@mixin container-styling {
+    background: rgba(1, 20, 17, 0.85);
+    backdrop-filter: blur(5px) brightness(0.96) contrast(1.03) sepia(0.01);
+    -webkit-backdrop-filter: blur(5px) brightness(0.96) contrast(1.03) sepia(0.01);
+    border: 1px solid var(--border-medium);
+    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.2),
+                0 5px 18px rgba(0, 0, 0, 0.3);
+}
+
+@mixin subtle-hover {
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+    
+    &:hover {
+        opacity: 1;
+        background: rgba(1, 20, 17, 0.75);
+    }
+}
+
+@mixin chromatic-aberration-base {
+    text-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.3),
+        0.5px 0 0 rgba(255, 40, 89, 0.2),
+        -0.5px 0 0 rgba(0, 255, 170, 0.2);
+}
+
+@mixin chromatic-aberration-hover {
+    text-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.4),
+        1px 0 0 rgba(255, 40, 89, 0.4),
+        -1px 0 0 rgba(0, 255, 170, 0.4);
+}
+
+@mixin nav-link-base {
+    padding: 18px var(--nav-padding);
+    color: var(--text-color);
+    text-decoration: none;
+    font-family: var(--font-secondary);
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: lowercase;
+    border-radius: var(--button-border-radius);
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    transition: opacity 0.2s ease, background 0.2s ease, backdrop-filter 0.2s ease;
+    opacity: 0.9;
+}
+
+@keyframes chromatic-pulse {
+    0% {
+        @include chromatic-aberration-hover;
+    }
+    50% {
+        text-shadow: 
+            0 1px 2px rgba(0, 0, 0, 0.4),
+            2px 0 0 rgba(255, 40, 89, 0.7),
+            -2px 0 0 rgba(0, 255, 170, 0.7);
+    }
+    100% {
+        @include chromatic-aberration-hover;
+    }
+}
+
+@mixin nav-hover {
+    @include subtle-hover;
+    
+    &:hover {
+        border-color: var(--border-warm);
+        color: var(--link-color);
+        animation: chromatic-pulse 2s ease-in-out;
+    }
+} 

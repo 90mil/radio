@@ -47,6 +47,20 @@ window.PageInit = (function () {
             if (state.scheduleInitialized && typeof window.scheduleCleanup === 'function') {
                 window.scheduleCleanup();
             }
+            
+            // Clean up now playing widget
+            if (typeof destroyNowPlaying === 'function') {
+                destroyNowPlaying();
+            }
+
+            // Clean up featured show widget
+            if (typeof destroyFeaturedShow === 'function') {
+                destroyFeaturedShow();
+            }
+
+            // Reset global widget loading states
+            window.nowPlayingLoaded = false;
+            window.featuredShowLoaded = false;
 
             // Reset global variables that might be set by page scripts
             window.isLoadingMore = false;
@@ -64,6 +78,10 @@ window.PageInit = (function () {
 
             // Clear event handlers that might be duplicated
             window.removeEventListener('scroll', window.handleScroll);
+            const mainContainer = document.getElementById('content-container');
+            if (mainContainer && window.handleScroll) {
+                mainContainer.removeEventListener('scroll', window.handleScroll);
+            }
         },
 
         /**
@@ -101,23 +119,92 @@ window.PageInit = (function () {
          * Initialize the home page
          */
         homePage: function () {
-            // Home page initialization if needed
+            // Force clear all widget states
+            window.nowPlayingLoaded = false;
+            window.featuredShowLoaded = false;
+            
+            // Clear any cached widget data
+            if (typeof localStorage !== 'undefined') {
+                localStorage.removeItem('featuredShowData');
+                localStorage.removeItem('featuredShowTimestamp');
+            }
+            
+            // Force reinitialize widgets immediately if elements exist
+            const nowPlayingContainer = document.getElementById('now-playing-content');
+            const featuredShowContainer = document.querySelector('.featured-show');
+            
+            // Initialize widgets directly if containers exist
+            if (nowPlayingContainer) {
+                if (typeof initNowPlaying === 'function') {
+                    initNowPlaying();
+                } else {
+                    // Load script and initialize
+                    this.loadScriptIfNeeded('/assets/js/now-playing.js', () => {
+                        if (typeof initNowPlaying === 'function') {
+                            initNowPlaying();
+                        }
+                    });
+                }
+            }
+            
+            if (featuredShowContainer) {
+                if (typeof checkAndLoadFeaturedShow === 'function') {
+                    checkAndLoadFeaturedShow();
+                } else {
+                    // Load script and initialize
+                    this.loadScriptIfNeeded('/assets/js/featured-show.js', () => {
+                        if (typeof checkAndLoadFeaturedShow === 'function') {
+                            checkAndLoadFeaturedShow();
+                        }
+                    });
+                }
+            }
+            
+            // Also set up a backup timer to catch any missed initializations
+            setTimeout(() => {
+                if (!window.nowPlayingLoaded && document.getElementById('now-playing-content')) {
+                    if (typeof initNowPlaying === 'function') {
+                        initNowPlaying();
+                    }
+                }
+                
+                if (!window.featuredShowLoaded && document.querySelector('.featured-show')) {
+                    if (typeof checkAndLoadFeaturedShow === 'function') {
+                        checkAndLoadFeaturedShow();
+                    }
+                }
+            }, 500);
         },
 
         /**
          * Load a script if it hasn't been loaded yet
          */
         loadScriptIfNeeded: function (src, callback) {
+            // For widget scripts, always execute the callback even if script exists
+            // to ensure proper reinitialization after SPA navigation
+            const isWidgetScript = src.includes('featured-show.js') || src.includes('now-playing.js');
+            
             const isLoaded = Array.from(document.scripts).some(script =>
                 script.src && script.src.includes(src.split('/').pop())
             );
 
             if (isLoaded) {
+                // For widget scripts, always call the callback to reinitialize
+                if (isWidgetScript) {
+                    // Small delay to ensure any previous cleanup is complete
+                    setTimeout(callback, 25);
+                } else {
                 callback();
+                }
             } else {
                 const script = document.createElement('script');
                 script.src = src;
                 script.onload = callback;
+                script.onerror = () => {
+                    console.error(`Failed to load script: ${src}`);
+                    // Try to call callback anyway in case of network issues
+                    callback();
+                };
                 document.head.appendChild(script);
             }
         }

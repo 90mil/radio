@@ -19,7 +19,7 @@ const CONFIG = {
     MARGIN: 10,
     HOVER_OFFSET: 5,
     DRAG_THRESHOLD: 3,
-    HEADER_HEIGHT: 52,
+    HEADER_HEIGHT: -8,
     PIXELS_PER_HOUR: 60,
     MOBILE_BREAKPOINT: 768,
     HOVER_DELAY: 300,
@@ -92,6 +92,40 @@ function formatDateLong(date) {
     const months = ['January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'];
     return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+}
+
+function isDaylightSavingTime(date) {
+    // Create dates for start and end of DST in Berlin
+    const year = date.getFullYear();
+    const dstStart = new Date(year, 2, 31); // Last Sunday in March
+    dstStart.setDate(31 - ((dstStart.getDay() + 6) % 7));
+    dstStart.setHours(2, 0, 0, 0);
+    
+    const dstEnd = new Date(year, 9, 31); // Last Sunday in October
+    dstEnd.setDate(31 - ((dstEnd.getDay() + 6) % 7));
+    dstEnd.setHours(3, 0, 0, 0);
+    
+    return date >= dstStart && date < dstEnd;
+}
+
+function formatTimeWithTimezone(date) {
+    return date.toLocaleTimeString([], { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        hour12: false, 
+        timeZone: 'Europe/Berlin' 
+    });
+}
+
+function formatTimeRangeWithTimezone(startDate, endDate) {
+    const startTime = formatTimeWithTimezone(startDate);
+    const endTime = formatTimeWithTimezone(endDate);
+    
+    // Add CEST/CET based on DST
+    const isDST = isDaylightSavingTime(startDate);
+    const timezone = isDST ? 'CEST' : 'CET';
+    
+    return `${startTime} - ${endTime} ${timezone}`;
 }
 
 function hideHoverBoxDuringScroll() {
@@ -204,6 +238,13 @@ function createDayBlock(day, shows, showDay, weekEarliestHour, weekLatestHour) {
     dayHeader.className = 'day-header';
     dayBlock.appendChild(dayHeader);
 
+    // Calculate total height needed for this week
+    const totalHours = weekLatestHour - weekEarliestHour + 1;
+    const showsContainerHeight = totalHours * 60;
+    
+    // Set minimum height on the day block itself to ensure uniformity
+    dayBlock.style.minHeight = `${showsContainerHeight + 60}px`; // +60 for day header
+
     if (shows.length === 0) {
         dayHeader.textContent = day.charAt(0).toUpperCase() + day.slice(1);
     } else {
@@ -214,10 +255,8 @@ function createDayBlock(day, shows, showDay, weekEarliestHour, weekLatestHour) {
         const showsContainer = document.createElement('div');
         showsContainer.className = 'shows-container';
 
-        // Set height of shows container only
-        const totalHours = weekLatestHour - weekEarliestHour + 1;
-        const containerHeight = totalHours * 60;
-        showsContainer.style.height = `${containerHeight}px`;
+        // Set height of shows container
+        showsContainer.style.height = `${showsContainerHeight}px`;
 
         shows.forEach(show => {
             const showElement = createShowElement(show, weekEarliestHour);
@@ -265,7 +304,7 @@ function createBasicShowStructure(show, earliestHour) {
     // Create time info
     const timeInfo = document.createElement('div');
     timeInfo.className = 'time-info';
-    timeInfo.innerHTML = `${showStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}<br>${showEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}`;
+    timeInfo.innerHTML = `${formatTimeWithTimezone(showStart)}<br>${formatTimeWithTimezone(showEnd)}`;
 
     // Create show info
     const showInfo = document.createElement('div');
@@ -304,7 +343,7 @@ function createHoverBox(show, { titleStr, hostStr }) {
 
     const showStart = new Date(show.start_timestamp);
     const showEnd = new Date(show.end_timestamp);
-    const timeStr = `${showStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} - ${showEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} · ${formatDateLong(showStart)}`;
+    const timeStr = `${formatTimeRangeWithTimezone(showStart, showEnd)} · ${formatDateLong(showStart)}`;
 
     const fullShowInfo = document.createElement('div');
     fullShowInfo.className = 'full-show-info';

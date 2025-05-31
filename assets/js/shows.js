@@ -1,5 +1,5 @@
 // Constants
-const BATCH_SIZE = 50;
+const BATCH_SIZE = 20;
 const BATCH_DELAY = 50; // Milliseconds between batches
 const SCROLL_THRESHOLD = 500; // px from bottom to trigger next batch
 let currentOffset = 0;
@@ -69,8 +69,15 @@ window.showsInit = function () {
     renderShows();
 
     // Set up scroll handler
+    const mainContainer = document.getElementById('content-container');
     window.removeEventListener('scroll', handleScroll);
     window.addEventListener('scroll', handleScroll);
+    
+    // Also listen to the main container's scroll since it's the scrolling element
+    if (mainContainer) {
+        mainContainer.removeEventListener('scroll', handleScroll);
+        mainContainer.addEventListener('scroll', handleScroll);
+    }
 
     // Set up player close button if needed
     const player = document.querySelector('.play-bar-container');
@@ -80,6 +87,9 @@ window.showsInit = function () {
         closeButton.addEventListener('click', closePlayer);
         player.querySelector('.play-bar').appendChild(closeButton);
     }
+
+    // Check for hash to auto-play specific show
+    checkForAutoPlay();
 };
 
 function createLoadMoreTrigger() {
@@ -93,7 +103,7 @@ function createLoadMoreTrigger() {
 }
 
 
-async function fetchWithTimeout(url, timeout = 5000) {
+async function fetchWithTimeout(url, timeout = 3000) {
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -120,10 +130,10 @@ async function fetchWithTimeout(url, timeout = 5000) {
 
 async function fetchShowDetails(showKey) {
     try {
-        return await fetchWithTimeout(`https://api.mixcloud.com${showKey}`);
+        return await fetchWithTimeout(`https://api.mixcloud.com${showKey}`, 2000); // Even shorter timeout for details
     } catch (error) {
-        console.error(`Failed to fetch show details for ${showKey}:`, error);
-        return null;
+        console.warn(`Failed to fetch show details for ${showKey}:`, error.message);
+        return null; // Return null instead of undefined for cleaner handling
     }
 }
 
@@ -300,8 +310,10 @@ async function fetchShows() {
 function handleScroll() {
     if (isLoadingMore || reachedEnd) return;
 
-    const scrollPosition = window.scrollY + window.innerHeight;
-    const totalHeight = document.documentElement.scrollHeight;
+    // Get the main content container since it's now the scrolling element
+    const mainContainer = document.getElementById('content-container');
+    const scrollPosition = mainContainer ? mainContainer.scrollTop + mainContainer.clientHeight : window.scrollY + window.innerHeight;
+    const totalHeight = mainContainer ? mainContainer.scrollHeight : document.documentElement.scrollHeight;
 
     if (totalHeight - scrollPosition < SCROLL_THRESHOLD) {
         loadMoreShows();
@@ -660,4 +672,14 @@ async function renderInBatches(showsByMonth, isAdditional) {
             }
         });
     });
+}
+
+function checkForAutoPlay() {
+    const hash = window.location.hash.substring(1); // Remove the #
+    if (hash === 'circling-the-whuhula') {
+        // Wait a bit for the shows to load, then trigger the play
+        setTimeout(() => {
+            playShow('https://www.mixcloud.com/90milradio/circling-the-whuhula-tales-of-our-i/');
+        }, 1000);
+    }
 } 

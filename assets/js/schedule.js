@@ -19,7 +19,7 @@ const CONFIG = {
     MARGIN: 10,
     HOVER_OFFSET: 5,
     DRAG_THRESHOLD: 3,
-    HEADER_HEIGHT: 52,
+    HEADER_HEIGHT: -8,
     PIXELS_PER_HOUR: 60,
     MOBILE_BREAKPOINT: 768,
     HOVER_DELAY: 300,
@@ -238,6 +238,13 @@ function createDayBlock(day, shows, showDay, weekEarliestHour, weekLatestHour) {
     dayHeader.className = 'day-header';
     dayBlock.appendChild(dayHeader);
 
+    // Calculate total height needed for this week
+    const totalHours = weekLatestHour - weekEarliestHour + 1;
+    const showsContainerHeight = totalHours * 60;
+    
+    // Set minimum height on the day block itself to ensure uniformity
+    dayBlock.style.minHeight = `${showsContainerHeight + 60}px`; // +60 for day header
+
     if (shows.length === 0) {
         dayHeader.textContent = day.charAt(0).toUpperCase() + day.slice(1);
     } else {
@@ -248,10 +255,8 @@ function createDayBlock(day, shows, showDay, weekEarliestHour, weekLatestHour) {
         const showsContainer = document.createElement('div');
         showsContainer.className = 'shows-container';
 
-        // Set height of shows container only
-        const totalHours = weekLatestHour - weekEarliestHour + 1;
-        const containerHeight = totalHours * 60;
-        showsContainer.style.height = `${containerHeight}px`;
+        // Set height of shows container
+        showsContainer.style.height = `${showsContainerHeight}px`;
 
         shows.forEach(show => {
             const showElement = createShowElement(show, weekEarliestHour);

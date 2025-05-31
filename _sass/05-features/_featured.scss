@@ -41,7 +41,7 @@
 
 .featured-event {
     @include container-styling;
-    padding: 25px;
+    padding: 20px;
     border-radius: 0;
     
     h2 {
@@ -50,7 +50,7 @@
         align-self: flex-start;
         flex-shrink: 0;
     }
-    
+
     .featured-poster {
         margin: 20px auto;
         text-align: center;
@@ -104,7 +104,7 @@
 
 .featured-show {
     @include container-styling;
-    padding: 32px;
+    padding: 20px;
     border-radius: 0;
     min-height: 400px;
     display: flex;
@@ -127,17 +127,18 @@
     align-items: flex-start;
     
     .featured-show-image {
-        width: auto;
+        width: 100%;
         max-width: 400px;
+        min-width: 200px;
         height: auto;
-        margin: 0 auto; /* Center when narrower than container */
+        margin: 0 auto;
         border-radius: 6px;
         object-fit: cover;
         background: rgba(255, 255, 255, 0.1);
         border: none;
         display: block;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        flex: 0 0 auto;
+        flex: 1 1 300px; /* Grow and shrink with preferred width of 300px */
         align-self: flex-start;
     }
     
@@ -147,7 +148,7 @@
         flex-direction: column;
         justify-content: space-between;
         padding-top: 0;
-        flex: 1;
+        flex: 2 1 400px; /* Take more space, preferred width 400px */
         min-height: 100%;
         min-width: 0;
     }
@@ -231,10 +232,6 @@
     }
 }
 
-.featured-poster-description {
-    padding: 4px;
-}
-
 .featured-info {
     color: white;
     padding: 0 20px;
@@ -278,24 +275,11 @@
 
 @media (min-width: 1400px) {
     .featured-container {
-        grid-template-columns: minmax(400px, 35%) 1fr;
-        max-width: 85vw; /* Slightly smaller on very large screens */
+        grid-template-columns: minmax(600px, 35%) 1fr;
+        max-width: 1600px;
     }
 }
 
-@media (max-width: 1200px) {
-    .featured-container {
-        grid-template-columns: minmax(320px, 45%) 1fr;
-        gap: 32px;
-    }
-}
-
-@media (max-width: 1100px) {
-    .featured-container {
-        grid-template-columns: minmax(300px, 50%) 1fr;
-        gap: 28px;
-    }
-}
 
 @media (max-width: 1024px) {
     .hero-section {
@@ -307,40 +291,27 @@
         flex-direction: column;
         gap: 32px;
         max-width: 95vw;
-        margin: 0 auto;
-        align-items: stretch;
-        width: 100%;
-    }
-    
-    .featured-left, .featured-right {
-        display: flex;
-        flex-direction: column;
-        gap: 32px;
-        width: 100%;
-    }
-    
-    .featured-event, .featured-show {
-        width: 100%;
-        box-sizing: border-box;
-    }
-    
-    .show-content {
-        flex-direction: column;
-        gap: 15px;
-        
-        .featured-show-image {
-            width: auto; /* Natural width on mobile */
-            max-width: 100%; /* Don't exceed container */
-            align-self: center;
-        }
-        
-        .show-text {
-            text-align: left;
-        }
     }
 }
 
 @media (max-width: 800px) {
+    /* Now we switch show content to vertical at 800px, well after container goes vertical */
+    .show-content {
+        flex-direction: column;
+        gap: 24px;
+        
+        .featured-show-image {
+            flex: 0 0 auto;
+            min-width: 200px;
+            width: 100%;
+            align-self: center;
+        }
+        
+        .show-text {
+            flex: 1;
+        }
+    }
+    
     .featured-actions {
         .cta-button, .cta-secondary {
             font-size: 0.9rem;
@@ -355,17 +326,10 @@
     }
     
     .show-content {
-        flex-direction: column;
-        gap: 15px;
+        gap: 20px;
         
         .featured-show-image {
-            width: auto; /* Natural width on mobile */
-            max-width: 100%; /* Don't exceed container */
-            align-self: center;
-        }
-        
-        .show-text {
-            text-align: left;
+            min-width: 180px;
         }
     }
     

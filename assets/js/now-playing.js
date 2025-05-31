@@ -40,7 +40,21 @@ class NowPlayingWidget {
         if (!this.container) return;
 
         try {
-            // Get live data
+            // PRIORITY 1: Check schedule data first
+            const weekResponse = await fetch(this.weekApiUrl, { cache: 'no-store' });
+            if (weekResponse.ok) {
+                const weekData = await weekResponse.json();
+                const currentScheduledShow = this.getCurrentShow(weekData);
+                
+                if (currentScheduledShow) {
+                    // We have a scheduled show running, use it regardless of live-info
+                    const nextScheduledShow = this.getNextScheduledShow(weekData);
+                    this.renderScheduledShow(currentScheduledShow, nextScheduledShow);
+                    return;
+                }
+            }
+
+            // PRIORITY 2: Check live-info only if no scheduled show
             const liveResponse = await fetch(this.liveApiUrl, { cache: 'no-store' });
             if (liveResponse.ok) {
                 const liveData = await liveResponse.json();
@@ -54,7 +68,7 @@ class NowPlayingWidget {
                 if (isLiveShow) {
                     this.renderLiveShow(liveData.currentShow[0], liveData.current, liveData.next);
                 } else if (liveData.current && liveData.current.metadata && liveData.current.metadata.track_title) {
-                    // Show archived content
+                    // Show archived content only if no scheduled show
                     this.renderArchivedContent(liveData.current, liveData.next);
                 } else {
                     this.renderOffAir();
@@ -82,6 +96,33 @@ class NowPlayingWidget {
         );
 
         return activeShows.length > 0 ? activeShows[0] : null;
+    }
+
+    getNextScheduledShow(data) {
+        const now = new Date();
+        const currentDay = this.getCurrentDayKey(now);
+        
+        // Check today first
+        const todayShows = data[currentDay] || [];
+        const upcomingToday = todayShows.filter(show => 
+            show.name !== "90mil Radio" && 
+            new Date(show.start_timestamp) > now
+        ).sort((a, b) => new Date(a.start_timestamp) - new Date(b.start_timestamp));
+        
+        if (upcomingToday.length > 0) {
+            return upcomingToday[0];
+        }
+        
+        // Check tomorrow if no shows today
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowDay = this.getCurrentDayKey(tomorrow);
+        const tomorrowShows = data[tomorrowDay] || [];
+        const upcomingTomorrow = tomorrowShows.filter(show => 
+            show.name !== "90mil Radio"
+        ).sort((a, b) => new Date(a.start_timestamp) - new Date(b.start_timestamp));
+        
+        return upcomingTomorrow.length > 0 ? upcomingTomorrow[0] : null;
     }
 
     getCurrentDayKey(date) {
@@ -127,20 +168,32 @@ class NowPlayingWidget {
             hour12: false
         });
     }
-    
-    formatTimeWithTimezone(timestamp) {
-        // Convert timestamp to Date object and round to nominal show time
+
+    formatScheduleTime(timestamp) {
+        // For schedule data - timestamps are already correct, no timezone adjustment needed
         const date = new Date(timestamp);
-        const nominalDate = this.roundToNearestHalfHourAndAdjustCET(date);
         
-        const timeString = nominalDate.toLocaleTimeString('en-GB', { 
+        return date.toLocaleTimeString('en-GB', { 
             hour: '2-digit', 
             minute: '2-digit',
-            hour12: false
+            hour12: false,
+            timeZone: 'Europe/Berlin'
+        });
+    }
+
+    formatScheduleTimeWithTimezone(timestamp) {
+        // For schedule data - timestamps are already correct
+        const date = new Date(timestamp);
+        
+        const timeString = date.toLocaleTimeString('en-GB', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false,
+            timeZone: 'Europe/Berlin'
         });
         
         // Use CEST/CET based on DST
-        const isDST = this.isDaylightSavingTime(nominalDate);
+        const isDST = this.isDaylightSavingTime(date);
         const timezone = isDST ? 'CEST' : 'CET';
         
         return `${timeString} ${timezone}`;
@@ -150,6 +203,15 @@ class NowPlayingWidget {
         if (startTime && endTime) {
             const start = this.formatTime(startTime);
             const end = this.formatTimeWithTimezone(endTime);
+            return `${title} <span class="time-display">${start} - ${end}</span>`;
+        }
+        return title;
+    }
+
+    formatTitleWithTimeFromSchedule(title, startTime, endTime) {
+        if (startTime && endTime) {
+            const start = this.formatScheduleTime(startTime);
+            const end = this.formatScheduleTimeWithTimezone(endTime);
             return `${title} <span class="time-display">${start} - ${end}</span>`;
         }
         return title;
@@ -262,22 +324,69 @@ class NowPlayingWidget {
         `;
     }
 
-    renderScheduledShow(show) {
-        const startTime = this.formatTime(show.start_timestamp);
-        const endTime = this.formatTime(show.end_timestamp);
+    renderScheduledShow(show, nextShow = null) {
         const showName = this.decodeHtmlEntities(show.name);
         const description = show.description ? this.decodeHtmlEntities(show.description) : '';
+        
+        // Parse show name for host information
+        let title = showName;
+        let host = '';
+        
+        if (showName.includes("hosted by")) {
+            const parts = showName.split("hosted by").map(part => part.trim());
+            title = parts[0];
+            host = parts[1] || '';
+        }
+        
+        // Format title with time - using schedule time formatting (no timezone adjustment)
+        const showTitleWithTime = this.formatTitleWithTimeFromSchedule(title, show.start_timestamp, show.end_timestamp);
+
+        // Next up info from schedule
+        let nextUpHtml = '';
+        if (nextShow) {
+            const nextShowName = this.decodeHtmlEntities(nextShow.name);
+            const nextDescription = nextShow.description ? this.decodeHtmlEntities(nextShow.description) : '';
+            
+            // Parse next show name for host information
+            let nextTitle = nextShowName;
+            let nextHost = '';
+            
+            if (nextShowName.includes("hosted by")) {
+                const parts = nextShowName.split("hosted by").map(part => part.trim());
+                nextTitle = parts[0];
+                nextHost = parts[1] || '';
+            }
+            
+            const nextTitleWithTime = this.formatTitleWithTimeFromSchedule(nextTitle, nextShow.start_timestamp, nextShow.end_timestamp);
+            
+            nextUpHtml = `
+                <div class="next-section">
+                    <div class="section-label">NEXT:</div>
+                    <div class="section-title">${nextTitleWithTime}</div>
+                    ${nextHost ? `<div class="section-host">hosted by ${nextHost}</div>` : ''}
+                    ${nextDescription ? `<div class="section-description">${nextDescription}</div>` : ''}
+                    <div class="section-status">
+                        <span class="aired-date"></span><span class="status-label">SCHEDULED</span>
+                    </div>
+                </div>
+            `;
+        }
 
         this.container.innerHTML = `
-            <div class="show-info">
-                <div class="show-title">${showName}</div>
-                <div class="show-time">${startTime} - ${endTime}</div>
-                ${description ? `<div class="show-description">${description}</div>` : ''}
+            <div class="now-section">
+                <div class="section-label">NOW:</div>
+                <div class="section-title">${showTitleWithTime}</div>
+                ${host ? `<div class="section-host">hosted by ${host}</div>` : ''}
+                ${description ? `<div class="section-description">${description}</div>` : ''}
+                <div class="section-status">
+                    <span class="aired-date"></span>
+                    <div class="live-indicator">
+                        <span class="live-dot"></span>
+                        <span class="live-text">ON AIR</span>
+                    </div>
+                </div>
             </div>
-            <div class="live-indicator">
-                <span class="live-dot"></span>
-                <span class="live-text">ON AIR</span>
-            </div>
+            ${nextUpHtml}
         `;
     }
 

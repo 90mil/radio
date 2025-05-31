@@ -52,13 +52,13 @@
     }
     
     .featured-poster {
-        margin: 0 0 20px 0;
+        margin: 20px auto;
         text-align: center;
         
         picture.poster-image,
         img.poster-image {
             display: block;
-            width: 100%;
+            width: auto;
             max-width: 100%;
             height: auto;
             max-height: 60vh;
@@ -69,7 +69,7 @@
         
         picture.poster-image img {
             display: block;
-            width: 100%;
+            width: auto;
             max-width: 100%;
             height: auto;
             max-height: 60vh;
@@ -127,9 +127,10 @@
     align-items: flex-start;
     
     .featured-show-image {
-        width: 100%;
+        width: auto;
         max-width: 400px;
-        aspect-ratio: 1;
+        height: auto;
+        margin: 0 auto; /* Center when narrower than container */
         border-radius: 6px;
         object-fit: cover;
         background: rgba(255, 255, 255, 0.1);
@@ -205,23 +206,25 @@
     justify-content: center;
     align-items: center;
     margin: 0 0 20px 0;
-    width: 100%;
+    width: fit-content;
     align-self: center;
     
     picture.poster-image,
     img.poster-image {
-        width: 100%;
+        width: auto;
         max-width: 100%;
         height: auto;
+        margin: 0 auto; /* Center when narrower than container */
         object-fit: contain;
         border-radius: 4px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     }
     
     picture.poster-image img {
-        width: 100%;
+        width: auto;
         max-width: 100%;
         height: auto;
+        margin: 0 auto; /* Center when narrower than container */
         object-fit: contain;
         border-radius: 4px;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -322,10 +325,17 @@
     }
     
     .show-content {
-        gap: 24px;
+        flex-direction: column;
+        gap: 15px;
         
         .featured-show-image {
-            max-width: 350px; /* Slightly smaller on tablets */
+            width: auto; /* Natural width on mobile */
+            max-width: 100%; /* Don't exceed container */
+            align-self: center;
+        }
+        
+        .show-text {
+            text-align: left;
         }
     }
 }
@@ -349,7 +359,8 @@
         gap: 15px;
         
         .featured-show-image {
-            width: 100%;
+            width: auto; /* Natural width on mobile */
+            max-width: 100%; /* Don't exceed container */
             align-self: center;
         }
         

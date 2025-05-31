@@ -191,10 +191,20 @@ class NowPlayingWidget {
         const showName = this.decodeHtmlEntities(show.name);
         const isLive = current && current.type === 'livestream';
         
+        // Parse show name for host information like we do for next show
+        let title = showName;
+        let host = '';
+        
+        if (showName.includes("hosted by")) {
+            const parts = showName.split("hosted by").map(part => part.trim());
+            title = parts[0];
+            host = parts[1] || '';
+        }
+        
         // Format title with time
-        let showTitleWithTime = showName;
+        let showTitleWithTime = title;
         if (current && current.starts && current.ends) {
-            showTitleWithTime = this.formatTitleWithTime(showName, current.starts, current.ends);
+            showTitleWithTime = this.formatTitleWithTime(title, current.starts, current.ends);
         }
 
         // Get description from show data
@@ -242,9 +252,10 @@ class NowPlayingWidget {
             <div class="now-section">
                 <div class="section-label">NOW:</div>
                 <div class="section-title">${showTitleWithTime}</div>
+                ${host ? `<div class="section-host">hosted by ${host}</div>` : ''}
                 ${description ? `<div class="section-description">${description}</div>` : ''}
                 <div class="section-status">
-                    <span class="status-label">${currentStatus}</span>
+                    <span class="aired-date"></span><span class="status-label">${currentStatus}</span>
                 </div>
             </div>
             ${nextUpHtml}

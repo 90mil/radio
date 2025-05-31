@@ -181,29 +181,33 @@ nav {
 
 @media (max-width: 768px) {
     nav {
-        justify-content: flex-end;
+        justify-content: center;
         pointer-events: none;
-        padding: 0 var(--margin-tablet);
+        padding: 0;
+        @include container-styling;
+        height: var(--nav-height);
+        position: relative;
+        z-index: calc(var(--z-modal) + 1);
     }
 
     .menu-toggle {
         pointer-events: auto;
         display: block;
-        z-index: var(--z-modal);
-        margin: 8px 0;
+        z-index: calc(var(--z-modal) + 2);
         flex: 0 0 auto;
-        order: 2;
+        order: 1;
+        backdrop-filter: blur(4px);
+        border-radius: 4px;
     }
 
     .nav-links {
-        /* Inherit desktop nav-links styles */
         pointer-events: none;
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         flex-direction: column;
-        z-index: calc(var(--z-header) - 1);
+        z-index: calc(var(--z-modal) + 1);
         padding: 0;
         border-bottom: none;
         opacity: 0;
@@ -221,18 +225,18 @@ nav {
         }
 
         a {
-            /* Override desktop styles for mobile layout */
             width: 100%;
             justify-content: center;
             text-align: center;
-            margin: 0 2px 2px 2px;
+            margin: 0 2px 1px 2px;
             border-right: none;
             border-bottom: 1px solid var(--border-soft);
+            padding: 12px var(--nav-padding);
 
             &:first-child,
             &:last-child {
-                margin: 0 2px 2px 2px;
-                padding: 18px var(--nav-padding);
+                margin: 0 2px 1px 2px;
+                padding: 12px var(--nav-padding);
                 justify-content: center;
             }
         }
@@ -245,9 +249,11 @@ nav {
     }
 
     .mixcloud-link {
-        order: 1;
-        margin-right: auto;
+        order: 2;
+        margin-left: auto;
+        margin-right: 20px;
         top: 0;
+        height: var(--nav-height);
         
         a {
             padding: 15px;

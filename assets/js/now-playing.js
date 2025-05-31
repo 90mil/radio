@@ -169,6 +169,24 @@ class NowPlayingWidget {
         });
     }
 
+    formatTimeWithTimezone(timestamp) {
+        // Convert timestamp to Date object and round to nominal show time
+        const date = new Date(timestamp);
+        const nominalDate = this.roundToNearestHalfHourAndAdjustCET(date);
+        
+        const timeString = nominalDate.toLocaleTimeString('en-GB', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false
+        });
+        
+        // Use CEST/CET based on DST
+        const isDST = this.isDaylightSavingTime(date);
+        const timezone = isDST ? 'CEST' : 'CET';
+        
+        return `${timeString} ${timezone}`;
+    }
+
     formatScheduleTime(timestamp) {
         // For schedule data - timestamps are already correct, no timezone adjustment needed
         const date = new Date(timestamp);

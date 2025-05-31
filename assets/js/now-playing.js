@@ -41,7 +41,10 @@ class NowPlayingWidget {
 
         try {
             // PRIORITY 1: Check schedule data first
-            const weekResponse = await fetch(this.weekApiUrl, { cache: 'no-store' });
+            const weekResponse = await fetch(this.weekApiUrl, { 
+                cache: 'no-store',
+                signal: AbortSignal.timeout(10000) // 10 second timeout
+            });
             if (weekResponse.ok) {
                 const weekData = await weekResponse.json();
                 const currentScheduledShow = this.getCurrentShow(weekData);
@@ -55,7 +58,10 @@ class NowPlayingWidget {
             }
 
             // PRIORITY 2: Check live-info only if no scheduled show
-            const liveResponse = await fetch(this.liveApiUrl, { cache: 'no-store' });
+            const liveResponse = await fetch(this.liveApiUrl, { 
+                cache: 'no-store',
+                signal: AbortSignal.timeout(10000) // 10 second timeout
+            });
             if (liveResponse.ok) {
                 const liveData = await liveResponse.json();
                 
@@ -79,7 +85,17 @@ class NowPlayingWidget {
             this.renderOffAir();
         } catch (error) {
             console.warn('Error fetching now playing data:', error);
-            this.renderFallback();
+            
+            // Determine error type for better user feedback
+            const isNetworkError = error.name === 'TypeError' || error.message.includes('fetch');
+            const isTimeoutError = error.name === 'TimeoutError' || error.message.includes('timeout');
+            const isCorsError = error.message.includes('CORS');
+            
+            if (isNetworkError || isTimeoutError || isCorsError) {
+                this.renderTemporaryError();
+            } else {
+                this.renderFallback();
+            }
         }
     }
 
@@ -423,11 +439,23 @@ class NowPlayingWidget {
     renderFallback() {
         this.container.innerHTML = `
             <div class="show-info">
-                <div class="show-title">Off Air</div>
-                <div class="show-description">No scheduled programming at the moment</div>
+                <div class="show-title">Signal drifting...</div>
+                <div class="show-description">Our transmission is taking a scenic route...</div>
             </div>
             <div class="live-indicator off-air">
-                <span class="live-text">OFF AIR</span>
+                <span class="live-text">SEARCHING FREQUENCIES</span>
+            </div>
+        `;
+    }
+
+    renderTemporaryError() {
+        this.container.innerHTML = `
+            <div class="show-info">
+                <div class="show-title">Tuning through static...</div>
+                <div class="show-description">Signal caught in atmospheric waveguide, retuning...</div>
+            </div>
+            <div class="live-indicator off-air">
+                <span class="live-text">ADJUSTING ANTENNA</span>
             </div>
         `;
     }

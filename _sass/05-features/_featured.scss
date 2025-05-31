@@ -39,45 +39,28 @@
 
 /* ===== FEATURED EVENT COMPONENT ===== */
 
-.featured-event {
-    @include container-styling;
-    padding: 20px;
-    border-radius: 0;
-    
-    h2 {
-        @extend .heading-level-2;
-        margin: 0 0 20px 0;
-        align-self: flex-start;
-        flex-shrink: 0;
+.featured-poster {
+    margin: 20px auto;
+    text-align: center;
+
+    picture {
+      display: block;
+      width: auto;
+      max-width: 100%;
+      height: auto;
     }
 
-    .featured-poster {
-        margin: 20px auto;
-        text-align: center;
-        
-        picture.poster-image,
-        img.poster-image {
-            display: block;
-            width: auto;
-            max-width: 100%;
-            height: auto;
-            max-height: 60vh;
-            border-radius: 4px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            object-fit: contain;
-        }
-        
-        picture.poster-image img {
-            display: block;
-            width: auto;
-            max-width: 100%;
-            height: auto;
-            max-height: 60vh;
-            border-radius: 4px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            object-fit: contain;
-        }
+    img.poster-image {
+      display: block;
+      width: auto;
+      max-width: 100%;
+      height: auto;
+      max-height: 75vh;
+      border-radius: 4px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      object-fit: contain;
     }
+  }
     
     .featured-poster-description {
         margin-bottom: 20px;

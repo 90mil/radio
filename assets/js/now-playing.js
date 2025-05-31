@@ -169,6 +169,24 @@ class NowPlayingWidget {
         });
     }
 
+    formatTimeWithTimezone(timestamp) {
+        // Convert timestamp to Date object and round to nominal show time
+        const date = new Date(timestamp);
+        const nominalDate = this.roundToNearestHalfHourAndAdjustCET(date);
+        
+        const timeString = nominalDate.toLocaleTimeString('en-GB', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false
+        });
+        
+        // Use CEST/CET based on DST
+        const isDST = this.isDaylightSavingTime(date);
+        const timezone = isDST ? 'CEST' : 'CET';
+        
+        return `${timeString} ${timezone}`;
+    }
+
     formatScheduleTime(timestamp) {
         // For schedule data - timestamps are already correct, no timezone adjustment needed
         const date = new Date(timestamp);
@@ -180,7 +198,7 @@ class NowPlayingWidget {
             timeZone: 'Europe/Berlin'
         });
     }
-
+    
     formatScheduleTimeWithTimezone(timestamp) {
         // For schedule data - timestamps are already correct
         const date = new Date(timestamp);
@@ -380,10 +398,10 @@ class NowPlayingWidget {
                 ${description ? `<div class="section-description">${description}</div>` : ''}
                 <div class="section-status">
                     <span class="aired-date"></span>
-                    <div class="live-indicator">
-                        <span class="live-dot"></span>
-                        <span class="live-text">ON AIR</span>
-                    </div>
+            <div class="live-indicator">
+                <span class="live-dot"></span>
+                <span class="live-text">ON AIR</span>
+            </div>
                 </div>
             </div>
             ${nextUpHtml}

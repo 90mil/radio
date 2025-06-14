@@ -312,147 +312,24 @@ function playShow(showUrl) {
     playBarContainer.style.display = 'flex';
 }
 
-// Add playlist filter handler
-function initPlaylistFilter() {
-    console.log('Initializing playlist filter');
-    const playlistSelect = document.getElementById('playlist-select');
-    if (!playlistSelect) {
-        console.error('Playlist select element not found');
-        return;
-    }
-
-    // Clear existing options except "All shows"
-    while (playlistSelect.options.length > 1) {
-        playlistSelect.remove(1);
-    }
-
-    // Set initial playlist from URL if present
-    const urlParams = new URLSearchParams(window.location.search);
-    const playlistParam = urlParams.get('playlist');
-    if (playlistParam) {
-        playlistSelect.value = playlistParam;
-        currentPlaylist = playlistParam;
-    }
-
-    // Function to update dropdown options
-    function updatePlaylistOptions(shows) {
-        console.log('Updating playlist options with shows:', shows.length);
-        // Get unique show names
-        const showNames = [...new Set(shows.map(show => {
-            const name = decodeHtmlEntities(show.name);
-            return name.split(' hosted by')[0].trim();
-        }))];
-        console.log('Unique show names:', showNames);
-
-        // Add each show name as an option
-        showNames.forEach(name => {
-            const option = document.createElement('option');
-            option.value = name.toLowerCase();
-            option.textContent = name;
-            playlistSelect.appendChild(option);
-        });
-
-        // Restore selected value if it exists
-        if (playlistParam) {
-            playlistSelect.value = playlistParam;
-        }
-    }
-
-    playlistSelect.addEventListener('change', (e) => {
-        currentPlaylist = e.target.value;
-        console.log('Playlist changed to:', currentPlaylist);
-        
-        // Update URL without page reload
-        const url = new URL(window.location);
-        if (currentPlaylist) {
-            url.searchParams.set('playlist', currentPlaylist);
-        } else {
-            url.searchParams.delete('playlist');
-        }
-        window.history.pushState({}, '', url);
-
-        // Filter existing shows
-        if (currentPlaylist) {
-            filteredShows = allShows.filter(show => {
-                const name = decodeHtmlEntities(show.name).toLowerCase();
-                return name.includes(currentPlaylist.toLowerCase());
-            });
-        } else {
-            filteredShows = allShows;
-        }
-
-        // Reset and reload shows
-        currentOffset = 0;
-        reachedEnd = false;
-        renderShows();
-    });
-}
-
-// Function to load all shows metadata for the dropdown
-async function loadAllShowNames() {
-    if (isLoadingAllShows) return;
-    isLoadingAllShows = true;
-
-    try {
-        let offset = 0;
-        let hasMore = true;
-
-        while (hasMore) {
-            const url = `${CLOUDCAST_API_URL}&offset=${offset}`;
-            console.log('Loading shows for dropdown, offset:', offset);
-            const response = await fetchWithTimeout(url);
-            
-            if (!response || !response.data || response.data.length === 0) {
-                hasMore = false;
-                break;
-            }
-
-            // Store all metadata
-            allShowsMetadata = [...allShowsMetadata, ...response.data];
-
-            // Add new show names to the set
-            response.data.forEach(show => {
-                const name = decodeHtmlEntities(show.name).split(' hosted by')[0].trim();
-                allShowNames.add(name);
-            });
-
-            // Update dropdown with current set of names
-            updatePlaylistDropdown();
-
-            offset += BATCH_SIZE;
-        }
-    } catch (error) {
-        console.error('Error loading all show names:', error);
-    } finally {
-        isLoadingAllShows = false;
-    }
-}
-
-// Function to update the playlist dropdown
-function updatePlaylistDropdown() {
-    const playlistSelect = document.getElementById('playlist-select');
-    if (!playlistSelect) return;
-
-    // Store current selection
-    const currentValue = playlistSelect.value;
-
-    // Clear existing options except "All shows"
-    while (playlistSelect.options.length > 1) {
-        playlistSelect.remove(1);
-    }
-
-    // Add each show name as an option
-    [...allShowNames].sort().forEach(name => {
-        const option = document.createElement('option');
-        option.value = name.toLowerCase();
-        option.textContent = name;
-        playlistSelect.appendChild(option);
-    });
-
-    // Restore selection
-    if (currentValue) {
-        playlistSelect.value = currentValue;
-    }
+// Add helper function to check if show matches filter
+function showMatchesFilter(show, filterText) {
+    if (!filterText) return true;
+    
+    const searchText = filterText.toLowerCase();
+    
+    // Check show name
+    const name = decodeHtmlEntities(show.name).toLowerCase();
+    if (name.includes(searchText)) return true;
+    
+    // Check host name
+    const hostMatch = name.match(/hosted by (.+)/i);
+    if (hostMatch && hostMatch[1].toLowerCase().includes(searchText)) return true;
+    
+    // Check genres/tags
+    if (show.tags && show.tags.some(tag => tag.name.toLowerCase().includes(searchText))) return true;
+    
+    return false;
 }
 
 // Modify fetchShows to use stored metadata
@@ -464,24 +341,35 @@ async function fetchShows() {
         reachedEnd = false;
         filteredShows = [];
 
-        // Start loading all show names in the background if not already loaded
+        // If we don't have metadata yet, fetch first batch immediately
         if (allShowsMetadata.length === 0) {
-            await loadAllShowNames();
+            console.log('No metadata yet, fetching first batch');
+            const response = await fetchWithTimeout(CLOUDCAST_API_URL);
+            if (!response || !response.data) {
+                throw new Error('Invalid response from Mixcloud API');
+            }
+            
+            // Store this batch as metadata
+            allShowsMetadata = response.data;
+            
+            // Start loading the rest in the background
+            loadAllShowNames();
+            
+            // Return first batch for immediate display
+            return { data: response.data };
         }
 
-        // Filter shows if playlist is selected
+        // If we have metadata, use it for filtering
         if (currentPlaylist) {
             // Search through all metadata for matches
-            filteredShows = allShowsMetadata.filter(show => {
-                const name = decodeHtmlEntities(show.name).toLowerCase();
-                return name.includes(currentPlaylist.toLowerCase());
-            });
+            filteredShows = allShowsMetadata.filter(show => showMatchesFilter(show, currentPlaylist));
             console.log('Filtered shows:', filteredShows.length);
             
             // Only take the first batch for initial display
             return { data: filteredShows.slice(0, BATCH_SIZE) };
         } else {
             // For unfiltered view, just return first batch
+            filteredShows = allShowsMetadata;
             return { data: allShowsMetadata.slice(0, BATCH_SIZE) };
         }
     } catch (error) {
@@ -552,7 +440,12 @@ window.renderShows = async function (isAdditional = false) {
         // Group shows by month
         const showsByMonth = new Map();
         processedShows.forEach(show => {
-            const monthYear = formatMonthYear(new Date(show.created_time));
+            // Use the most recent upload date for grouping
+            const latestUpload = show.uploads.reduce((latest, current) => {
+                return new Date(current.created_time) > new Date(latest.created_time) ? current : latest;
+            }, show.uploads[0]);
+            
+            const monthYear = formatMonthYear(new Date(latestUpload.created_time));
             if (!showsByMonth.has(monthYear)) {
                 showsByMonth.set(monthYear, []);
             }
@@ -804,8 +697,13 @@ async function renderInBatches(showsByMonth, isAdditional) {
             showContainer.appendChild(monthContainer);
         }
 
+        // Sort shows within month by date
+        const sortedShows = shows.sort((a, b) => 
+            new Date(b.created_time) - new Date(a.created_time)
+        );
+
         // Update shows within month container
-        for (const show of shows) {
+        for (const show of sortedShows) {
             const existingBox = monthContainer.querySelector(`[data-show-key="${show.name}"]`);
 
             if (existingBox) {
@@ -855,4 +753,117 @@ function checkForAutoPlay() {
             playShow('https://www.mixcloud.com/90milradio/circling-the-whuhula-tales-of-our-i/');
         }, 1000);
     }
+}
+
+// Function to load all shows metadata for the dropdown
+async function loadAllShowNames() {
+    if (isLoadingAllShows) return;
+    isLoadingAllShows = true;
+
+    try {
+        let offset = BATCH_SIZE; // Start from second batch since we already have first batch
+        let hasMore = true;
+
+        while (hasMore) {
+            const url = `${CLOUDCAST_API_URL}&offset=${offset}`;
+            console.log('Loading additional shows, offset:', offset);
+            const response = await fetchWithTimeout(url);
+            
+            if (!response || !response.data || response.data.length === 0) {
+                hasMore = false;
+                break;
+            }
+
+            // Store all metadata
+            allShowsMetadata = [...allShowsMetadata, ...response.data];
+
+            // Add new show names to the set
+            response.data.forEach(show => {
+                const name = decodeHtmlEntities(show.name).split(' hosted by')[0].trim();
+                allShowNames.add(name);
+            });
+
+            offset += BATCH_SIZE;
+        }
+    } catch (error) {
+        console.error('Error loading additional shows:', error);
+    } finally {
+        isLoadingAllShows = false;
+    }
+}
+
+// Function to update the playlist dropdown
+function updatePlaylistDropdown() {
+    const playlistSelect = document.getElementById('playlist-select');
+    if (!playlistSelect) return;
+
+    // Store current selection
+    const currentValue = playlistSelect.value;
+
+    // Clear existing options except "All shows"
+    while (playlistSelect.options.length > 1) {
+        playlistSelect.remove(1);
+    }
+
+    // Add each show name as an option
+    [...allShowNames].sort().forEach(name => {
+        const option = document.createElement('option');
+        option.value = name.toLowerCase();
+        option.textContent = name;
+        playlistSelect.appendChild(option);
+    });
+
+    // Restore selection
+    if (currentValue) {
+        playlistSelect.value = currentValue;
+    }
+}
+
+// Add playlist filter handler
+function initPlaylistFilter() {
+    console.log('Initializing playlist filter');
+    const playlistFilter = document.getElementById('playlist-filter');
+    if (!playlistFilter) {
+        console.error('Playlist filter element not found');
+        return;
+    }
+
+    // Set initial filter from URL if present
+    const urlParams = new URLSearchParams(window.location.search);
+    const playlistParam = urlParams.get('playlist');
+    if (playlistParam) {
+        playlistFilter.value = playlistParam;
+        currentPlaylist = playlistParam;
+    }
+
+    // Add debounced input handler
+    let debounceTimer;
+    playlistFilter.addEventListener('input', (e) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            currentPlaylist = e.target.value.toLowerCase();
+            console.log('Filter changed to:', currentPlaylist);
+            
+            // Update URL without page reload
+            const url = new URL(window.location);
+            if (currentPlaylist) {
+                url.searchParams.set('playlist', currentPlaylist);
+            } else {
+                url.searchParams.delete('playlist');
+            }
+            window.history.pushState({}, '', url);
+
+            // Filter existing shows
+            if (currentPlaylist) {
+                filteredShows = allShowsMetadata.filter(show => showMatchesFilter(show, currentPlaylist));
+            } else {
+                filteredShows = allShowsMetadata;
+            }
+
+            // Reset and reload shows
+            currentOffset = 0;
+            reachedEnd = false;
+            renderShows();
+        }, 300); // 300ms debounce
+    });
 } 

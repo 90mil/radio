@@ -378,28 +378,34 @@
 }
 
 .playlist-filter {
-    padding: 20px var(--margin-desktop);
+    padding: 20px;
     margin-bottom: 20px;
     display: flex;
     justify-content: flex-end;
+    align-items: center;
 }
 
-.playlist-select {
-    background: var(--accent-2);
-    border: 1px solid var(--accent-1);
+.playlist-input {
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
     color: var(--text-color);
-    padding: 8px 16px;
+    padding: 8px 12px;
     border-radius: 4px;
     font-size: 14px;
-    cursor: pointer;
+    width: 200px;
     transition: all 0.3s ease;
 
     &:hover {
-        background: var(--accent-1);
+        border-color: var(--accent-color);
     }
 
     &:focus {
         outline: none;
-        border-color: var(--text-color);
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb), 0.2);
+    }
+
+    &::placeholder {
+        color: var(--text-color-muted);
     }
 }

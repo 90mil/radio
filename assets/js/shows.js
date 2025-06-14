@@ -22,6 +22,11 @@ let currentPlaylist = '';
 let allShows = [];
 let filteredShows = [];
 
+// Add state for all shows metadata
+let allShowsMetadata = [];
+let allShowNames = new Set();
+let isLoadingAllShows = false;
+
 window.addEventListener('message', function (event) {
     // Check if message is from Mixcloud widget or banner
     if (event.origin === MIXCLOUD_ORIGIN || event.origin === BANNER_ORIGIN) {
@@ -383,65 +388,102 @@ function initPlaylistFilter() {
     });
 }
 
-// Modify fetchShows to load all shows metadata first
+// Function to load all shows metadata for the dropdown
+async function loadAllShowNames() {
+    if (isLoadingAllShows) return;
+    isLoadingAllShows = true;
+
+    try {
+        let offset = 0;
+        let hasMore = true;
+
+        while (hasMore) {
+            const url = `${CLOUDCAST_API_URL}&offset=${offset}`;
+            console.log('Loading shows for dropdown, offset:', offset);
+            const response = await fetchWithTimeout(url);
+            
+            if (!response || !response.data || response.data.length === 0) {
+                hasMore = false;
+                break;
+            }
+
+            // Store all metadata
+            allShowsMetadata = [...allShowsMetadata, ...response.data];
+
+            // Add new show names to the set
+            response.data.forEach(show => {
+                const name = decodeHtmlEntities(show.name).split(' hosted by')[0].trim();
+                allShowNames.add(name);
+            });
+
+            // Update dropdown with current set of names
+            updatePlaylistDropdown();
+
+            offset += BATCH_SIZE;
+        }
+    } catch (error) {
+        console.error('Error loading all show names:', error);
+    } finally {
+        isLoadingAllShows = false;
+    }
+}
+
+// Function to update the playlist dropdown
+function updatePlaylistDropdown() {
+    const playlistSelect = document.getElementById('playlist-select');
+    if (!playlistSelect) return;
+
+    // Store current selection
+    const currentValue = playlistSelect.value;
+
+    // Clear existing options except "All shows"
+    while (playlistSelect.options.length > 1) {
+        playlistSelect.remove(1);
+    }
+
+    // Add each show name as an option
+    [...allShowNames].sort().forEach(name => {
+        const option = document.createElement('option');
+        option.value = name.toLowerCase();
+        option.textContent = name;
+        playlistSelect.appendChild(option);
+    });
+
+    // Restore selection
+    if (currentValue) {
+        playlistSelect.value = currentValue;
+    }
+}
+
+// Modify fetchShows to use stored metadata
 async function fetchShows() {
     try {
         console.log('Starting fetchShows');
         // Reset state when fetching new shows
         currentOffset = 0;
         reachedEnd = false;
-        allShows = [];
         filteredShows = [];
 
-        // Initial fetch
-        console.log('Fetching from URL:', CLOUDCAST_API_URL);
-        const response = await fetchWithTimeout(CLOUDCAST_API_URL);
-        console.log('API Response:', response);
-        
-        if (!response || !response.data) {
-            throw new Error('Invalid response from Mixcloud API');
+        // Start loading all show names in the background if not already loaded
+        if (allShowsMetadata.length === 0) {
+            await loadAllShowNames();
         }
 
-        // Store all shows
-        allShows = response.data;
-        console.log('Loaded shows:', allShows.length);
-        
-        // Update playlist options
-        const playlistSelect = document.getElementById('playlist-select');
-        if (playlistSelect) {
-            // Clear existing options except "All shows"
-            while (playlistSelect.options.length > 1) {
-                playlistSelect.remove(1);
-            }
-
-            // Get unique show names
-            const showNames = [...new Set(allShows.map(show => {
-                const name = decodeHtmlEntities(show.name);
-                return name.split(' hosted by')[0].trim();
-            }))];
-            console.log('Unique show names:', showNames);
-
-            // Add each show name as an option
-            showNames.forEach(name => {
-                const option = document.createElement('option');
-                option.value = name.toLowerCase();
-                option.textContent = name;
-                playlistSelect.appendChild(option);
-            });
-        }
-        
         // Filter shows if playlist is selected
         if (currentPlaylist) {
-            filteredShows = allShows.filter(show => {
-                const name = show.name.toLowerCase();
+            // Search through all metadata for matches
+            filteredShows = allShowsMetadata.filter(show => {
+                const name = decodeHtmlEntities(show.name).toLowerCase();
                 return name.includes(currentPlaylist.toLowerCase());
             });
             console.log('Filtered shows:', filteredShows.length);
+            
+            // Only take the first batch for initial display
+            return { data: filteredShows.slice(0, BATCH_SIZE) };
         } else {
-            filteredShows = allShows;
+            // For unfiltered view, just return first batch
+            return { data: allShowsMetadata.slice(0, BATCH_SIZE) };
         }
-
-        return { data: filteredShows };
     } catch (error) {
         console.error('Failed to fetch shows:', error);
         throw error;
@@ -457,8 +499,17 @@ function handleScroll() {
     const scrollPosition = mainContainer ? mainContainer.scrollTop + mainContainer.clientHeight : window.scrollY + window.innerHeight;
     const totalHeight = mainContainer ? mainContainer.scrollHeight : document.documentElement.scrollHeight;
 
-    if (totalHeight - scrollPosition < SCROLL_THRESHOLD) {
-        loadMoreShows();
+    // If we're filtering, we need to keep loading until we find matches
+    if (currentPlaylist) {
+        // Load more if we're near the bottom or if we haven't found any matches yet
+        if (totalHeight - scrollPosition < SCROLL_THRESHOLD || filteredShows.length === 0) {
+            loadMoreShows();
+        }
+    } else {
+        // Normal pagination for unfiltered view
+        if (totalHeight - scrollPosition < SCROLL_THRESHOLD) {
+            loadMoreShows();
+        }
     }
 }
 
@@ -498,59 +549,18 @@ window.renderShows = async function (isAdditional = false) {
             showContainer.classList.add('loaded');
         }
 
-        let processedCount = 0;
-        const mergedShows = new Map();
-
-        async function processBatch() {
-            const batchShows = processedShows.slice(processedCount, processedCount + BATCH_SIZE);
-            if (batchShows.length === 0) return;
-
-            const batchPromises = batchShows.map(async (show) => {
-                const monthYear = getMonthYear(show.created_time);
-                const showKey = `${show.name}-${monthYear}`;
-
-                if (!mergedShows.has(showKey)) {
-                    mergedShows.set(showKey, {
-                        ...show,
-                        monthYear,
-                        uploads: [show],
-                        latestDate: new Date(show.created_time)
-                    });
-                } else {
-                    const existingShow = mergedShows.get(showKey);
-                    existingShow.uploads.push(show);
-                    const newDate = new Date(show.created_time);
-                    if (newDate > existingShow.latestDate) {
-                        existingShow.latestDate = newDate;
-                    }
-                }
-                return showKey;
-            });
-
-            await Promise.all(batchPromises);
-
-            // Group shows by month
-            const showsByMonth = new Map();
-            Array.from(mergedShows.values()).forEach(show => {
-                const monthYear = formatMonthYear(show.latestDate);
-                if (!showsByMonth.has(monthYear)) {
-                    showsByMonth.set(monthYear, []);
-                }
-                showsByMonth.get(monthYear).push(show);
-            });
-
-            // Render this batch
-            await renderInBatches(showsByMonth, isAdditional);
-
-            processedCount += BATCH_SIZE;
-
-            if (processedCount < processedShows.length) {
-                await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
-                await processBatch();
+        // Group shows by month
+        const showsByMonth = new Map();
+        processedShows.forEach(show => {
+            const monthYear = formatMonthYear(new Date(show.created_time));
+            if (!showsByMonth.has(monthYear)) {
+                showsByMonth.set(monthYear, []);
             }
-        }
+            showsByMonth.get(monthYear).push(show);
+        });
 
-        await processBatch();
+        // Render all shows immediately
+        await renderInBatches(showsByMonth, isAdditional);
 
         // Update offset for next fetch
         currentOffset += shows.length;
@@ -668,40 +678,23 @@ function updatePlayDates(showBox, show) {
     }
 }
 
-// Update loadMoreShows to handle pagination with filtered shows
+// Update loadMoreShows to use stored metadata
 async function loadMoreShows() {
     if (reachedEnd || isLoadingMore) return;
 
     try {
         isLoadingMore = true;
-        const url = `${CLOUDCAST_API_URL}&offset=${currentOffset}`;
-        
-        const response = await fetchWithTimeout(url);
-        const newShows = response.data;
 
-        if (!newShows || newShows.length === 0) {
-            reachedEnd = true;
-            return;
-        }
-
-        // Add new shows to allShows
-        allShows = [...allShows, ...newShows];
-
-        // Update filtered shows
         if (currentPlaylist) {
-            const newFilteredShows = newShows.filter(show => {
-                const name = show.name.toLowerCase();
-                return name.includes(currentPlaylist.toLowerCase());
-            });
-            filteredShows = [...filteredShows, ...newFilteredShows];
-        } else {
-            filteredShows = allShows;
-        }
+            // For filtered view, get next batch from filtered shows
+            const nextBatch = filteredShows.slice(currentOffset, currentOffset + BATCH_SIZE);
+            
+            if (!nextBatch || nextBatch.length === 0) {
+                reachedEnd = true;
+                return;
+            }
 
-        if (filteredShows.length > 0) {
-            const processedShows = await processShows(filteredShows);
-
-            // Group shows by month using actual upload dates
+            const processedShows = await processShows(nextBatch);
             const showsByMonth = new Map();
             processedShows.forEach(show => {
                 const monthYear = formatMonthYear(new Date(show.created_time));
@@ -710,8 +703,25 @@ async function loadMoreShows() {
                 }
                 showsByMonth.get(monthYear).push(show);
             });
+            await renderInBatches(showsByMonth, true);
+        } else {
+            // For unfiltered view, get next batch from all metadata
+            const nextBatch = allShowsMetadata.slice(currentOffset, currentOffset + BATCH_SIZE);
+            
+            if (!nextBatch || nextBatch.length === 0) {
+                reachedEnd = true;
+                return;
+            }
 
-            // Render the additional shows
+            const processedShows = await processShows(nextBatch);
+            const showsByMonth = new Map();
+            processedShows.forEach(show => {
+                const monthYear = formatMonthYear(new Date(show.created_time));
+                if (!showsByMonth.has(monthYear)) {
+                    showsByMonth.set(monthYear, []);
+                }
+                showsByMonth.get(monthYear).push(show);
+            });
             await renderInBatches(showsByMonth, true);
         }
 
@@ -777,7 +787,7 @@ async function renderInBatches(showsByMonth, isAdditional) {
         });
 
     // Process all months
-    sortedMonths.forEach(([monthYear, shows]) => {
+    for (const [monthYear, shows] of sortedMonths) {
         let monthContainer = document.querySelector(`[data-month="${monthYear}"]`);
 
         if (!monthContainer) {
@@ -795,7 +805,7 @@ async function renderInBatches(showsByMonth, isAdditional) {
         }
 
         // Update shows within month container
-        shows.forEach(show => {
+        for (const show of shows) {
             const existingBox = monthContainer.querySelector(`[data-show-key="${show.name}"]`);
 
             if (existingBox) {
@@ -833,8 +843,8 @@ async function renderInBatches(showsByMonth, isAdditional) {
                 newBox.__showData = show;
                 monthContainer.appendChild(newBox);
             }
-        });
-    });
+        }
+    }
 }
 
 function checkForAutoPlay() {

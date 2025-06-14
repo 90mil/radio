@@ -391,8 +391,8 @@ function initPlaylistFilter() {
     const urlParams = new URLSearchParams(window.location.search);
     const filterParam = urlParams.get('filter');
     if (filterParam) {
-        playlistFilter.value = filterParam;
-        currentPlaylist = filterParam;
+        playlistFilter.value = filterParam.trim();
+        currentPlaylist = filterParam.trim();
         // Apply initial filter
         filteredShows = allShowsMetadata.filter(show => showMatchesFilter(show, currentPlaylist));
         renderShows();
@@ -403,9 +403,8 @@ function initPlaylistFilter() {
     playlistFilter.addEventListener('input', (e) => {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
-            currentPlaylist = e.target.value.toLowerCase();
+            currentPlaylist = e.target.value.trim().toLowerCase();
             console.log('Filter changed to:', currentPlaylist);
-            
             // Update URL without page reload
             const url = new URL(window.location);
             if (currentPlaylist) {
@@ -414,14 +413,12 @@ function initPlaylistFilter() {
                 url.searchParams.delete('filter');
             }
             window.history.pushState({}, '', url);
-
             // Filter existing shows
             if (currentPlaylist) {
                 filteredShows = allShowsMetadata.filter(show => showMatchesFilter(show, currentPlaylist));
             } else {
                 filteredShows = allShowsMetadata;
             }
-
             // Reset and reload shows
             currentOffset = 0;
             reachedEnd = false;

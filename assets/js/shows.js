@@ -15,6 +15,18 @@ const CLOUDCAST_API_URL = `https://api.mixcloud.com/90milradio/cloudcasts/?limit
 // DOM Elements
 let showContainer;
 
+// Add playlist filtering state
+let currentPlaylist = '';
+
+// Add state for filtered shows
+let allShows = [];
+let filteredShows = [];
+
+// Add state for all shows metadata
+let allShowsMetadata = [];
+let allShowNames = new Set();
+let isLoadingAllShows = false;
+
 window.addEventListener('message', function (event) {
     // Check if message is from Mixcloud widget or banner
     if (event.origin === MIXCLOUD_ORIGIN || event.origin === BANNER_ORIGIN) {
@@ -90,6 +102,9 @@ window.showsInit = function () {
 
     // Check for hash to auto-play specific show
     checkForAutoPlay();
+
+    // Initialize playlist filter
+    initPlaylistFilter();
 };
 
 function createLoadMoreTrigger() {
@@ -297,12 +312,170 @@ function playShow(showUrl) {
     playBarContainer.style.display = 'flex';
 }
 
+// Add helper function to check if show matches filter
+function showMatchesFilter(show, filterText) {
+    if (!filterText) return true;
+    
+    const searchText = filterText.toLowerCase();
+    
+    // Check show name
+    const name = decodeHtmlEntities(show.name).toLowerCase();
+    if (name.includes(searchText)) return true;
+    
+    // Check host name
+    const hostMatch = name.match(/hosted by (.+)/i);
+    if (hostMatch && hostMatch[1].toLowerCase().includes(searchText)) return true;
+    
+    // Check genres/tags
+    if (show.tags && show.tags.some(tag => tag.name.toLowerCase().includes(searchText))) return true;
+    
+    return false;
+}
+
+// Function to load all shows metadata for the dropdown
+async function loadAllShowNames() {
+    if (isLoadingAllShows) return;
+    isLoadingAllShows = true;
+
+    try {
+        let offset = BATCH_SIZE; // Start from second batch since we already have first batch
+        let hasMore = true;
+
+        while (hasMore) {
+            const url = `${CLOUDCAST_API_URL}&offset=${offset}`;
+            console.log('Loading additional shows, offset:', offset);
+            const response = await fetchWithTimeout(url);
+            
+            if (!response || !response.data || response.data.length === 0) {
+                hasMore = false;
+                break;
+            }
+
+            // Store all metadata
+            allShowsMetadata = [...allShowsMetadata, ...response.data];
+
+            // Add new show names to the set
+            response.data.forEach(show => {
+                const name = decodeHtmlEntities(show.name).split(' hosted by')[0].trim();
+                allShowNames.add(name);
+            });
+
+            // If we have an active filter, update the filtered results
+            if (currentPlaylist) {
+                filteredShows = allShowsMetadata.filter(show => showMatchesFilter(show, currentPlaylist));
+                // Only update the display if we have more filtered results than currently shown
+                if (filteredShows.length > currentOffset) {
+                    renderShows(true);
+                }
+            }
+
+            offset += BATCH_SIZE;
+        }
+    } catch (error) {
+        console.error('Error loading additional shows:', error);
+    } finally {
+        isLoadingAllShows = false;
+    }
+}
+
+// Add playlist filter handler
+function initPlaylistFilter() {
+    console.log('Initializing playlist filter');
+    const playlistFilter = document.getElementById('playlist-filter');
+    if (!playlistFilter) {
+        console.error('Playlist filter element not found');
+        return;
+    }
+
+    // Set initial filter from URL if present
+    const urlParams = new URLSearchParams(window.location.search);
+    const filterParam = urlParams.get('filter');
+    if (filterParam) {
+        playlistFilter.value = filterParam.trim();
+        currentPlaylist = filterParam.trim();
+        // Apply initial filter
+        filteredShows = allShowsMetadata.filter(show => showMatchesFilter(show, currentPlaylist));
+        renderShows();
+    }
+
+    // Add debounced input handler
+    let debounceTimer;
+    playlistFilter.addEventListener('input', (e) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            currentPlaylist = e.target.value.trim().toLowerCase();
+            console.log('Filter changed to:', currentPlaylist);
+            // Update URL without page reload
+            const url = new URL(window.location);
+            if (currentPlaylist) {
+                url.searchParams.set('filter', currentPlaylist);
+            } else {
+                url.searchParams.delete('filter');
+            }
+            window.history.pushState({}, '', url);
+            // Filter existing shows
+            if (currentPlaylist) {
+                filteredShows = allShowsMetadata.filter(show => showMatchesFilter(show, currentPlaylist));
+            } else {
+                filteredShows = allShowsMetadata;
+            }
+            // Reset and reload shows
+            currentOffset = 0;
+            reachedEnd = false;
+            renderShows();
+        }, 300); // 300ms debounce
+    });
+}
+
+// Modify fetchShows to use stored metadata
 async function fetchShows() {
     try {
-        return await fetchWithTimeout(CLOUDCAST_API_URL);
+        console.log('Starting fetchShows');
+        // Reset state when fetching new shows
+        currentOffset = 0;
+        reachedEnd = false;
+        filteredShows = [];
+
+        // If we don't have metadata yet, fetch first batch immediately
+        if (allShowsMetadata.length === 0) {
+            console.log('No metadata yet, fetching first batch');
+            const response = await fetchWithTimeout(CLOUDCAST_API_URL);
+            if (!response || !response.data) {
+                throw new Error('Invalid response from Mixcloud API');
+            }
+            
+            // Store this batch as metadata
+            allShowsMetadata = response.data;
+            
+            // Start loading the rest in the background
+            loadAllShowNames();
+            
+            // If we have an initial filter, apply it
+            if (currentPlaylist) {
+                filteredShows = allShowsMetadata.filter(show => showMatchesFilter(show, currentPlaylist));
+                return { data: filteredShows.slice(0, BATCH_SIZE) };
+            }
+            
+            // Return first batch for immediate display
+            return { data: response.data };
+        }
+
+        // If we have metadata, use it for filtering
+        if (currentPlaylist) {
+            // Search through all metadata for matches
+            filteredShows = allShowsMetadata.filter(show => showMatchesFilter(show, currentPlaylist));
+            console.log('Filtered shows:', filteredShows.length);
+            
+            // Only take the first batch for initial display
+            return { data: filteredShows.slice(0, BATCH_SIZE) };
+        } else {
+            // For unfiltered view, just return first batch
+            filteredShows = allShowsMetadata;
+            return { data: allShowsMetadata.slice(0, BATCH_SIZE) };
+        }
     } catch (error) {
-        console.error('Failed to fetch cloudcasts:', error);
-        return { data: [] };
+        console.error('Failed to fetch shows:', error);
+        throw error;
     }
 }
 
@@ -315,166 +488,250 @@ function handleScroll() {
     const scrollPosition = mainContainer ? mainContainer.scrollTop + mainContainer.clientHeight : window.scrollY + window.innerHeight;
     const totalHeight = mainContainer ? mainContainer.scrollHeight : document.documentElement.scrollHeight;
 
-    if (totalHeight - scrollPosition < SCROLL_THRESHOLD) {
-        loadMoreShows();
+    // If we're filtering, we need to keep loading until we find matches
+    if (currentPlaylist) {
+        // Load more if we're near the bottom or if we haven't found any matches yet
+        if (totalHeight - scrollPosition < SCROLL_THRESHOLD || filteredShows.length === 0) {
+            loadMoreShows();
+        }
+    } else {
+        // Normal pagination for unfiltered view
+        if (totalHeight - scrollPosition < SCROLL_THRESHOLD) {
+            loadMoreShows();
+        }
     }
 }
 
-// Modified renderShows to be a global function and accept options
+// Helper function to process uploads for rendering, with metadata enrichment
+async function flattenAndEnrichUploads(rawShows) {
+    // For each upload, fetch details and merge in
+    const uploads = [];
+    for (const show of rawShows) {
+        const fullName = decodeHtmlEntities(show.name);
+        const hostMatch = fullName.match(/hosted by (.+)/i);
+        const hostName = hostMatch ? hostMatch[1].trim() : '';
+        const showName = fullName.split(' hosted by')[0].trim();
+        const showUploads = show.uploads ? show.uploads : [{
+            key: show.key,
+            url: show.url,
+            created_time: show.created_time
+        }];
+        for (const upload of showUploads) {
+            // Fetch details for each upload (by show key)
+            const details = await fetchShowDetails(upload.key || show.key);
+            uploads.push({
+                showKey: show.key,
+                showName,
+                hostName,
+                pictures: show.pictures,
+                user: show.user,
+                description: decodeHtmlEntities(details?.description || show.description || 'No description available'),
+                tags: details?.tags || show.tags || [],
+                uploadKey: upload.key,
+                uploadUrl: upload.url,
+                uploadCreated: upload.created_time
+            });
+        }
+    }
+    return uploads;
+}
+
+// Helper to create or get the loading ellipsis at the end
+function getOrCreateSpinner() {
+    let spinner = document.getElementById('shows-loading-spinner');
+    if (!spinner) {
+        spinner = document.createElement('div');
+        spinner.id = 'shows-loading-spinner';
+        spinner.className = 'shows-ellipsis';
+        spinner.innerHTML = '<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>';
+        showContainer.appendChild(spinner);
+    } else {
+        // Always move spinner to the end if not already
+        if (spinner.parentNode === showContainer && spinner !== showContainer.lastElementChild) {
+            showContainer.appendChild(spinner);
+        }
+    }
+    return spinner;
+}
+
+function hideSpinner() {
+    const spinner = getOrCreateSpinner();
+    spinner.style.display = 'none';
+}
+
+function showSpinner() {
+    const spinner = getOrCreateSpinner();
+    spinner.style.display = 'flex';
+}
+
+// Modified renderShows to use spinner at the end, without clearing it
 window.renderShows = async function (isAdditional = false) {
     if (isLoadingMore) return;
     isLoadingMore = true;
 
     if (!isAdditional) {
-        const loadingText = document.createElement('div');
-        loadingText.className = 'month-header';
-        loadingText.textContent = 'Loading shows...';
-        showContainer.innerHTML = '';
-        showContainer.appendChild(loadingText);
+        // Only clear show content, not the spinner
+        Array.from(showContainer.children).forEach(child => {
+            if (child.id !== 'shows-loading-spinner') {
+                showContainer.removeChild(child);
+            }
+        });
         showContainer.classList.remove('loaded');
     }
+    showSpinner();
 
     try {
-        const initialShows = (await fetchShows()).data;
-        if (initialShows.length === 0) {
-            if (!isAdditional) {
-                showContainer.innerHTML = 'No shows available at the moment.';
+        const response = await fetchShows();
+        const shows = response.data;
+        if (!shows || !Array.isArray(shows)) {
+            throw new Error(`Invalid shows data: ${JSON.stringify(shows)}`);
+        }
+        const uploads = await flattenAndEnrichUploads(shows);
+        if (uploads.length === 0) {
+            if (!isLoadingAllShows && allShowsMetadata.length > 0) {
+                // Only clear show content, not the spinner
+                Array.from(showContainer.children).forEach(child => {
+                    if (child.id !== 'shows-loading-spinner') {
+                        showContainer.removeChild(child);
+                    }
+                });
             }
+            hideSpinner();
             return;
         }
-
-        const processedShows = await processShows(initialShows);
-
         if (!isAdditional) {
-            showContainer.innerHTML = '';
+            // Only clear show content, not the spinner
+            Array.from(showContainer.children).forEach(child => {
+                if (child.id !== 'shows-loading-spinner') {
+                    showContainer.removeChild(child);
+                }
+            });
             showContainer.classList.add('loaded');
         }
-
-        let processedCount = 0;
-        const mergedShows = new Map(); // Track shows across all batches
-
-        async function processBatch() {
-            const batchShows = processedShows.slice(processedCount, processedCount + BATCH_SIZE);
-            if (batchShows.length === 0) return;
-
-            const batchPromises = batchShows.map(async (show) => {
-                const monthYear = getMonthYear(show.created_time);
-                const showKey = `${show.name}-${monthYear}`;
-
-                if (!mergedShows.has(showKey)) {
-                    mergedShows.set(showKey, {
-                        ...show,
-                        monthYear,
-                        uploads: [show],
-                        latestDate: new Date(show.created_time)
-                    });
-                } else {
-                    const existingShow = mergedShows.get(showKey);
-                    existingShow.uploads.push(show);
-                    const newDate = new Date(show.created_time);
-                    if (newDate > existingShow.latestDate) {
-                        existingShow.latestDate = newDate;
-                    }
-                }
-                return showKey;
-            });
-
-            await Promise.all(batchPromises);
-
-            // Group shows by month
-            const showsByMonth = new Map();
-            Array.from(mergedShows.values()).forEach(show => {
-                const monthYear = formatMonthYear(show.latestDate);
-                if (!showsByMonth.has(monthYear)) {
-                    showsByMonth.set(monthYear, []);
-                }
-                showsByMonth.get(monthYear).push(show);
-            });
-
-            // Render this batch
-            await renderInBatches(showsByMonth, isAdditional);
-
-            processedCount += BATCH_SIZE;
-
-            if (processedCount < processedShows.length) {
-                await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
-                await processBatch();
+        // Group uploads by month
+        const uploadsByMonth = new Map();
+        uploads.forEach(upload => {
+            const monthYear = formatMonthYear(new Date(upload.uploadCreated));
+            if (!uploadsByMonth.has(monthYear)) {
+                uploadsByMonth.set(monthYear, []);
             }
-        }
-
-        await processBatch();
-
-        // Update offset for next fetch
-        currentOffset += initialShows.length;
-
+            uploadsByMonth.get(monthYear).push(upload);
+        });
+        await renderUploadsInBatches(uploadsByMonth, isAdditional);
+        // Always ensure spinner is at the end
+        getOrCreateSpinner();
+        currentOffset += shows.length;
+        hideSpinner();
     } catch (error) {
         console.error('Error rendering shows:', error);
         if (!isAdditional) {
-            showContainer.innerHTML = 'Error loading shows. Please try again later.';
+            // Only clear show content, not the spinner
+            Array.from(showContainer.children).forEach(child => {
+                if (child.id !== 'shows-loading-spinner') {
+                    showContainer.removeChild(child);
+                }
+            });
+            showContainer.innerHTML += `Error loading shows: ${error.message}`;
         }
+        hideSpinner();
     } finally {
         isLoadingMore = false;
     }
 };
 
-// Helper function to process shows consistently
-async function processShows(rawShows) {
-    // First, group shows by their name to collect all uploads
-    const showGroups = new Map();
+// Helper function to render uploads in batches
+async function renderUploadsInBatches(uploadsByMonth, isAdditional) {
+    const sortedMonths = Array.from(uploadsByMonth.entries())
+        .sort(([monthA, uploadsA], [monthB, uploadsB]) => {
+            // Get the first upload of each month to compare dates
+            const dateA = new Date(uploadsA[0].uploadCreated);
+            const dateB = new Date(uploadsB[0].uploadCreated);
+            return dateB - dateA;
+        });
 
-    // First pass - group shows by name and collect their uploads
-    rawShows.forEach(show => {
-        const fullName = decodeHtmlEntities(show.name);
-        const hostMatch = fullName.match(/hosted by (.+)/i);
-        const hostName = hostMatch ? hostMatch[1].trim() : ''; // Just empty string if no host
-        const showName = fullName.split(' hosted by')[0].trim();
+    for (const [monthYear, uploads] of sortedMonths) {
+        let monthContainer = document.querySelector(`[data-month="${monthYear}"]`);
+        if (!monthContainer) {
+            const monthHeader = document.createElement('div');
+            monthHeader.classList.add('month-header');
+            monthHeader.textContent = monthYear;
 
-        if (!showGroups.has(showName)) {
-            showGroups.set(showName, {
-                key: show.key,
-                name: showName,
-                hostName: hostName, // Will be empty string if no host
-                pictures: show.pictures,
-                user: show.user,
-                uploads: []
-            });
+            monthContainer = document.createElement('div');
+            monthContainer.classList.add('month-container');
+            monthContainer.dataset.month = monthYear;
+
+            showContainer.appendChild(monthHeader);
+            showContainer.appendChild(monthContainer);
         }
 
-        // Add this instance as an upload
-        showGroups.get(showName).uploads.push({
-            key: show.key,
-            url: show.url,
-            created_time: show.created_time
-        });
-    });
+        // Sort uploads within month by date
+        const sortedUploads = uploads.sort((a, b) => new Date(b.uploadCreated) - new Date(a.uploadCreated));
+        for (const upload of sortedUploads) {
+            // Use uploadUrl as unique key
+            const showKey = `${upload.showName}-${upload.uploadUrl}`;
+            let existingBox = monthContainer.querySelector(`[data-show-key="${showKey}"]`);
+            if (!existingBox) {
+                // Create a show box for this upload
+                const showBox = document.createElement('div');
+                showBox.className = 'show-box';
+                showBox.dataset.showKey = showKey;
 
-    // Second pass - fetch details and process each unique show
-    const processedShows = await Promise.all(
-        Array.from(showGroups.values()).map(async show => {
-            // Fetch additional details using the first upload's key
-            const details = await fetchShowDetails(show.key);
+                // Image
+                const imageContainer = document.createElement('div');
+                imageContainer.className = 'image-container';
+                const img = document.createElement('img');
+                img.className = 'show-image';
+                img.src = upload.pictures?.large || upload.pictures?.medium || upload.pictures?.thumbnail || '';
+                img.onload = () => img.classList.add('loaded');
+                imageContainer.appendChild(img);
+                showBox.appendChild(imageContainer);
 
-            // Get description and tags from details
-            const description = decodeHtmlEntities(details?.description || 'No description available');
-            const tags = details?.tags || [];
+                // Show name
+                const name = document.createElement('div');
+                name.className = 'show-name';
+                name.textContent = upload.showName;
+                showBox.appendChild(name);
 
-            // Sort uploads by date (newest first)
-            const sortedUploads = show.uploads.sort((a, b) =>
-                new Date(b.created_time) - new Date(a.created_time)
-            );
+                // Host
+                if (upload.hostName && upload.hostName.length > 0) {
+                    const hostedBy = document.createElement('div');
+                    hostedBy.className = 'hosted-by';
+                    hostedBy.textContent = `Hosted by ${upload.hostName}`;
+                    showBox.appendChild(hostedBy);
+                }
 
-            return {
-                ...show,
-                ...details,
-                description,
-                tags,
-                uploads: sortedUploads,
-                created_time: sortedUploads[0].created_time
-            };
-        })
-    );
+                // Genres
+                if (upload.tags?.length > 0) {
+                    const genres = document.createElement('div');
+                    genres.classList.add('genres');
+                    genres.textContent = `Genres: ${upload.tags.map(tag => tag.name).join(', ')}`;
+                    showBox.appendChild(genres);
+                }
 
-    return processedShows;
+                // Description
+                const description = document.createElement('div');
+                description.classList.add('description');
+                description.textContent = upload.description || 'No description available.';
+                showBox.appendChild(description);
+
+                // Play button and date
+                const playDatesContainer = document.createElement('div');
+                playDatesContainer.classList.add('play-dates-container');
+                const playContainer = document.createElement('div');
+                playContainer.classList.add('play-container');
+                playContainer.onclick = () => playShow(upload.uploadUrl);
+                playContainer.appendChild(createPlayButton(upload.uploadUrl));
+                const playDate = document.createElement('div');
+                playDate.classList.add('play-date');
+                playDate.textContent = formatDate(upload.uploadCreated);
+                playContainer.appendChild(playDate);
+                playDatesContainer.appendChild(playContainer);
+                showBox.appendChild(playDatesContainer);
+
+                monthContainer.appendChild(showBox);
+            }
+        }
+    }
 }
 
 function updatePlayDates(showBox, show) {
@@ -520,44 +777,47 @@ function updatePlayDates(showBox, show) {
     }
 }
 
-// Update loadMoreShows to use the common processing
+// Update loadMoreShows to show/hide spinner and keep it at the end
 async function loadMoreShows() {
     if (reachedEnd || isLoadingMore) return;
-
     try {
         isLoadingMore = true;
-        const response = await fetchWithTimeout(
-            `${CLOUDCAST_API_URL}&offset=${currentOffset}`
-        );
-
-        const newShows = response.data;
-
-        if (!newShows || newShows.length === 0) {
+        showSpinner();
+        let nextBatch;
+        if (currentPlaylist) {
+            nextBatch = filteredShows.slice(currentOffset, currentOffset + BATCH_SIZE);
+        } else {
+            nextBatch = allShowsMetadata.slice(currentOffset, currentOffset + BATCH_SIZE);
+        }
+        if (!nextBatch || nextBatch.length === 0) {
             reachedEnd = true;
+            hideSpinner();
             return;
         }
-
-        const processedShows = await processShows(newShows);
-
-        // Group shows by month using actual upload dates
-        const showsByMonth = new Map();
-        processedShows.forEach(show => {
-            const monthYear = formatMonthYear(new Date(show.created_time));
-            if (!showsByMonth.has(monthYear)) {
-                showsByMonth.set(monthYear, []);
+        const uploads = await flattenAndEnrichUploads(nextBatch);
+        if (uploads.length === 0) {
+            reachedEnd = true;
+            hideSpinner();
+            return;
+        }
+        // Group uploads by month
+        const uploadsByMonth = new Map();
+        uploads.forEach(upload => {
+            const monthYear = formatMonthYear(new Date(upload.uploadCreated));
+            if (!uploadsByMonth.has(monthYear)) {
+                uploadsByMonth.set(monthYear, []);
             }
-            showsByMonth.get(monthYear).push(show);
+            uploadsByMonth.get(monthYear).push(upload);
         });
-
-        // Render the additional shows
-        await renderInBatches(showsByMonth, true);
-
-        // Update offset for next fetch
-        currentOffset += BATCH_SIZE;
-
+        await renderUploadsInBatches(uploadsByMonth, true);
+        // Always ensure spinner is at the end
+        getOrCreateSpinner();
+        currentOffset += nextBatch.length;
+        hideSpinner();
     } catch (error) {
         console.error('Error loading more shows:', error);
         currentOffset -= BATCH_SIZE;
+        hideSpinner();
     } finally {
         isLoadingMore = false;
     }
@@ -614,7 +874,7 @@ async function renderInBatches(showsByMonth, isAdditional) {
         });
 
     // Process all months
-    sortedMonths.forEach(([monthYear, shows]) => {
+    for (const [monthYear, shows] of sortedMonths) {
         let monthContainer = document.querySelector(`[data-month="${monthYear}"]`);
 
         if (!monthContainer) {
@@ -631,8 +891,13 @@ async function renderInBatches(showsByMonth, isAdditional) {
             showContainer.appendChild(monthContainer);
         }
 
+        // Sort shows within month by date
+        const sortedShows = shows.sort((a, b) => 
+            new Date(b.created_time) - new Date(a.created_time)
+        );
+
         // Update shows within month container
-        shows.forEach(show => {
+        for (const show of sortedShows) {
             const existingBox = monthContainer.querySelector(`[data-show-key="${show.name}"]`);
 
             if (existingBox) {
@@ -670,8 +935,8 @@ async function renderInBatches(showsByMonth, isAdditional) {
                 newBox.__showData = show;
                 monthContainer.appendChild(newBox);
             }
-        });
-    });
+        }
+    }
 }
 
 function checkForAutoPlay() {
@@ -681,5 +946,32 @@ function checkForAutoPlay() {
         setTimeout(() => {
             playShow('https://www.mixcloud.com/90milradio/circling-the-whuhula-tales-of-our-i/');
         }, 1000);
+    }
+}
+
+// Function to update the playlist dropdown
+function updatePlaylistDropdown() {
+    const playlistSelect = document.getElementById('playlist-select');
+    if (!playlistSelect) return;
+
+    // Store current selection
+    const currentValue = playlistSelect.value;
+
+    // Clear existing options except "All shows"
+    while (playlistSelect.options.length > 1) {
+        playlistSelect.remove(1);
+    }
+
+    // Add each show name as an option
+    [...allShowNames].sort().forEach(name => {
+        const option = document.createElement('option');
+        option.value = name.toLowerCase();
+        option.textContent = name;
+        playlistSelect.appendChild(option);
+    });
+
+    // Restore selection
+    if (currentValue) {
+        playlistSelect.value = currentValue;
     }
 } 

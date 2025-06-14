@@ -105,6 +105,7 @@ window.showsInit = function () {
 
     // Initialize playlist filter
     initPlaylistFilter();
+    setupShowsNavFilterClear();
 };
 
 function createLoadMoreTrigger() {
@@ -398,7 +399,7 @@ function initPlaylistFilter() {
         renderShows();
     }
 
-    // Add debounced input handler
+    // Live filter with debounce and immediate filter on Enter
     let debounceTimer;
     playlistFilter.addEventListener('input', (e) => {
         clearTimeout(debounceTimer);
@@ -423,7 +424,32 @@ function initPlaylistFilter() {
             currentOffset = 0;
             reachedEnd = false;
             renderShows();
-        }, 300); // 300ms debounce
+        }, 600); // 600ms debounce
+    });
+    playlistFilter.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.keyCode === 13) {
+            clearTimeout(debounceTimer);
+            currentPlaylist = e.target.value.trim().toLowerCase();
+            console.log('Filter changed to:', currentPlaylist);
+            // Update URL without page reload
+            const url = new URL(window.location);
+            if (currentPlaylist) {
+                url.searchParams.set('filter', currentPlaylist);
+            } else {
+                url.searchParams.delete('filter');
+            }
+            window.history.pushState({}, '', url);
+            // Filter existing shows
+            if (currentPlaylist) {
+                filteredShows = allShowsMetadata.filter(show => showMatchesFilter(show, currentPlaylist));
+            } else {
+                filteredShows = allShowsMetadata;
+            }
+            // Reset and reload shows
+            currentOffset = 0;
+            reachedEnd = false;
+            renderShows();
+        }
     });
 }
 
@@ -974,4 +1000,39 @@ function updatePlaylistDropdown() {
     if (currentValue) {
         playlistSelect.value = currentValue;
     }
+}
+
+// Utility to clear the filter input and state
+function clearShowFilter() {
+    const playlistFilter = document.getElementById('playlist-filter');
+    if (playlistFilter) playlistFilter.value = '';
+    currentPlaylist = '';
+    filteredShows = allShowsMetadata;
+    // Remove filter param from URL
+    const url = new URL(window.location);
+    url.searchParams.delete('filter');
+    window.history.replaceState({}, '', url);
+}
+
+// Attach event listener to shows nav link to clear filter
+function setupShowsNavFilterClear() {
+    // Try to find the shows nav link
+    const navLinks = document.querySelectorAll('.nav-links a, nav .nav-links a');
+    navLinks.forEach(link => {
+        if (link.getAttribute('href') === '/shows' || link.pathname === '/shows') {
+            link.addEventListener('click', () => {
+                clearShowFilter();
+                if (typeof window.renderShows === 'function') {
+                    window.renderShows();
+                }
+            });
+        }
+    });
+}
+
+// Call setupShowsNavFilterClear after DOMContentLoaded and after showsInit
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupShowsNavFilterClear);
+} else {
+    setupShowsNavFilterClear();
 } 

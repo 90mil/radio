@@ -332,6 +332,104 @@ function showMatchesFilter(show, filterText) {
     return false;
 }
 
+// Function to load all shows metadata for the dropdown
+async function loadAllShowNames() {
+    if (isLoadingAllShows) return;
+    isLoadingAllShows = true;
+
+    try {
+        let offset = BATCH_SIZE; // Start from second batch since we already have first batch
+        let hasMore = true;
+
+        while (hasMore) {
+            const url = `${CLOUDCAST_API_URL}&offset=${offset}`;
+            console.log('Loading additional shows, offset:', offset);
+            const response = await fetchWithTimeout(url);
+            
+            if (!response || !response.data || response.data.length === 0) {
+                hasMore = false;
+                break;
+            }
+
+            // Store all metadata
+            allShowsMetadata = [...allShowsMetadata, ...response.data];
+
+            // Add new show names to the set
+            response.data.forEach(show => {
+                const name = decodeHtmlEntities(show.name).split(' hosted by')[0].trim();
+                allShowNames.add(name);
+            });
+
+            // If we have an active filter, update the filtered results
+            if (currentPlaylist) {
+                filteredShows = allShowsMetadata.filter(show => showMatchesFilter(show, currentPlaylist));
+                // Only update the display if we have more filtered results than currently shown
+                if (filteredShows.length > currentOffset) {
+                    renderShows(true);
+                }
+            }
+
+            offset += BATCH_SIZE;
+        }
+    } catch (error) {
+        console.error('Error loading additional shows:', error);
+    } finally {
+        isLoadingAllShows = false;
+    }
+}
+
+// Add playlist filter handler
+function initPlaylistFilter() {
+    console.log('Initializing playlist filter');
+    const playlistFilter = document.getElementById('playlist-filter');
+    if (!playlistFilter) {
+        console.error('Playlist filter element not found');
+        return;
+    }
+
+    // Set initial filter from URL if present
+    const urlParams = new URLSearchParams(window.location.search);
+    const filterParam = urlParams.get('filter');
+    if (filterParam) {
+        playlistFilter.value = filterParam;
+        currentPlaylist = filterParam;
+        // Apply initial filter
+        filteredShows = allShowsMetadata.filter(show => showMatchesFilter(show, currentPlaylist));
+        renderShows();
+    }
+
+    // Add debounced input handler
+    let debounceTimer;
+    playlistFilter.addEventListener('input', (e) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            currentPlaylist = e.target.value.toLowerCase();
+            console.log('Filter changed to:', currentPlaylist);
+            
+            // Update URL without page reload
+            const url = new URL(window.location);
+            if (currentPlaylist) {
+                url.searchParams.set('filter', currentPlaylist);
+            } else {
+                url.searchParams.delete('filter');
+            }
+            window.history.pushState({}, '', url);
+
+            // Filter existing shows
+            if (currentPlaylist) {
+                filteredShows = allShowsMetadata.filter(show => showMatchesFilter(show, currentPlaylist));
+            } else {
+                filteredShows = allShowsMetadata;
+            }
+
+            // Reset and reload shows
+            currentOffset = 0;
+            reachedEnd = false;
+            renderShows();
+        }, 300); // 300ms debounce
+    });
+}
+
 // Modify fetchShows to use stored metadata
 async function fetchShows() {
     try {
@@ -354,6 +452,12 @@ async function fetchShows() {
             
             // Start loading the rest in the background
             loadAllShowNames();
+            
+            // If we have an initial filter, apply it
+            if (currentPlaylist) {
+                filteredShows = allShowsMetadata.filter(show => showMatchesFilter(show, currentPlaylist));
+                return { data: filteredShows.slice(0, BATCH_SIZE) };
+            }
             
             // Return first batch for immediate display
             return { data: response.data };
@@ -401,131 +505,236 @@ function handleScroll() {
     }
 }
 
-// Modified renderShows to handle errors properly
+// Helper function to process uploads for rendering, with metadata enrichment
+async function flattenAndEnrichUploads(rawShows) {
+    // For each upload, fetch details and merge in
+    const uploads = [];
+    for (const show of rawShows) {
+        const fullName = decodeHtmlEntities(show.name);
+        const hostMatch = fullName.match(/hosted by (.+)/i);
+        const hostName = hostMatch ? hostMatch[1].trim() : '';
+        const showName = fullName.split(' hosted by')[0].trim();
+        const showUploads = show.uploads ? show.uploads : [{
+            key: show.key,
+            url: show.url,
+            created_time: show.created_time
+        }];
+        for (const upload of showUploads) {
+            // Fetch details for each upload (by show key)
+            const details = await fetchShowDetails(upload.key || show.key);
+            uploads.push({
+                showKey: show.key,
+                showName,
+                hostName,
+                pictures: show.pictures,
+                user: show.user,
+                description: decodeHtmlEntities(details?.description || show.description || 'No description available'),
+                tags: details?.tags || show.tags || [],
+                uploadKey: upload.key,
+                uploadUrl: upload.url,
+                uploadCreated: upload.created_time
+            });
+        }
+    }
+    return uploads;
+}
+
+// Helper to create or get the loading ellipsis at the end
+function getOrCreateSpinner() {
+    let spinner = document.getElementById('shows-loading-spinner');
+    if (!spinner) {
+        spinner = document.createElement('div');
+        spinner.id = 'shows-loading-spinner';
+        spinner.className = 'shows-ellipsis';
+        spinner.innerHTML = '<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>';
+        showContainer.appendChild(spinner);
+    } else {
+        // Always move spinner to the end if not already
+        if (spinner.parentNode === showContainer && spinner !== showContainer.lastElementChild) {
+            showContainer.appendChild(spinner);
+        }
+    }
+    return spinner;
+}
+
+function hideSpinner() {
+    const spinner = getOrCreateSpinner();
+    spinner.style.display = 'none';
+}
+
+function showSpinner() {
+    const spinner = getOrCreateSpinner();
+    spinner.style.display = 'flex';
+}
+
+// Modified renderShows to use spinner at the end, without clearing it
 window.renderShows = async function (isAdditional = false) {
     if (isLoadingMore) return;
     isLoadingMore = true;
 
     if (!isAdditional) {
-        const loadingText = document.createElement('div');
-        loadingText.className = 'month-header';
-        loadingText.textContent = 'Loading shows...';
-        showContainer.innerHTML = '';
-        showContainer.appendChild(loadingText);
+        // Only clear show content, not the spinner
+        Array.from(showContainer.children).forEach(child => {
+            if (child.id !== 'shows-loading-spinner') {
+                showContainer.removeChild(child);
+            }
+        });
         showContainer.classList.remove('loaded');
     }
+    showSpinner();
 
     try {
         const response = await fetchShows();
         const shows = response.data;
-        
         if (!shows || !Array.isArray(shows)) {
             throw new Error(`Invalid shows data: ${JSON.stringify(shows)}`);
         }
-
-        if (shows.length === 0) {
-            if (!isAdditional) {
-                showContainer.innerHTML = 'No shows available at the moment.';
+        const uploads = await flattenAndEnrichUploads(shows);
+        if (uploads.length === 0) {
+            if (!isLoadingAllShows && allShowsMetadata.length > 0) {
+                // Only clear show content, not the spinner
+                Array.from(showContainer.children).forEach(child => {
+                    if (child.id !== 'shows-loading-spinner') {
+                        showContainer.removeChild(child);
+                    }
+                });
             }
+            hideSpinner();
             return;
         }
-
-        const processedShows = await processShows(shows);
-
         if (!isAdditional) {
-            showContainer.innerHTML = '';
+            // Only clear show content, not the spinner
+            Array.from(showContainer.children).forEach(child => {
+                if (child.id !== 'shows-loading-spinner') {
+                    showContainer.removeChild(child);
+                }
+            });
             showContainer.classList.add('loaded');
         }
-
-        // Group shows by month
-        const showsByMonth = new Map();
-        processedShows.forEach(show => {
-            // Use the most recent upload date for grouping
-            const latestUpload = show.uploads.reduce((latest, current) => {
-                return new Date(current.created_time) > new Date(latest.created_time) ? current : latest;
-            }, show.uploads[0]);
-            
-            const monthYear = formatMonthYear(new Date(latestUpload.created_time));
-            if (!showsByMonth.has(monthYear)) {
-                showsByMonth.set(monthYear, []);
+        // Group uploads by month
+        const uploadsByMonth = new Map();
+        uploads.forEach(upload => {
+            const monthYear = formatMonthYear(new Date(upload.uploadCreated));
+            if (!uploadsByMonth.has(monthYear)) {
+                uploadsByMonth.set(monthYear, []);
             }
-            showsByMonth.get(monthYear).push(show);
+            uploadsByMonth.get(monthYear).push(upload);
         });
-
-        // Render all shows immediately
-        await renderInBatches(showsByMonth, isAdditional);
-
-        // Update offset for next fetch
+        await renderUploadsInBatches(uploadsByMonth, isAdditional);
+        // Always ensure spinner is at the end
+        getOrCreateSpinner();
         currentOffset += shows.length;
-
+        hideSpinner();
     } catch (error) {
         console.error('Error rendering shows:', error);
         if (!isAdditional) {
-            showContainer.innerHTML = `Error loading shows: ${error.message}`;
+            // Only clear show content, not the spinner
+            Array.from(showContainer.children).forEach(child => {
+                if (child.id !== 'shows-loading-spinner') {
+                    showContainer.removeChild(child);
+                }
+            });
+            showContainer.innerHTML += `Error loading shows: ${error.message}`;
         }
+        hideSpinner();
     } finally {
         isLoadingMore = false;
     }
 };
 
-// Helper function to process shows consistently
-async function processShows(rawShows) {
-    // First, group shows by their name to collect all uploads
-    const showGroups = new Map();
+// Helper function to render uploads in batches
+async function renderUploadsInBatches(uploadsByMonth, isAdditional) {
+    const sortedMonths = Array.from(uploadsByMonth.entries())
+        .sort(([monthA, uploadsA], [monthB, uploadsB]) => {
+            // Get the first upload of each month to compare dates
+            const dateA = new Date(uploadsA[0].uploadCreated);
+            const dateB = new Date(uploadsB[0].uploadCreated);
+            return dateB - dateA;
+        });
 
-    // First pass - group shows by name and collect their uploads
-    rawShows.forEach(show => {
-        const fullName = decodeHtmlEntities(show.name);
-        const hostMatch = fullName.match(/hosted by (.+)/i);
-        const hostName = hostMatch ? hostMatch[1].trim() : ''; // Just empty string if no host
-        const showName = fullName.split(' hosted by')[0].trim();
+    for (const [monthYear, uploads] of sortedMonths) {
+        let monthContainer = document.querySelector(`[data-month="${monthYear}"]`);
+        if (!monthContainer) {
+            const monthHeader = document.createElement('div');
+            monthHeader.classList.add('month-header');
+            monthHeader.textContent = monthYear;
 
-        if (!showGroups.has(showName)) {
-            showGroups.set(showName, {
-                key: show.key,
-                name: showName,
-                hostName: hostName, // Will be empty string if no host
-                pictures: show.pictures,
-                user: show.user,
-                uploads: []
-            });
+            monthContainer = document.createElement('div');
+            monthContainer.classList.add('month-container');
+            monthContainer.dataset.month = monthYear;
+
+            showContainer.appendChild(monthHeader);
+            showContainer.appendChild(monthContainer);
         }
 
-        // Add this instance as an upload
-        showGroups.get(showName).uploads.push({
-            key: show.key,
-            url: show.url,
-            created_time: show.created_time
-        });
-    });
+        // Sort uploads within month by date
+        const sortedUploads = uploads.sort((a, b) => new Date(b.uploadCreated) - new Date(a.uploadCreated));
+        for (const upload of sortedUploads) {
+            // Use uploadUrl as unique key
+            const showKey = `${upload.showName}-${upload.uploadUrl}`;
+            let existingBox = monthContainer.querySelector(`[data-show-key="${showKey}"]`);
+            if (!existingBox) {
+                // Create a show box for this upload
+                const showBox = document.createElement('div');
+                showBox.className = 'show-box';
+                showBox.dataset.showKey = showKey;
 
-    // Second pass - fetch details and process each unique show
-    const processedShows = await Promise.all(
-        Array.from(showGroups.values()).map(async show => {
-            // Fetch additional details using the first upload's key
-            const details = await fetchShowDetails(show.key);
+                // Image
+                const imageContainer = document.createElement('div');
+                imageContainer.className = 'image-container';
+                const img = document.createElement('img');
+                img.className = 'show-image';
+                img.src = upload.pictures?.large || upload.pictures?.medium || upload.pictures?.thumbnail || '';
+                img.onload = () => img.classList.add('loaded');
+                imageContainer.appendChild(img);
+                showBox.appendChild(imageContainer);
 
-            // Get description and tags from details
-            const description = decodeHtmlEntities(details?.description || 'No description available');
-            const tags = details?.tags || [];
+                // Show name
+                const name = document.createElement('div');
+                name.className = 'show-name';
+                name.textContent = upload.showName;
+                showBox.appendChild(name);
 
-            // Sort uploads by date (newest first)
-            const sortedUploads = show.uploads.sort((a, b) =>
-                new Date(b.created_time) - new Date(a.created_time)
-            );
+                // Host
+                if (upload.hostName && upload.hostName.length > 0) {
+                    const hostedBy = document.createElement('div');
+                    hostedBy.className = 'hosted-by';
+                    hostedBy.textContent = `Hosted by ${upload.hostName}`;
+                    showBox.appendChild(hostedBy);
+                }
 
-            return {
-                ...show,
-                ...details,
-                description,
-                tags,
-                uploads: sortedUploads,
-                created_time: sortedUploads[0].created_time
-            };
-        })
-    );
+                // Genres
+                if (upload.tags?.length > 0) {
+                    const genres = document.createElement('div');
+                    genres.classList.add('genres');
+                    genres.textContent = `Genres: ${upload.tags.map(tag => tag.name).join(', ')}`;
+                    showBox.appendChild(genres);
+                }
 
-    return processedShows;
+                // Description
+                const description = document.createElement('div');
+                description.classList.add('description');
+                description.textContent = upload.description || 'No description available.';
+                showBox.appendChild(description);
+
+                // Play button and date
+                const playDatesContainer = document.createElement('div');
+                playDatesContainer.classList.add('play-dates-container');
+                const playContainer = document.createElement('div');
+                playContainer.classList.add('play-container');
+                playContainer.onclick = () => playShow(upload.uploadUrl);
+                playContainer.appendChild(createPlayButton(upload.uploadUrl));
+                const playDate = document.createElement('div');
+                playDate.classList.add('play-date');
+                playDate.textContent = formatDate(upload.uploadCreated);
+                playContainer.appendChild(playDate);
+                playDatesContainer.appendChild(playContainer);
+                showBox.appendChild(playDatesContainer);
+
+                monthContainer.appendChild(showBox);
+            }
+        }
+    }
 }
 
 function updatePlayDates(showBox, show) {
@@ -571,59 +780,47 @@ function updatePlayDates(showBox, show) {
     }
 }
 
-// Update loadMoreShows to use stored metadata
+// Update loadMoreShows to show/hide spinner and keep it at the end
 async function loadMoreShows() {
     if (reachedEnd || isLoadingMore) return;
-
     try {
         isLoadingMore = true;
-
+        showSpinner();
+        let nextBatch;
         if (currentPlaylist) {
-            // For filtered view, get next batch from filtered shows
-            const nextBatch = filteredShows.slice(currentOffset, currentOffset + BATCH_SIZE);
-            
-            if (!nextBatch || nextBatch.length === 0) {
-                reachedEnd = true;
-                return;
-            }
-
-            const processedShows = await processShows(nextBatch);
-            const showsByMonth = new Map();
-            processedShows.forEach(show => {
-                const monthYear = formatMonthYear(new Date(show.created_time));
-                if (!showsByMonth.has(monthYear)) {
-                    showsByMonth.set(monthYear, []);
-                }
-                showsByMonth.get(monthYear).push(show);
-            });
-            await renderInBatches(showsByMonth, true);
+            nextBatch = filteredShows.slice(currentOffset, currentOffset + BATCH_SIZE);
         } else {
-            // For unfiltered view, get next batch from all metadata
-            const nextBatch = allShowsMetadata.slice(currentOffset, currentOffset + BATCH_SIZE);
-            
-            if (!nextBatch || nextBatch.length === 0) {
-                reachedEnd = true;
-                return;
-            }
-
-            const processedShows = await processShows(nextBatch);
-            const showsByMonth = new Map();
-            processedShows.forEach(show => {
-                const monthYear = formatMonthYear(new Date(show.created_time));
-                if (!showsByMonth.has(monthYear)) {
-                    showsByMonth.set(monthYear, []);
-                }
-                showsByMonth.get(monthYear).push(show);
-            });
-            await renderInBatches(showsByMonth, true);
+            nextBatch = allShowsMetadata.slice(currentOffset, currentOffset + BATCH_SIZE);
         }
-
-        // Update offset for next fetch
-        currentOffset += BATCH_SIZE;
-
+        if (!nextBatch || nextBatch.length === 0) {
+            reachedEnd = true;
+            hideSpinner();
+            return;
+        }
+        const uploads = await flattenAndEnrichUploads(nextBatch);
+        if (uploads.length === 0) {
+            reachedEnd = true;
+            hideSpinner();
+            return;
+        }
+        // Group uploads by month
+        const uploadsByMonth = new Map();
+        uploads.forEach(upload => {
+            const monthYear = formatMonthYear(new Date(upload.uploadCreated));
+            if (!uploadsByMonth.has(monthYear)) {
+                uploadsByMonth.set(monthYear, []);
+            }
+            uploadsByMonth.get(monthYear).push(upload);
+        });
+        await renderUploadsInBatches(uploadsByMonth, true);
+        // Always ensure spinner is at the end
+        getOrCreateSpinner();
+        currentOffset += nextBatch.length;
+        hideSpinner();
     } catch (error) {
         console.error('Error loading more shows:', error);
         currentOffset -= BATCH_SIZE;
+        hideSpinner();
     } finally {
         isLoadingMore = false;
     }
@@ -755,43 +952,6 @@ function checkForAutoPlay() {
     }
 }
 
-// Function to load all shows metadata for the dropdown
-async function loadAllShowNames() {
-    if (isLoadingAllShows) return;
-    isLoadingAllShows = true;
-
-    try {
-        let offset = BATCH_SIZE; // Start from second batch since we already have first batch
-        let hasMore = true;
-
-        while (hasMore) {
-            const url = `${CLOUDCAST_API_URL}&offset=${offset}`;
-            console.log('Loading additional shows, offset:', offset);
-            const response = await fetchWithTimeout(url);
-            
-            if (!response || !response.data || response.data.length === 0) {
-                hasMore = false;
-                break;
-            }
-
-            // Store all metadata
-            allShowsMetadata = [...allShowsMetadata, ...response.data];
-
-            // Add new show names to the set
-            response.data.forEach(show => {
-                const name = decodeHtmlEntities(show.name).split(' hosted by')[0].trim();
-                allShowNames.add(name);
-            });
-
-            offset += BATCH_SIZE;
-        }
-    } catch (error) {
-        console.error('Error loading additional shows:', error);
-    } finally {
-        isLoadingAllShows = false;
-    }
-}
-
 // Function to update the playlist dropdown
 function updatePlaylistDropdown() {
     const playlistSelect = document.getElementById('playlist-select');
@@ -817,53 +977,4 @@ function updatePlaylistDropdown() {
     if (currentValue) {
         playlistSelect.value = currentValue;
     }
-}
-
-// Add playlist filter handler
-function initPlaylistFilter() {
-    console.log('Initializing playlist filter');
-    const playlistFilter = document.getElementById('playlist-filter');
-    if (!playlistFilter) {
-        console.error('Playlist filter element not found');
-        return;
-    }
-
-    // Set initial filter from URL if present
-    const urlParams = new URLSearchParams(window.location.search);
-    const playlistParam = urlParams.get('playlist');
-    if (playlistParam) {
-        playlistFilter.value = playlistParam;
-        currentPlaylist = playlistParam;
-    }
-
-    // Add debounced input handler
-    let debounceTimer;
-    playlistFilter.addEventListener('input', (e) => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            currentPlaylist = e.target.value.toLowerCase();
-            console.log('Filter changed to:', currentPlaylist);
-            
-            // Update URL without page reload
-            const url = new URL(window.location);
-            if (currentPlaylist) {
-                url.searchParams.set('playlist', currentPlaylist);
-            } else {
-                url.searchParams.delete('playlist');
-            }
-            window.history.pushState({}, '', url);
-
-            // Filter existing shows
-            if (currentPlaylist) {
-                filteredShows = allShowsMetadata.filter(show => showMatchesFilter(show, currentPlaylist));
-            } else {
-                filteredShows = allShowsMetadata;
-            }
-
-            // Reset and reload shows
-            currentOffset = 0;
-            reachedEnd = false;
-            renderShows();
-        }, 300); // 300ms debounce
-    });
 } 

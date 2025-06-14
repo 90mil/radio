@@ -376,3 +376,30 @@
         margin-right: var(--margin-mobile);
     }
 }
+
+.playlist-filter {
+    padding: 20px var(--margin-desktop);
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.playlist-select {
+    background: var(--accent-2);
+    border: 1px solid var(--accent-1);
+    color: var(--text-color);
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background: var(--accent-1);
+    }
+
+    &:focus {
+        outline: none;
+        border-color: var(--text-color);
+    }
+}

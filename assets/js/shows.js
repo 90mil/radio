@@ -15,6 +15,13 @@ const CLOUDCAST_API_URL = `https://api.mixcloud.com/90milradio/cloudcasts/?limit
 // DOM Elements
 let showContainer;
 
+// Add playlist filtering state
+let currentPlaylist = '';
+
+// Add state for filtered shows
+let allShows = [];
+let filteredShows = [];
+
 window.addEventListener('message', function (event) {
     // Check if message is from Mixcloud widget or banner
     if (event.origin === MIXCLOUD_ORIGIN || event.origin === BANNER_ORIGIN) {
@@ -90,6 +97,9 @@ window.showsInit = function () {
 
     // Check for hash to auto-play specific show
     checkForAutoPlay();
+
+    // Initialize playlist filter
+    initPlaylistFilter();
 };
 
 function createLoadMoreTrigger() {
@@ -297,12 +307,144 @@ function playShow(showUrl) {
     playBarContainer.style.display = 'flex';
 }
 
+// Add playlist filter handler
+function initPlaylistFilter() {
+    console.log('Initializing playlist filter');
+    const playlistSelect = document.getElementById('playlist-select');
+    if (!playlistSelect) {
+        console.error('Playlist select element not found');
+        return;
+    }
+
+    // Clear existing options except "All shows"
+    while (playlistSelect.options.length > 1) {
+        playlistSelect.remove(1);
+    }
+
+    // Set initial playlist from URL if present
+    const urlParams = new URLSearchParams(window.location.search);
+    const playlistParam = urlParams.get('playlist');
+    if (playlistParam) {
+        playlistSelect.value = playlistParam;
+        currentPlaylist = playlistParam;
+    }
+
+    // Function to update dropdown options
+    function updatePlaylistOptions(shows) {
+        console.log('Updating playlist options with shows:', shows.length);
+        // Get unique show names
+        const showNames = [...new Set(shows.map(show => {
+            const name = decodeHtmlEntities(show.name);
+            return name.split(' hosted by')[0].trim();
+        }))];
+        console.log('Unique show names:', showNames);
+
+        // Add each show name as an option
+        showNames.forEach(name => {
+            const option = document.createElement('option');
+            option.value = name.toLowerCase();
+            option.textContent = name;
+            playlistSelect.appendChild(option);
+        });
+
+        // Restore selected value if it exists
+        if (playlistParam) {
+            playlistSelect.value = playlistParam;
+        }
+    }
+
+    playlistSelect.addEventListener('change', (e) => {
+        currentPlaylist = e.target.value;
+        console.log('Playlist changed to:', currentPlaylist);
+        
+        // Update URL without page reload
+        const url = new URL(window.location);
+        if (currentPlaylist) {
+            url.searchParams.set('playlist', currentPlaylist);
+        } else {
+            url.searchParams.delete('playlist');
+        }
+        window.history.pushState({}, '', url);
+
+        // Filter existing shows
+        if (currentPlaylist) {
+            filteredShows = allShows.filter(show => {
+                const name = decodeHtmlEntities(show.name).toLowerCase();
+                return name.includes(currentPlaylist.toLowerCase());
+            });
+        } else {
+            filteredShows = allShows;
+        }
+
+        // Reset and reload shows
+        currentOffset = 0;
+        reachedEnd = false;
+        renderShows();
+    });
+}
+
+// Modify fetchShows to load all shows metadata first
 async function fetchShows() {
     try {
-        return await fetchWithTimeout(CLOUDCAST_API_URL);
+        console.log('Starting fetchShows');
+        // Reset state when fetching new shows
+        currentOffset = 0;
+        reachedEnd = false;
+        allShows = [];
+        filteredShows = [];
+
+        // Initial fetch
+        console.log('Fetching from URL:', CLOUDCAST_API_URL);
+        const response = await fetchWithTimeout(CLOUDCAST_API_URL);
+        console.log('API Response:', response);
+        
+        if (!response || !response.data) {
+            throw new Error('Invalid response from Mixcloud API');
+        }
+
+        // Store all shows
+        allShows = response.data;
+        console.log('Loaded shows:', allShows.length);
+        
+        // Update playlist options
+        const playlistSelect = document.getElementById('playlist-select');
+        if (playlistSelect) {
+            // Clear existing options except "All shows"
+            while (playlistSelect.options.length > 1) {
+                playlistSelect.remove(1);
+            }
+
+            // Get unique show names
+            const showNames = [...new Set(allShows.map(show => {
+                const name = decodeHtmlEntities(show.name);
+                return name.split(' hosted by')[0].trim();
+            }))];
+            console.log('Unique show names:', showNames);
+
+            // Add each show name as an option
+            showNames.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name.toLowerCase();
+                option.textContent = name;
+                playlistSelect.appendChild(option);
+            });
+        }
+        
+        // Filter shows if playlist is selected
+        if (currentPlaylist) {
+            filteredShows = allShows.filter(show => {
+                const name = show.name.toLowerCase();
+                return name.includes(currentPlaylist.toLowerCase());
+            });
+            console.log('Filtered shows:', filteredShows.length);
+        } else {
+            filteredShows = allShows;
+        }
+
+        return { data: filteredShows };
     } catch (error) {
-        console.error('Failed to fetch cloudcasts:', error);
-        return { data: [] };
+        console.error('Failed to fetch shows:', error);
+        throw error;
     }
 }
 
@@ -320,7 +462,7 @@ function handleScroll() {
     }
 }
 
-// Modified renderShows to be a global function and accept options
+// Modified renderShows to handle errors properly
 window.renderShows = async function (isAdditional = false) {
     if (isLoadingMore) return;
     isLoadingMore = true;
@@ -335,15 +477,21 @@ window.renderShows = async function (isAdditional = false) {
     }
 
     try {
-        const initialShows = (await fetchShows()).data;
-        if (initialShows.length === 0) {
+        const response = await fetchShows();
+        const shows = response.data;
+        
+        if (!shows || !Array.isArray(shows)) {
+            throw new Error(`Invalid shows data: ${JSON.stringify(shows)}`);
+        }
+
+        if (shows.length === 0) {
             if (!isAdditional) {
                 showContainer.innerHTML = 'No shows available at the moment.';
             }
             return;
         }
 
-        const processedShows = await processShows(initialShows);
+        const processedShows = await processShows(shows);
 
         if (!isAdditional) {
             showContainer.innerHTML = '';
@@ -351,7 +499,7 @@ window.renderShows = async function (isAdditional = false) {
         }
 
         let processedCount = 0;
-        const mergedShows = new Map(); // Track shows across all batches
+        const mergedShows = new Map();
 
         async function processBatch() {
             const batchShows = processedShows.slice(processedCount, processedCount + BATCH_SIZE);
@@ -405,12 +553,12 @@ window.renderShows = async function (isAdditional = false) {
         await processBatch();
 
         // Update offset for next fetch
-        currentOffset += initialShows.length;
+        currentOffset += shows.length;
 
     } catch (error) {
         console.error('Error rendering shows:', error);
         if (!isAdditional) {
-            showContainer.innerHTML = 'Error loading shows. Please try again later.';
+            showContainer.innerHTML = `Error loading shows: ${error.message}`;
         }
     } finally {
         isLoadingMore = false;
@@ -520,16 +668,15 @@ function updatePlayDates(showBox, show) {
     }
 }
 
-// Update loadMoreShows to use the common processing
+// Update loadMoreShows to handle pagination with filtered shows
 async function loadMoreShows() {
     if (reachedEnd || isLoadingMore) return;
 
     try {
         isLoadingMore = true;
-        const response = await fetchWithTimeout(
-            `${CLOUDCAST_API_URL}&offset=${currentOffset}`
-        );
-
+        const url = `${CLOUDCAST_API_URL}&offset=${currentOffset}`;
+        
+        const response = await fetchWithTimeout(url);
         const newShows = response.data;
 
         if (!newShows || newShows.length === 0) {
@@ -537,20 +684,36 @@ async function loadMoreShows() {
             return;
         }
 
-        const processedShows = await processShows(newShows);
+        // Add new shows to allShows
+        allShows = [...allShows, ...newShows];
 
-        // Group shows by month using actual upload dates
-        const showsByMonth = new Map();
-        processedShows.forEach(show => {
-            const monthYear = formatMonthYear(new Date(show.created_time));
-            if (!showsByMonth.has(monthYear)) {
-                showsByMonth.set(monthYear, []);
-            }
-            showsByMonth.get(monthYear).push(show);
-        });
+        // Update filtered shows
+        if (currentPlaylist) {
+            const newFilteredShows = newShows.filter(show => {
+                const name = show.name.toLowerCase();
+                return name.includes(currentPlaylist.toLowerCase());
+            });
+            filteredShows = [...filteredShows, ...newFilteredShows];
+        } else {
+            filteredShows = allShows;
+        }
 
-        // Render the additional shows
-        await renderInBatches(showsByMonth, true);
+        if (filteredShows.length > 0) {
+            const processedShows = await processShows(filteredShows);
+
+            // Group shows by month using actual upload dates
+            const showsByMonth = new Map();
+            processedShows.forEach(show => {
+                const monthYear = formatMonthYear(new Date(show.created_time));
+                if (!showsByMonth.has(monthYear)) {
+                    showsByMonth.set(monthYear, []);
+                }
+                showsByMonth.get(monthYear).push(show);
+            });
+
+            // Render the additional shows
+            await renderInBatches(showsByMonth, true);
+        }
 
         // Update offset for next fetch
         currentOffset += BATCH_SIZE;

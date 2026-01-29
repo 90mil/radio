@@ -23,13 +23,13 @@ nav {
         --nav-padding: var(--padding-nav);
         @include nav-link-base;
         @include nav-hover;
-        
+
         border-right: 1px solid var(--border-soft);
         margin-right: 2px;
         justify-content: center;
         flex: 1;
         min-width: fit-content;
-
+        font-style: italic;
         &:first-child {
             margin-left: 0;
             padding-left: var(--margin-desktop);
@@ -69,7 +69,8 @@ nav {
     transition: opacity 0.2s ease, background 0.2s ease;
     opacity: 1;
     outline: none;
-    
+    font-style: italic;
+
     /* Menu text styling */
     color: var(--text-color);
     font-family: var(--font-secondary);
@@ -126,7 +127,7 @@ nav {
         opacity: 1;
         color: var(--text-color);
     }
-    
+
     .menu-icon {
         background: transparent;
 
@@ -164,7 +165,7 @@ nav {
     .nav-links a {
         font-size: 16px;
         padding: 18px 12px;
-        
+
         &:first-child {
             padding-left: var(--margin-laptop);
         }
@@ -201,6 +202,7 @@ nav {
     }
 
     .nav-links {
+        font-style: italic!important;
         pointer-events: none;
         position: absolute;
         top: 0;
@@ -254,7 +256,7 @@ nav {
         margin-right: 20px;
         top: 0;
         height: var(--nav-height);
-        
+
         a {
             padding: 15px;
         }

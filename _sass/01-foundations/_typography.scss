@@ -1,4 +1,4 @@
-/* Font Face Declarations */
+/* Font Face Declarations (Glacial Indifference) */
 @font-face {
     font-family: 'Glacial Indifference';
     src: url('/assets/fonts/GlacialIndifference-Regular.otf') format('opentype');
@@ -23,8 +23,18 @@
     font-display: swap;
 }
 
-/* Add Abel font import if not using Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Abel&display=swap');
+/* Design Code 2025: Import Header Font (Lora) */
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+
+/* --- Font Variable Mappings --- */
+:root {
+    /* Paragraph/Body -> Glacial Indifference */
+    --font-body: 'Glacial Indifference', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+    /* Header -> Lora */
+    --font-primary: 'Lora', Georgia, 'Times New Roman', serif;
+    --font-secondary: 'Lora', Georgia, serif;
+}
 
 /* Typography Styles */
 body {
@@ -68,7 +78,7 @@ h1, h2, h3, h4, h5, h6,
 .month-header,
 .week-header {
     filter: contrast(1.05) brightness(0.98);
-    text-shadow: 
+    text-shadow:
         0 0 1px rgba(255, 255, 255, 0.1),
         0 0 2px rgba(0, 0, 0, 0.8),
         1px 0 0 rgba(255, 255, 255, 0.03),
@@ -78,28 +88,29 @@ h1, h2, h3, h4, h5, h6,
 }
 
 h1 {
-    font-family: var(--font-primary);
+    font-family: var(--font-primary); /* Lora */
     font-size: 2.5rem;
-    font-weight: bold;
+    font-weight: 600; /* Slightly lighter than bold for Lora */
+    font-style: italic;
     margin-bottom: 1rem;
 }
 
 h2 {
-    font-family: var(--font-secondary);
+    font-family: var(--font-secondary); /* Lora */
     font-size: var(--font-size-h2);
-    font-weight: normal;
+    font-weight: 400;
     margin-bottom: 1rem;
 }
 
 h3 {
-    font-family: var(--font-body);
+    font-family: var(--font-body); /* Glacial Indifference */
     font-size: var(--font-size-h3);
     font-weight: bold;
     margin-bottom: 0.5rem;
 }
 
 h4, h5, h6 {
-    font-family: var(--font-body);
+    font-family: var(--font-body); /* Glacial Indifference */
     font-weight: bold;
     margin-bottom: 0.5rem;
 }
@@ -115,7 +126,8 @@ p, .description, .show-description {
 /* Level 2: Major section headers - about, contact, month headers, week headers */
 .heading-level-2,
 .section-header {
-    font-family: var(--heading-level-2-font);
+    /* Lora (Header) */
+    font-family: var(--font-primary);
     font-size: var(--heading-level-2-size);
     font-style: var(--heading-level-2-style);
     color: var(--heading-level-2-color);
@@ -127,7 +139,8 @@ p, .description, .show-description {
 
 /* Level 3: Widget headers - homepage widgets (coming up, featured, now playing) */
 .heading-level-3 {
-    font-family: var(--heading-level-3-font);
+    /* Glacial Indifference (Paragraph/Details) */
+    font-family: var(--font-body);
     font-size: var(--heading-level-3-size);
     font-style: var(--heading-level-3-style);
     color: var(--heading-level-3-color);
@@ -140,7 +153,8 @@ p, .description, .show-description {
 
 /* Level 4: Lower level headers - day headers, show titles */
 .heading-level-4 {
-    font-family: var(--heading-level-4-font);
+    /* Glacial Indifference (Paragraph/Details) */
+    font-family: var(--font-body);
     font-size: var(--heading-level-4-size);
     font-style: var(--heading-level-4-style);
     color: var(--heading-level-4-color);
@@ -161,8 +175,10 @@ a:hover {
     color: var(--text-color);
 }
 
+/* Design Code: Accent */
 .accent {
-    font-family: var(--font-primary);
+    /* Explicitly Glacial Indifference Bold Italic as per design code */
+    font-family: 'Glacial Indifference', sans-serif;
     font-style: italic;
     font-weight: bold;
 }

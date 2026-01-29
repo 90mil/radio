@@ -23,3 +23,13 @@ bundle exec jekyll serve
 Site automatically deploys to GitHub Pages when changes are pushed to main branch.
 
 See [LICENSE](LICENSE.md) for code and content terms.
+
+
+## Local development
+If you don't want to install ruby and jekyll globally, you can use Docker to run the site locally:
+```
+docker run --rm --volume="$PWD:/srv/jekyll" -p 4000:4000 -it jekyll/jekyll:latest bash -c "bundle install && bundle exec jekyll serve --host 0.0.0.0"
+```
+*the `--rm` flag ensures the container is removed after you stop it.*
+
+Then open your browser at `http://localhost:4000`.

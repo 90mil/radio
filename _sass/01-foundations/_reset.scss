@@ -1,3 +1,19 @@
+:root {
+    /* Design Key 2025 Colors */
+
+    /* Body/Background  */
+    --body-bg: #111411;
+
+    /* Text/Details -> Set to Off-White for readability on the dark background */
+    --text-color: #E6EAE9;
+
+    /* Accent I (2C4E55) -> Used for Links */
+    --link-color: #2C4E55;
+
+    /* Accent II (011411) -> Available for other accents */
+    --color-accent-2: #011411;
+}
+
 /* Modern CSS Reset */
 * {
     margin: 0;
@@ -23,7 +39,7 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('../images/darkwater/darkwater-1920.webp');
+    // background-image: url('../images/darkwater/darkwater-1920.webp');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -62,4 +78,4 @@ main#content-container {
     bottom: 0;
     box-sizing: border-box;
     overflow-y: auto;
-} 
+}

@@ -4,13 +4,13 @@ Website for 90mil Radio - an independent platform for experimental arts and soun
 
 ## Development
 
-\```bash
+```bash
 # Install dependencies
 bundle install
 
 # Run locally
 bundle exec jekyll serve
-\```
+```
 
 ## Structure
 - `/assets` - CSS, JS, and images
